@@ -1,0 +1,52 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="meter_no">用戶表號</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="meter_no" formControlName="meter_no" [class.invalid]="isError('meter_no')" />
+        <small class="text-danger" *ngIf="errorType('meter_no', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('meter_no', 'maxlength')">*長度超過20字元</small>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+        <small class="text-danger" *ngIf="errorType('description', 'maxlength')">*長度超過50字元</small>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="pp_id">用戶電號</label>
+      </div>
+      <div class="form-input">
+        <select id="pp_id" formControlName="pp_id" [class.invalid]="isError('pp_id')">
+          <option *ngFor="let data of ppplist" value={{data.id}}>{{ data.power_no }}</option>
+        </select>
+        <small class="text-danger" *ngIf="errorType('pp_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

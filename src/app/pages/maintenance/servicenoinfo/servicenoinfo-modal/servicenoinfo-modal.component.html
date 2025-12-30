@@ -1,0 +1,86 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+   <!-- 所屬 -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="book_id">所屬</label>
+    </div>
+    <div class="form-input">
+      <ng-select 
+        [items]="booklist"
+        bindValue="book_id"
+        bindLabel="name"
+        [clearable]="false"
+        formControlName="book_id"
+        [class.invalid]="isError('book_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+      <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
+    </div>
+  </div>
+
+  <!-- 服務編號 -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="service_no">服務編號</label>
+    </div>
+    <div class="form-input">
+      <input type="text" id="service_no" formControlName="service_no" [class.invalid]="isError('service_no')" />
+      <small class="text-danger" *ngIf="errorType('service_no', 'required')">*必填欄位</small>
+      <small class="text-danger" *ngIf="errorType('service_no', 'maxlength')">*不可超過20字元</small>
+    </div>
+  </div>
+
+  <!-- 購電裝置容量(瓩) -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="ps_total_kwp">購電裝置容量(瓩)</label>
+    </div>
+    <div class="form-input">
+      <input type="number" id="ps_total_kwp" formControlName="ps_total_kwp" [class.invalid]="isError('ps_total_kwp')" />
+      <small class="text-danger" *ngIf="errorType('ps_total_kwp', 'required')">*必填欄位</small>
+      <small class="text-danger" *ngIf="errorType('ps_total_kwp', 'decimal')">*最多3位小數</small>
+    </div>
+  </div>
+
+
+
+  <!-- 售電費率 -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="pp_rate">售電費率</label>
+    </div>
+    <div class="form-input">
+      <input type="number" id="pp_rate" formControlName="pp_rate" [class.invalid]="isError('pp_rate')" />
+      <small class="text-danger" *ngIf="errorType('pp_rate', 'required')">*必填欄位</small>
+      <small class="text-danger" *ngIf="errorType('pp_rate', 'decimal')">*最多2位小數</small>
+      <small class="text-danger" *ngIf="errorType('pp_rate', 'max')">*不可超過9999.99</small>
+    </div>
+  </div>
+
+
+  <!-- 說明 -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="description">說明</label>
+    </div>
+    <div class="form-input">
+      <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+      <small class="text-danger" *ngIf="errorType('description', 'maxlength')">*不可超過50字元<br></small>
+    </div>
+  </div>
+
+ 
+</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

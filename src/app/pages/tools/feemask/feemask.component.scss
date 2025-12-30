@@ -1,0 +1,47 @@
+button{
+  margin: 3px;
+  margin-bottom: 5px;
+}
+.table_field {
+ //改成固定100%
+  width: 100%;
+  margin: auto;
+}
+::ng-deep .mat-simple-snackbar-action {
+  color: white
+}
+.upload-btn-wrapper {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer; /* 容器本身設為 pointer */
+
+  button {
+    /* 讓按鈕不要攔截滑鼠事件，讓事件穿透到下方的 input (或上方的 input) */
+    pointer-events: none; 
+    min-width: 200px;
+  }
+
+  input[type=file] {
+    position: absolute;
+    top: 0;
+    left: -70px;
+    width: 260px;
+    height: 100%;
+    
+    /* 核心：讓 input 透明但佔據空間 */
+    opacity: 0;
+    cursor: pointer !important; /* 強制手型 */
+    
+    /* 確保在最頂層 */
+    z-index: 10;
+    
+    /* 針對部分瀏覽器修正 */
+    display: block;
+  }
+}
+
+mat-card {
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}

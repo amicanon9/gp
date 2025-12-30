@@ -1,0 +1,57 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+
+    <!-- 銀行代號 -->
+    <div class="form-group">
+      <div class="form-name">
+        <label for="bank_no">銀行代號</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="bank_no" formControlName="bank_no" [class.invalid]="isError('bank_no')" />
+        <small class="text-danger" *ngIf="errorType('bank_no', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('bank_no', 'maxlength')">*長度超過3字元</small>
+      </div>
+    </div>
+
+    <!-- 銀行名稱 -->
+    <div class="form-group">
+      <div class="form-name">
+        <label for="bank_name">銀行名稱</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="bank_name" formControlName="bank_name" [class.invalid]="isError('bank_name')" />
+        <small class="text-danger" *ngIf="errorType('bank_name', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('bank_name', 'maxlength')">*長度超過50字元</small>
+      </div>
+    </div>
+
+    <!-- 說明 -->
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+        <small class="text-danger" *ngIf="errorType('description', 'maxlength')">*長度超過50字元</small>
+      </div>
+    </div>
+
+    <!-- 是否停用 -->
+    <div class="form-group">
+      <mat-checkbox formControlName="disable">是否停用</mat-checkbox>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

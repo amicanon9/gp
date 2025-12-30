@@ -1,0 +1,31 @@
+::ng-deep .mat-expansion-panel-body{
+  padding: 0!important;
+}
+::ng-deep .mat-expansion-panel{
+  box-shadow: none!important;
+  background: transparent!important;
+  border-radius: 0!important;
+}
+::ng-deep .mat-expansion-panel-header{
+ padding-left: 0px!important;
+}
+::ng-deep .mat-expansion-panel-header:hover{
+  background: transparent!important;
+
+}
+::ng-deep .mat-header-cell{
+  color:black;
+  font-weight: bold;
+}
+::ng-deep .sidebar-wrapper .mat-content{
+  display: block!important;
+}
+.mat-expansion-panel-header a{
+  margin-left: 15px;
+  margin-top: 0!important;
+  margin-bottom: 0!important;
+}
+
+.children{
+  // background-color: #f2f2f2!important;
+}

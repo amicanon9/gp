@@ -1,0 +1,106 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{title}}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    <div class="form-group">
+      <div class="form-name">
+        <label for="book_id">所屬</label>
+      </div>
+      <div class="form-input">
+        <ng-select 
+        [items]="booklist"
+        bindValue="book_id"
+        bindLabel="name"
+        [clearable]="false"
+        formControlName="book_id"
+        [class.invalid]="isError('book_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+      
+        <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="ps_no">代號</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="ps_no" formControlName="ps_no" [class.invalid]="isError('ps_no')" />
+        <small class="text-danger" *ngIf="errorType('ps_no', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('ps_no', 'maxlength')">*長度超過3字元</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="ps_name">公司名稱</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="ps_name" formControlName="ps_name" [class.invalid]="isError('ps_name')" />
+        <small class="text-danger" *ngIf="errorType('ps_name', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="tax_id_no">統一編號</label>
+      </div>
+      <div class="form-input">
+        <input type="number" id="tax_id_no" formControlName="tax_id_no" [class.invalid]="isError('tax_id_no')" />
+        <small class="text-danger" *ngIf="errorType('tax_id_no', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('ps_no', 'maxlength')">*長度超過8字元</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="contact">聯絡人</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="contact" formControlName="contact" [class.invalid]="isError('contact')" />
+        <small class="text-danger" *ngIf="errorType('contact', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="telephone">聯絡電話</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="telephone" formControlName="telephone" [class.invalid]="isError('telephone')" />
+        <small class="text-danger" *ngIf="errorType('telephone', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+      </div>
+    </div>
+  <div class="form-group">
+      <div class="form-name">
+        <label for="email">Email</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="email" formControlName="email" [class.invalid]="isError('email')" />
+         <small class="text-danger" *ngIf="errorType('email', 'required')">*必填欄位</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()"
+      [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

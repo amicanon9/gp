@@ -1,0 +1,101 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" (click)="modal.dismiss()">
+    <span>&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <form [formGroup]="formGroup">
+    <div class="form-group">
+      <div class="form-name"><label>轉供服務編號</label></div>
+      <div class="form-input">
+      <input class="form-control" formControlName="service_no">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name"><label>購電業名稱</label></div>
+      <div class="form-input">
+      <input class="form-control" formControlName="ps_name">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name"><label>電號</label></div>
+      <div class="form-input">
+      <input class="form-control" formControlName="ps_power_no">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name"><label>年/月</label></div>
+      <div class="form-input">
+      <input type="month" class="form-control" formControlName="monthDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-name"><label>分行名稱</label></div>
+      <div class="form-input">
+      <input class="form-control" formControlName="branch_name">
+      </div>
+    </div>
+  </form>
+   <div style="display: flex; align-items: center; margin-left: 1rem; padding-top: 15px;" >
+  <input
+    type="checkbox"
+    id="showOnlySelected"
+    [(ngModel)]="showOnlySelected"
+    [ngModelOptions]="{ standalone: true }"
+    (change)="toggleShowOnlySelected()"
+    style="width: 16px; height: 16px;" />
+    <label for="showOnlySelected" style="margin-left: 8px;">
+      只顯示已勾選
+      <span style="margin-left: 5px; color: #007bff;">({{ selectedMap.size }} / {{ filteredList.length }})</span>
+    </label>
+    <label style="margin-left:8px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
+      <input type="checkbox" [(ngModel)]="isSingleExport" />
+      個別匯出
+    </label>
+     <label style="margin-left:8px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
+      <input type="checkbox" [(ngModel)]="noTax" />
+      不含營業稅
+    </label>
+    <label style="margin-left:8px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
+      <input type="checkbox" [(ngModel)]="hide" />
+      隱藏特定欄位
+    </label>
+</div>
+
+  <div style="max-height: 450px; overflow-y: auto;">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th><input type="checkbox" (change)="toggleAll($event)" /></th>
+          <th>服務編號</th>
+          <th>購電業名稱</th>
+          <th>電號</th>
+          <th>分行名稱</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredList">
+          <td>
+            <input type="checkbox"
+                   [checked]="isChecked(item)"
+                   (change)="onItemCheckChange(item, $event.target.checked)" />
+          </td>
+          <td>{{ item.service_no }}</td>
+          <td>{{ item.ps_name }}</td>
+          <td>{{ item.ps_power_no }}</td>
+          <td>{{ item.branch_name }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-secondary" (click)="modal.dismiss()">取消</button>
+  <button class="btn btn-success" (click)="export()">匯出勾選項目<span *ngIf="isExporting" class="spinner-border spinner-border-sm text-light ms-2" role="status" aria-hidden="true"></span></button>
+</div>

@@ -1,0 +1,84 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{title}}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    <div class="form-group" [hidden]="true">
+      <input type="number" id="id" formControlName="id" readonly />
+    </div>
+    <div class="form-group">
+      <div class="form-name">
+        <label for="role_name">角色名稱</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="role_name" formControlName="role_name" [class.invalid]="isError('role_name')" />
+        <small class="text-danger" *ngIf="errorType('role_name', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="book_id">所屬</label>
+      </div>
+      <div class="form-input">
+        <ng-select 
+        [items]="booklist"
+        bindValue="book_id"
+        bindLabel="name"
+        [clearable]="false"
+        formControlName="book_id"
+        [class.invalid]="isError('book_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+        <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+        <small class="text-danger" *ngIf="errorType('description', 'required')">*必填欄位</small>
+      </div>
+    </div>
+    <div class="form-group">
+  <div class="form-name">
+    <label for="permission_level">權限等級</label>
+  </div>
+  <div class="form-input">
+    <ng-select
+      [items]="permissionMap"
+      bindLabel="label"
+      bindValue="value"
+      [clearable]="false"
+      [notFoundText]="'找不到權限等級'"
+      formControlName="permission_level"
+      [class.invalid]="isError('permission_level')">
+    </ng-select>
+    <small class="text-danger" *ngIf="errorType('permission_level', 'required')">*必填欄位</small>
+  </div>
+</div>
+    <div class="form-group">
+      <mat-checkbox formControlName="disabled">是否停用</mat-checkbox>
+    </div>
+
+    <div class="form-group">
+      <mat-checkbox formControlName="is_admin">最高權限</mat-checkbox>
+    </div>
+    <div style="padding: 2.5%">
+      <label for="description">目錄權限</label>
+      <lib-multi-select [pureValue]="false" [dataSource]="menulist" [valueProperty]="'id'" [textProperty]="'menuName'"
+        formControlName="menus">
+      </lib-multi-select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()"
+      [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

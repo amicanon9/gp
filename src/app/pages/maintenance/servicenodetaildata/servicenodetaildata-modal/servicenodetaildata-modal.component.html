@@ -1,0 +1,152 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+
+    <!-- 服務編號 (service_no_detail_id) -->
+    <div class="form-group">
+      <div class="form-name"><label for="service_no_detail_id">服務編號</label></div>
+      <div class="form-input">
+        <ng-select 
+        [items]="Svlist"
+        bindValue="id"
+        bindLabel="service_no"
+        [clearable]="false"
+        formControlName="service_no_detail_id"
+        [class.invalid]="isError('service_no_detail_id')"
+        [notFoundText]="'沒有找到符合的項目'"
+        (change)="onchange($event)">
+      </ng-select>
+        <small class="text-danger" *ngIf="errorType('service_no_detail_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+    <div class="form-group" >
+      <div class="form-name"><label></label></div>
+      <div class="form-input">
+      </div>
+    </div>
+    <!-- 額外顯示 ps_name -->
+    <div class="form-group" >
+      <div class="form-name"><label>購電業</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.ps_name }}</label>
+      </div>
+    </div>
+    <div class="form-group" >
+      <div class="form-name"><label>購電業表號</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.ps_power_no }}</label>
+      </div>
+    </div>
+    <div class="form-group" >
+      <div class="form-name"><label>用電戶</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.pp_name }}</label>
+      </div>
+    </div>
+    <div class="form-group" >
+      <div class="form-name"><label>用電戶電號</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.pp_power_no }}</label>
+      </div>
+    </div>
+    <!-- 年 (bill_year) -->
+    <div class="form-group">
+      <div class="form-name"><label for="bill_year">年</label></div>
+      <div class="form-input">
+        <input type="number" id="bill_year" formControlName="bill_year" [class.invalid]="isError('bill_year')" />
+        <small class="text-danger" *ngIf="errorType('bill_year', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <!-- 月 (bill_month) -->
+    <div class="form-group">
+      <div class="form-name"><label for="bill_month">月</label></div>
+      <div class="form-input">
+        <input type="number" id="bill_month" formControlName="bill_month" [class.invalid]="isError('bill_month')" />
+        <small class="text-danger" *ngIf="errorType('bill_month', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('bill_month', 'min') || errorType('bill_month', 'max')">*必須為1~12</small>
+      </div>
+    </div>
+
+    <!-- 當月使用量 (kwh_usage) -->
+    <div class="form-group">
+      <div class="form-name"><label for="kwh_usage">當月服務使用量(kWh)</label></div>
+      <div class="form-input">
+        <input type="number" id="kwh_usage" formControlName="kwh_usage" [class.invalid]="isError('kwh_usage')" />
+        <small class="text-danger" *ngIf="errorType('kwh_usage', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <!-- 輸電費率 (transmission_rate) -->
+    <div class="form-group">
+      <div class="form-name"><label for="transmission_rate">輸電費率</label></div>
+      <div class="form-input">
+        <input type="text" id="transmission_rate" formControlName="transmission_rate" [class.invalid]="isError('transmission_rate')" />
+        <small class="text-danger" *ngIf="errorType('transmission_rate', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('transmission_rate', 'decimal')">*最多4位小數</small>
+      </div>
+    </div>
+
+    <!-- 配電費率 (distribution_rate) -->
+    <div class="form-group">
+      <div class="form-name"><label for="distribution_rate">配電費率</label></div>
+      <div class="form-input">
+        <input type="text" id="distribution_rate" formControlName="distribution_rate" [class.invalid]="isError('distribution_rate')" />
+        <small class="text-danger" *ngIf="errorType('distribution_rate', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('distribution_rate', 'decimal')">*最多4位小數</small>
+      </div>
+    </div>
+
+    <!-- 電力調度費率 (dispatching_rate) -->
+    <div class="form-group">
+      <div class="form-name"><label for="dispatching_rate">電力調度費率</label></div>
+      <div class="form-input">
+        <input type="text" id="dispatching_rate" formControlName="dispatching_rate" [class.invalid]="isError('dispatching_rate')" />
+        <small class="text-danger" *ngIf="errorType('dispatching_rate', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('dispatching_rate', 'decimal')">*最多4位小數</small>
+      </div>
+    </div>
+
+    <!-- 輔助服務費率 (ancillary_services_rate) -->
+    <div class="form-group">
+      <div class="form-name"><label for="ancillary_services_rate">輔助服務費率</label></div>
+      <div class="form-input">
+        <input type="text" id="ancillary_services_rate" formControlName="ancillary_services_rate" [class.invalid]="isError('ancillary_services_rate')" />
+        <small class="text-danger" *ngIf="errorType('ancillary_services_rate', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('ancillary_services_rate', 'decimal')">*最多4位小數</small>
+      </div>
+    </div>
+
+    <!-- 費用 (fee) -->
+    <div class="form-group">
+      <div class="form-name"><label for="fee">費用</label></div>
+      <div class="form-input">
+        <input type="number" id="fee" formControlName="fee" [class.invalid]="isError('fee')" />
+        <small class="text-danger" *ngIf="errorType('fee', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <!-- 說明 (description) -->
+    <div class="form-group">
+      <div class="form-name"><label for="description">說明</label></div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+        <small class="text-danger" *ngIf="errorType('description', 'maxlength')">*不可超過50字元</small>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+
+<nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+  <div class="container-fluid">
+    <div class="navbar-wrapper">
+      <div class="navbar-toggle">
+        <button type="button" class="navbar-toggler" (click)="sidebarToggle()">
+          <span class="navbar-toggler-bar bar1"></span>
+          <span class="navbar-toggler-bar bar2"></span>
+          <span class="navbar-toggler-bar bar3"></span>
+        </button>
+      </div>
+      <a class="navbar-brand" href="javascript:void(0)">{{getTitle()}}</a>
+    </div>
+    <button class="navbar-toggler" type="button" (click)="collapse()"
+      [attr.aria-expanded]="!isCollapsed" aria-controls="collapseExample">
+      <span class="navbar-toggler-bar navbar-kebab"></span>
+      <span class="navbar-toggler-bar navbar-kebab"></span>
+      <span class="navbar-toggler-bar navbar-kebab"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="collapseExample" [ngbCollapse]="isCollapsed">
+      <!-- <form>
+        <div class="input-group no-border">
+          <input type="text" value="" class="form-control" placeholder="Search...">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <i class="nc-icon nc-zoom-split"></i>
+            </div>
+          </div>
+        </div>
+      </form> -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <p class="nav-link btn-magnify" href="javascript:void(0)">
+              連線剩餘時間 <countdown #cd [config]="config" (event)="timer($event)"></countdown>
+          </p>
+        </li>
+        <li class="nav-item">
+          <p class="nav-link btn-magnify" href="javascript:void(0)">
+              {{authSvc.state.company_name}}
+          </p>
+        </li>
+      <li class="nav-item">
+        <p class="nav-link btn-magnify" href="javascript:void(0)">
+            {{authSvc.state.sub}}
+        </p>
+      </li>
+        <li class="nav-item btn-rotate" ngbDropdown placement="bottom-left" [autoClose]="'outside'">
+          <a class="nav-link" ngbDropdownToggle id="navbarDropdownMenuLink" >
+            <i class="nc-icon nc-settings-gear-65"></i>
+            <p>
+              <span class="d-lg-none d-md-block">Some Actions</span>
+            </p>
+          </a>
+
+
+          <div ngbDropdownMenu aria-labelledby="navbarDropdownMenuLink" class="dropdown-menu dropdown-menu-right">
+            <a ngbDropdownItem href="javascript:void(0)" (click)="logout()">登出</a>
+            <a ngbDropdownItem href="javascript:void(0)" (click)="changepassword()">變更密碼</a>
+            <a ngbDropdownItem >
+              <span>目前角色</span><br>
+              <select [(ngModel)]="role" (ngModelChange)="changerole($event)">
+                <option *ngFor="let data of roles" value="{{data.id}}">{{data.role_name}}</option>
+              </select>
+            </a>
+            <!-- <a ngbDropdownItem href="javascript:void(0)">Another action</a>
+            <a ngbDropdownItem href="javascript:void(0)">Something else here</a> -->
+          </div>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link btn-rotate" href="javascript:void(0)">
+            <i class="nc-icon nc-settings-gear-65"></i>
+            <p>
+              <span class="d-lg-none d-md-block">Account</span>
+            </p>
+          </a>
+
+        </li> -->
+      </ul>
+    </div>
+  </div>
+</nav>

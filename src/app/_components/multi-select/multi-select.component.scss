@@ -1,0 +1,35 @@
+.multi-select-container {
+  height: auto;
+  padding: 5px;
+
+  &.disabled {
+    background-color: #e9ecef;
+  }
+
+  .select {
+    margin-right: 3px;
+  }
+
+  .actions {
+    button {
+      margin: 2px;
+    }
+  }
+
+  .result {
+    min-height: 34px;
+    max-height: 136px;
+    overflow-y: auto;
+  }
+
+  &.simple {
+    .select {
+      width: auto;
+    }
+  }
+}
+.multi{
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  border-width: 1px;
+}

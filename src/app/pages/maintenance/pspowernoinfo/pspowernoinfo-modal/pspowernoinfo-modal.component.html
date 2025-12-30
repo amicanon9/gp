@@ -1,0 +1,120 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="power_no">購電業電號</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="power_no" formControlName="power_no" [class.invalid]="isError('power_no')" />
+        <small class="text-danger" *ngIf="errorType('power_no', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf="errorType('power_no', 'maxlength')">*長度超過20字元</small>
+      </div>
+    </div>
+ <div class="form-group">
+      <div class="form-name">
+        <label for="info_id">購電業</label>
+      </div>
+      <div class="form-input">
+      <ng-select 
+        [items]="infolist"
+        bindValue="id"
+        bindLabel="ps_name"
+        [clearable]="false"
+        formControlName="info_id"
+        [class.invalid]="isError('info_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+        <small class="text-danger" *ngIf="errorType('info_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="ps_bank_id">受款人帳戶</label>
+      </div>
+      <div class="form-input">
+        <ng-select 
+        [items]="filteredBanks"
+        bindValue="id"
+        bindLabel="label"
+        [clearable]="false"
+        formControlName="ps_bank_id"
+        [class.invalid]="isError('ps_bank_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+        <small class="text-danger" *ngIf="errorType('ps_bank_id', 'required')">*必填欄位</small>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+        <small class="text-danger" *ngIf="errorType('description', 'maxlength')">*長度超過50字元</small>
+      </div>
+    </div>
+
+   
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="etype">能源類型</label>
+      </div>
+      <div class="form-input">
+        <ng-select formControlName="etype"[items]="etypelist" bindValue="code" bindLabel="description" [clearable]="false"[class.invalid]="isError('etype')" [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="trust_bank_id">信託銀行</label>
+      </div>
+      <div class="form-input">
+       <ng-select 
+        [items]="banklist"
+        bindValue="id"
+        bindLabel="label"
+        [clearable]="false"
+        formControlName="trust_bank_id"
+        [class.invalid]="isError('trust_bank_id')"
+        [notFoundText]="'沒有找到符合的項目'">
+       </ng-select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-name">
+        <label for="site_name">案場名稱</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="site_name" formControlName="site_name" [class.invalid]="isError('site_name')" />
+        <small class="text-danger" *ngIf="errorType('site_name', 'maxlength')">*長度超過500字元</small>
+      </div>
+    </div>
+ <div class="form-group">
+      <div class="form-name">
+        <label for="address">設置廠址</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="address" formControlName="address" [class.invalid]="isError('address')" />
+        <small class="text-danger" *ngIf="errorType('address', 'maxlength')">*長度超過500字元</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{title}}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    <div class="form-group" >
+      <div class="form-name">
+        <label for="book_id">所屬ID</label>
+      </div>
+      <div class="form-input">
+        <input type="number" id="book_id" formControlName="book_id" *ngIf="!formData" [class.invalid]="isError('book_id')" />
+        <input type="number" id="book_id" formControlName="book_id" *ngIf="formData"  readonly />
+        <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
+        <small class="text-danger" *ngIf=" errorType('book_id', 'pattern')">*限於大於0的數字</small>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-name">
+        <label for="name">所屬</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="name" formControlName="name" [class.invalid]="isError('name')" />
+        <small class="text-danger" *ngIf="errorType('name', 'required')">*必填欄位</small>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-name">
+        <label for="description">說明</label>
+      </div>
+      <div class="form-input">
+        <input type="text" id="description" formControlName="description" [class.invalid]="isError('description')" />
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()"
+      [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

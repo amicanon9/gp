@@ -1,0 +1,144 @@
+.modal-content{
+
+.form-group {
+    width: 100%;
+    display:inline-table;
+}
+
+input {
+    padding: 5px 10px;
+    border: 1px solid #6c757d;
+    outline: none;
+    width: -moz-available;
+    width: 100%;
+    border-radius: 5px;
+    &:read-only {
+        border: none;
+        background-color: transparent;
+    }
+}
+
+.ng-value-container {
+    .ng-value {
+      white-space: normal !important;
+      height: 24px;
+    }
+}
+.zero {
+    color: silver;
+}
+
+.password_group {
+    width: 100%;
+    display: inline-block;
+    height: 32px;
+
+    input.password {
+        width: auto !important;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+
+    button {
+        background-color: white;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        height: 100%;
+        outline: none;
+
+        &:active {
+            background-color: silver;
+        }
+    }
+}
+
+mat-card {
+    border-radius: 12px;
+    box-shadow: 0 6px 10px -4px rgb(0 0 0 / 15%)!important;
+    background-color: #FFFFFF;
+    color: #252422;
+    margin-bottom: 20px;
+    position: relative;
+    border: 0 none;
+    transition: transform 300ms cubic-bezier(0.34, 2, 0.6, 1), box-shadow 200ms ease;
+    padding: 30px;
+    width: 100%;
+  }
+
+
+.invalid {
+    border-color: salmon;
+    border-width: 2px;
+    .ng-select-container{
+    border: 2px solid salmon;
+    border-radius: 5px;
+    }
+}
+
+.btn-cancel {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    &:hover {
+        background-color: #4b545c;
+    }
+}
+
+select {
+    width: 100%;
+    padding: 5px 10px;
+    text-align-last: left;
+    border-width: 2px;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+}
+
+.few-data {
+    .form-group {
+        width: 100%;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .form-group {
+        width: 50%;
+        text-align: left;
+    }
+    .form-name {
+        display: inline-table;
+        text-align: left;
+        width: 20%;
+        padding-left: 10px;
+    }
+    .form-input {
+        display: inline-table;
+        text-align: left;
+        padding-left: 10px;
+        width: 80%;
+    }
+}
+}
+.modal-mySize .modal-dialog {
+  max-width: 1000px;
+}
+.mat-checkbox{
+ font-family: 'Noto Sans TC', 'Helvetica Neue',  Arial, sans-serif !important;
+ padding-left: 5%;
+}
+.item{
+  padding: 5px 8px;
+  margin: 2px 3px 0 0;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  border: 1px solid rgba(140,140,140,.25);
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+.item .remove{
+  cursor: pointer;
+  margin-left: 5px;
+  color: #8b0000;
+}

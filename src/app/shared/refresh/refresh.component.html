@@ -1,0 +1,15 @@
+<div class="modal-body">
+  <div class="form">
+    <div class="form-group">
+      <h2 style="padding-top: 10px;margin:0">
+        即將自動登出，是否延長使用時間?
+      </h2>
+    </div>
+    <div style="text-align: right;float: right;">
+      <button type="button" class="btn btn-cancel" (click)="signOut()">
+        否 ({{ countdown }})
+      </button>
+      <button type="button" class="btn btn-danger" (click)="submit()">是</button>
+    </div>
+  </div>
+</div>

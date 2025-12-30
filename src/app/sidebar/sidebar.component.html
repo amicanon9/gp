@@ -1,0 +1,36 @@
+
+<div class="sidebar-wrapper">
+  <div class="logo">
+    <a class="simple-text logo-mini">
+        <img src="assets/img/logo-colorful.svg" class="logo-image-small">
+    </a>
+    <span class="simple-text logo-normal">
+      綠電系統
+    </span>
+  </div>
+  <ng-container *ngIf="rolesSvc.menus$ | async as menuItems">
+  <mat-accordion *ngFor="let menuItem of menuItems">
+    <mat-expansion-panel [expanded]="true">
+      <mat-expansion-panel-header>
+        <ul class="nav">
+          <li>
+            <a>
+              <i class="nc-icon {{menuItem.icon}}"></i>
+              <p>{{menuItem.name}}</p>
+            </a>
+          </li>
+        </ul>
+      </mat-expansion-panel-header>
+      <ul class="nav children">
+        <li *ngFor="let menu of menuItem.children" routerLinkActive="active" class="{{menu.class}}">
+          <a [routerLink]="[menu.url]">
+            <i class="nc-icon {{menu.icon}}"></i>
+            <p>{{menu.name}}</p>
+          </a>
+        </li>
+      </ul>
+    </mat-expansion-panel>
+  </mat-accordion>
+</ng-container>
+
+</div>

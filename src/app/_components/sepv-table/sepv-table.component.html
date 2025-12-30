@@ -1,0 +1,88 @@
+<!-- 基礎style 資料 排序 -->
+<div class="nami-table-container" [style.maxHeight]="maxTableHeight" [style.minHeight]="minTableHeight">
+
+<button type="button" class="btn btn-primary" (click)="exportToExcel()">
+  匯出 Excel
+</button>
+
+  <ng-container *ngIf="status">
+    根據<b>{{stype.name}}</b>查詢
+    <select [(ngModel)]="stype_filter" (change)="filterStatus()" [compareWith]="compareById">
+      <option [ngValue]="''">全選</option>
+      <option *ngFor="let item of status" [ngValue]="item[stype.key]">{{item[stype.display_name]}}</option>
+    </select>
+  </ng-container>
+ 
+  <mat-table [dataSource]="innerDataSource" matSort
+    [matSortActive]="config.sort && config.sort.active"
+    [matSortDisabled]="!config.serverSide"
+    [matSortDirection]="config.sort && config.sort.direction"
+    [matSortDisableClear]="config.sort && config.sort.disableClear"
+    [class.disabled]="disabled">
+
+    <!-- 隱藏的checkbox -->
+    <ng-container matColumnDef="checkbox">
+      <th mat-header-cell *matHeaderCellDef class="hidden"></th>
+      <td mat-cell *matCellDef="let element; let i = index" class="hidden">
+        <mat-checkbox [checked]="selectedId === i" (change)="onSelect(element, i)"></mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- 動態欄位 -->
+    <ng-container [matColumnDef]="column.name" *ngFor="let column of config.columns" [sticky]="column.sticky" [stickyEnd]="column.stickyEnd">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{column.displayName}}</th>
+      <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)">
+        <ng-container [ngSwitch]="column.templateRef!=undefined ? column.templateRef : 'base'">
+          <ng-container *ngSwitchCase="'base'">
+            <div [style.width.px]="column.width" [matTooltip]="element[column.name]">{{ element[column.name] }}</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'date'">
+            <div [style.width.px]="column.width">{{ element[column.name] | date:'yyyy-MM-dd'}}</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'date_long'">
+            <div [style.width.px]="column.width">{{ element[column.name] | date:'yyyy-MM-dd HH:mm'}}</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'disabled'">
+            <div style="width:80%" class="text-left" style="text-overflow:clip">
+              <span class="badge badge-danger" *ngIf="element[column.name]==true">已停用</span>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'boolean'">
+            <div style="width:80%" class="text-center">
+              <i class="nc-icon nc-check-2" *ngIf="element[column.name]==true"></i>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'roles'">
+            <span class="item" *ngFor="let role of element[column.name]">{{role.role_name}}</span>
+          </ng-container>
+          <ng-container *ngSwitchCase="'menus'">
+            <span class="item" *ngFor="let data of element[column.name]">{{data.menuName}}</span>
+          </ng-container>
+          <ng-container *ngSwitchCase="'number'">
+            <span style="display: block;">
+              {{ element[column.name] | number:'1.0-2'}}
+            </span>
+          </ng-container>
+          <ng-container *ngSwitchCase="'permissions'">
+          <span class="item" style="margin-left: 15px;">
+            {{ permissionMap[element[column.name]] || '未知' }}
+          </span>
+        </ng-container>
+          <ng-container *ngSwitchCase="'detail'">
+            <div >
+            <button class="btn btn-success" style="padding: 5px;font-size: 12px;" *ngFor="let detail of element[column.name]" (click)="goToDetail(detail)">{{detail.name}}</button>
+            </div>
+          </ng-container>
+        </ng-container>
+      </td>
+    </ng-container>
+
+  
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" [class.selected]="i === selectedId"></tr>
+  </mat-table>
+</div>
+
+<!-- paginator 設定 -->
+<mat-paginator [class.disabled]="disabled" [pageSizeOptions]="[10, 5, 50]" *ngIf="config.serverSide"></mat-paginator>

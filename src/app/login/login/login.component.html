@@ -1,0 +1,30 @@
+<div class="login-page" style="background-color: inherit;">
+  <div class="login-box">
+    <div class="card">
+      <div class="card-header text-center">
+        <img src="assets/img/logo-colorful.svg" style="margin-top:-15px;width: 40px;padding-right: 5px;">
+        <span class="h3"><b>綠電系統</b></span>
+      </div>
+      <div class="card-body">
+        <div [formGroup]="formLogin">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="帳號" formControlName="user">
+
+          </div>
+          <div class="input-group mb-3">
+            <input type="password" class="form-control" placeholder="密碼" formControlName="pass"
+              (keyup.enter)="!(formLogin.invalid || formLogin.pristine || processing) && login()">
+
+          </div>
+          <div class="row">
+            <div class="col">
+              <button type="button" class="btn btn-primary btn-block" (click)="login()"
+                [disabled]="formLogin.invalid || formLogin.pristine || processing">登入
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+button{
+  margin: 3px;
+  margin-bottom: 5px;
+}
+.table_field {
+ //改成固定100%
+  width: 100%;
+  margin: auto;
+}
+::ng-deep .mat-simple-snackbar-action {
+  color: white
+}
+::ng-deep .mat-tooltip {
+  font-size: 16px;        // 字體大小
+  max-width: 1000px;       // 最大寬度
+  white-space: pre-line;  // 如果要支援換行
+  word-break: break-word; // 斷字方式
+}

@@ -1,0 +1,25 @@
+
+.login-box,
+.register-box {
+  margin: auto;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card{
+  width: 450px;
+  border-top: 5px solid #34b5b8;
+}
+@media (max-width: 576px) {
+  .login-box,
+  .register-box {
+    margin-top: .5rem;
+    width: 90%;
+  }
+}
+
+.login-box .card,
+.register-box .card {
+  margin-bottom: 0;
+}

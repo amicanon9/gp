@@ -1,0 +1,27 @@
+<div class="form-control multi-select-container" [class.disabled]="disabled">
+  <div fxLayout="row" fxLayout.xs="column" *ngIf="!disabled">
+    <select class="form-control select multi" fxFlex [formControl]="select" (change)="onChange()">
+      <option *ngFor="let item of items" [ngValue]="getValue(item)">
+        {{ getText(item)}}
+      </option>
+    </select>
+    <div class="actions" fxFlex="250px" fxFlex.xs fxLayout="row">
+      <button type="button" class="btn btn-light" fxFlex (click)="unselectAll()"
+        [disabled]="!selected || selected.length === 0">
+        全不選
+      </button>
+      <button class="btn btn-info" type="button"  fxFlex (click)="selectAll()"
+        [disabled]="!items || items.length === 1">
+        全選
+      </button>
+    </div>
+  </div>
+  <div class="result">
+    <div class="item" *ngFor="let item of selected">
+      <span [innerText]="getText(item)"></span>
+      <span (click)="remove(item)" *ngIf="!disabled">
+        <i class="fa fa-times-circle remove"></i>
+      </span>
+    </div>
+  </div>
+</div>

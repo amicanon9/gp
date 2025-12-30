@@ -1,0 +1,161 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+
+  <div class="form-group">
+    <div class="form-name">
+      <label for="ps_meter_id">購電業表號</label>
+    </div>
+    <div class="form-input">
+
+       <ng-select 
+        [items]="PSlist"
+        bindValue="id"
+        bindLabel="meter_no"
+        [clearable]="false"
+        formControlName="ps_meter_id"
+        [class.invalid]="isError('ps_meter_id')"
+         [notFoundText]="'沒有找到符合的項目'"
+         (change)="onchange($event)">
+      </ng-select>
+      <small class="text-danger" *ngIf="errorType('ps_meter_id', 'required')">*必填欄位</small>
+    </div>
+  </div>
+<div class="form-group">
+  <div class="form-name">
+    <label for="ps_rate">購電費率</label>
+  </div>
+  <div class="form-input">
+    <input class="form-control"
+           formControlName="ps_rate"
+           [class.is-invalid]="isError('ps_rate')" />
+    <small class="text-danger" *ngIf="errorType('ps_rate', 'decimal')">
+      *格式錯誤（最多四位小數）
+    </small>
+  </div>
+</div>
+<div class="form-group">
+  <div class="form-name">
+    <label for="ps_pp_percent">轉供比例</label>
+  </div>
+  <div class="form-input">
+    <input class="form-control"
+           formControlName="ps_pp_percent"
+           [class.is-invalid]="isError('ps_pp_percent')" />
+    <small class="text-danger" *ngIf="errorType('ps_pp_percent', 'decimal')">
+      *格式錯誤（最多四位小數）
+    </small>
+  </div>
+</div>
+<div class="form-group">
+  <div class="form-name">
+    <label for="ps_total_kwp">購電裝置容量(瓩)</label>
+  </div>
+  <div class="form-input">
+    <input class="form-control"
+           formControlName="ps_total_kwp"
+           [class.is-invalid]="isError('ps_total_kwp')" />
+    <small class="text-danger" *ngIf="errorType('ps_total_kwp', 'decimal')">
+      *格式錯誤（最多四位小數）
+    </small>
+  </div>
+</div>
+ <!-- 設置型式 -->
+  <div class="form-group">
+    <div class="form-name">
+      <label for="type">設置型式</label> 
+      </div>
+    <div class="form-input">
+      <input type="text" id="type" formControlName="type" [class.invalid]="isError('type')" />
+      <small class="text-danger" *ngIf="errorType('type', 'maxlength')">*不可超過50字元<br></small>
+    </div>
+  </div>
+
+
+
+
+     <div class="form-group" >
+      <div class="form-name"><label>購電業</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.ps_name }}</label>
+      </div>
+    </div>
+
+    
+    <div class="form-group" >
+      <div class="form-name"><label>購電業電號</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected.power_no }}</label>
+      </div>
+    </div>
+    
+  <div class="form-group">
+    <div class="form-name">
+      <label for="pp_meter_id">用戶表號</label>
+    </div>
+    <div class="form-input">
+       <ng-select 
+        [items]="Pplist"
+        bindValue="id"
+        bindLabel="meter_no"
+        [clearable]="false"
+        formControlName="pp_meter_id"
+        [class.invalid]="isError('pp_meter_id')"
+        [notFoundText]="'沒有找到符合的項目'"
+        (change)="onchange2($event)"
+         >
+      </ng-select>
+      
+      <small class="text-danger" *ngIf="errorType('pp_meter_id', 'required')">*必填欄位</small>
+    </div>
+  </div>
+<div class="form-group" >
+      <div class="form-name"><label></label></div>
+      <div class="form-input">
+      </div>
+    </div>
+
+
+    <div class="form-group" >
+      <div class="form-name"><label>用電戶</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected2.pp_name }}</label>
+      </div>
+    </div>
+    <div class="form-group" >
+      <div class="form-name"><label>用電戶電號</label></div>
+      <div class="form-input">
+        <label class="form-control-plaintext">{{ selected2.power_no }}</label>
+      </div>
+    </div>
+  <div class="form-group">
+    <div class="form-name">
+      <label for="service_no_id">服務編號</label>
+    </div>
+    <div class="form-input">
+      <ng-select 
+        [items]="Svlist"
+        bindValue="id"
+        bindLabel="service_no"
+        [clearable]="false"
+        formControlName="service_no_id"
+        [class.invalid]="isError('service_no_id')"
+         [notFoundText]="'沒有找到符合的項目'">
+      </ng-select>
+      <small class="text-danger" *ngIf="errorType('service_no_id', 'required')">*必填欄位</small>
+    </div>
+  </div>
+
+</div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+    <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  </div>
+</div>

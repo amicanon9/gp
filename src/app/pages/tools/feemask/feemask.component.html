@@ -1,0 +1,96 @@
+<div class="container-fluid py-4">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>PDF 電費單遮罩工具</mat-card-title>
+      <mat-card-subtitle>請選擇目標購電業及對應電號後，上傳 PDF 進行處理（自動去除前兩頁）</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="row align-items-center mt-3">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>選擇目標購電業 (ps_name)</mat-label>
+            <mat-select [(ngModel)]="selectedPsName" (selectionChange)="onPsNameChange()" [disabled]="isProcessing">
+              <mat-option *ngFor="let name of uniquePsNames" [value]="name">
+                {{ name }}
+              </mat-option>
+            </mat-select>
+
+
+            
+            <mat-hint>先選擇購電業以載入電號清單</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>選擇購電業電號 (ps_power_no)</mat-label>
+            <mat-select [(ngModel)]="selectedMeterNos" multiple [disabled]="isProcessing || !selectedPsName">
+              <div class="select-all-container p-2" style="margin-left: -18px;">
+                <mat-checkbox 
+                  [checked]="isAllMeterNosSelected()" 
+                  (change)="toggleAllMeterNos($event.checked)">
+                  全選所有電號
+                </mat-checkbox>
+              </div>
+              
+              <mat-option *ngFor="let no of filteredMeterNos" [value]="no">
+                {{ no }}
+              </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="selectedMeterNos.length > 0">已選擇 {{ selectedMeterNos.length }} 個電號</mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>指定忽略頁數</mat-label>
+    <input matInput type="number"
+          min="0"
+          step="1"
+           [(ngModel)]="pageFilter" 
+           placeholder="請輸入正整數" 
+           [disabled]="isProcessing">
+    <mat-icon matSuffix>find_in_page</mat-icon>
+    <mat-hint>例如:輸入2時只會產生第三頁以後的頁數</mat-hint>
+  </mat-form-field>
+</div>
+        <div class="col-md-4">
+          <div class="upload-btn-wrapper">
+            <button mat-raised-button color="primary" 
+                    [disabled]="!selectedPsName || selectedMeterNos.length === 0 || isProcessing">
+              <mat-icon *ngIf="!isProcessing">upload_file</mat-icon>
+              {{ isProcessing ? '處理中...' : '選擇 PDF 並開始處理' }}
+            </button>
+            <input 
+              type="file" 
+              (change)="processPdf($event)" 
+              accept="application/pdf" 
+              [disabled]="!selectedPsName || selectedMeterNos.length === 0 || isProcessing"
+            />
+          </div>
+        </div>
+        <!-- <div class="col-md-4">     //隱藏功能
+          <div class="upload-btn-wrapper">
+            <button mat-raised-button color="primary" [disabled]="!selectedPsName || isProcessing">
+              <mat-icon>upload_file</mat-icon> 選擇PDF 並 匯出excel
+            </button>
+            <input
+              type="file"
+              (change)="processPdfAndExportToExcel($event)"
+              accept="application/pdf"
+              [disabled]="!selectedPsName || isProcessing"
+            />
+          </div>
+        </div> -->
+      </div>
+
+      <div *ngIf="isProcessing" class="mt-4 text-center">
+        <mat-progress-bar mode="determinate" [value]="processPercent"></mat-progress-bar>
+        <p class="mt-2 text-muted">
+          正在處理第 {{ currentPage }} / {{ totalPages }} 頁 
+          (已完成: {{ processPercent | number:'1.0-0' }}%)
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

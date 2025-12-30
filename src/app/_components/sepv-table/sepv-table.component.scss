@@ -1,0 +1,75 @@
+.nami-table-container {
+  width: 100%;
+  overflow: auto;
+  margin: auto;
+
+  .mat-table {
+    width: 100%;
+    table-layout: fixed;
+    vertical-align: middle;
+    text-align: -webkit-center;
+    font-family: 'Noto Sans TC', 'Helvetica Neue',  Arial, sans-serif !important;
+    .mat-header-cell {
+      white-space: nowrap;
+      padding: 5px 15px;
+      font-size: 14px;
+    }
+
+    .mat-row {
+      transition: background-color 0.2s;
+
+      &.selected {
+        background-color: rgba(179, 230, 255,0.5);
+      }
+
+      .mat-cell {
+        text-align: left;
+        div {
+          white-space: nowrap;
+          padding: 5px 15px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 150px;
+        }
+        &.mat-column-checkbox {
+          width: 50px;
+          min-width: 50px;
+          text-align: center;
+          vertical-align: middle;
+        }
+      }
+    }
+
+    &.disabled {
+      background-color: #e9ecef;
+    }
+
+  }
+}
+
+.mat-paginator {
+  &.disabled {
+    background: #e9ecef !important;
+  }
+
+}
+::ng-deep .mat-primary .mat-option.mat-selected:not(.mat-option-disabled){
+    color: white !important;
+}
+
+.hidden {
+  display: none;
+}
+th{
+  font-weight: bold;
+}
+
+.ng-select.custom {
+    border:0px;
+    min-height: 0px;
+    border-radius: 0;
+}
+.ng-select.custom .ng-select-container  {
+    min-height: 0px;
+    border-radius: 0;
+}
