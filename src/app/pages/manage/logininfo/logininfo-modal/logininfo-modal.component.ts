@@ -19,7 +19,7 @@ export class LoginInfoModalComponent implements OnInit {
   formGroup = this.fb.group({
     id: [null],
     username: ["", Validators.required],
-    password: [null, [Validators.maxLength(30), Validators.pattern('(?=.*[A-Za-z])(?=.*[0-9!@#$%^&]).{8,}')]],
+    password: [null, [Validators.maxLength(30)]],
     book_id:[null, Validators.required],
     description: [""],
     disabled: [false, Validators.required],

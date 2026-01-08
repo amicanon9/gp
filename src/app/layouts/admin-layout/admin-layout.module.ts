@@ -70,6 +70,8 @@ import { HasPermissionDirective } from 'app/permission.directive';
 import { ServicenodetailinfoExportComponent } from 'app/pages/maintenance/servicenodetailinfo/servicenodetailinfo-export/servicenodetailinfo-export.component';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
+import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
+import { projectplmModalComponent } from 'app/pages/maintenance/projectplm/projectplm-modal/projectplm-modal.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -121,6 +123,8 @@ export const TW_FORMATS = {
     PpbasicInfoComponent,
     PspowernoinfoComponent,
     PspowernoinfoModalComponent,
+    projectplmComponent,
+    projectplmModalComponent,
     PsmeternoinfoComponent,
     PsmeternoinfoModalComponent,
     PpmeternoinfoComponent,

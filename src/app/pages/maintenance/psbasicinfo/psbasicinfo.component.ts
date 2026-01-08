@@ -38,7 +38,7 @@ export class PsbasicInfoComponent implements OnInit {
     },
     columns: [
       { name: 'book_name',displayName:'所屬'},
-      { name: 'ps_no', displayName: '代號' },
+      { name: 'ps_no', displayName: '客戶代號' },
       { name: 'ps_name', displayName: '公司名稱', width: 250 },
       { name: 'tax_id_no', displayName: '統一編號' },
       { name: 'contact', displayName: '聯絡人' },

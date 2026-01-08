@@ -24,7 +24,7 @@
         <label for="book_id">所屬</label>
       </div>
       <div class="form-input">
-        <ng-select 
+        <ng-select [readonly]="formData"
         [items]="booklist"
         bindValue="book_id"
         bindLabel="name"

@@ -40,6 +40,7 @@ export class AuthService {
                 localStorage.setItem('access_token', token);
                 const state = this.jwtSvc.decodeToken(token as string) as TokenInfo;
                 this.state=state
+                console.log(state)
                 this.signInState$.next(state);
                 if (returnUrl) {
                     this.router.navigateByUrl(returnUrl);

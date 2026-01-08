@@ -1,0 +1,161 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    <div style="padding-left: 10px;"> <h2 >重點結單預估日期</h2> </div>
+
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >年度</label></div>
+        <div class="form-input">
+          <input type="number"  formControlName="year" [class.invalid]="isError('year')" />
+          <small class="text-danger" *ngIf="errorType('year', 'required')">*必填</small>
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >季度</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="quarter" placeholder="如: Q1" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >月</label></div>
+        <div class="form-input">
+          <input type="number"  formControlName="month" min="1" max="12" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >預計結案日</label></div>
+        <div class="form-input">
+          <input type="date"  formControlName="close_date" />
+        </div>
+      </div>
+    </div>
+
+<div style="padding-left: 10px;"> <h2 >License</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >RFQ</label></div>
+        <div class="form-input">
+          <input type="number"  formControlName="rfq_to_client_amount" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >DS</label></div>
+        <div class="form-input">
+          <input type="number"  formControlName="net_to_ds_amount" placeholder="0.00" />
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-left: 10px;"> <h2 >DS系統</h2> </div>
+ <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >系統查詢Channel</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="system_inquiry_channel" />
+        </div>
+      </div>
+
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >是否查詢系統</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="is_system_checked" />
+        </div>
+        
+      </div>
+      
+      <div class="col-md-12 form-group">
+        <div class="form-name"><label >AGS是否Booking</label><mat-checkbox formControlName="is_ags_booking"></mat-checkbox></div>
+      </div>
+    </div>
+
+
+<div style="padding-left: 10px;"> <h2 >客戶資訊</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >客戶名稱</label></div>
+        <div class="form-input">
+          <ng-select [items]="cuslist" bindValue="id" bindLabel="name" [clearable]="true"
+            formControlName="customer_id" [class.invalid]="isError('customer_id')" [notFoundText]="'找不到客戶'">
+          </ng-select>
+          <small class="text-danger" *ngIf="errorType('customer_id', 'required')">*必選</small>
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >產業別 CRM</label></div>
+        <div class="form-input">
+          <input type="text" id="industry_crm" formControlName="industry_crm" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >現有 PLM</label></div>
+        <div class="form-input">
+          <input type="text" formControlName="existing_plm" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >現有 CAD</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="existing_cad" />
+        </div>
+      </div>
+    
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >業務負責人 (Sales)</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="sales_owner" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >服務負責人 (Service)</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="service_owner" />
+        </div>
+      </div>
+    </div>
+<div style="padding-left: 10px;"> <h2 >AGS管制點</h2> </div>
+
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>AGS 狀態</label></div>
+        <div class="form-input">
+          <input type="text" formControlName="ags_status" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label >掌控狀況 (Longshot)</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="under_control_longshot_year_q" />
+        </div>
+      </div>
+       <div class="col-md-6 form-group">
+        <div class="form-name"><label >解決方案對應</label></div>
+        <div class="form-input">
+          <input type="text"  formControlName="solution_mapping" />
+        </div>
+      </div>
+     
+    </div>
+
+   
+
+
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+</div>

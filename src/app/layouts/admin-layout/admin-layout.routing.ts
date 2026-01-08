@@ -24,11 +24,13 @@ import { MenuGuard } from 'app/menu.guard';
 import { PssurplusinfoComponent } from 'app/pages/maintenance/pssurplusinfo/pssurplusinfo.component';
 import { PssurplusdataComponent } from 'app/pages/maintenance/pssurplusdata/pssurplusdata.component';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
+import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
   { path: 'dashboard',      component: DashboardComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'icons',          component: IconsComponent},
+  { path: 'project/projectplm',      component: projectplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/feemask',          component: FeemaskComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'ps/psbasicinfo',      component: PsbasicInfoComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'ps/pspowernoinfo',      component: PspowernoinfoComponent, canActivate: [AuthGuard, MenuGuard] },

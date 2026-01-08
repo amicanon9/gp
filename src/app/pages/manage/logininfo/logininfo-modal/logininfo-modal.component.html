@@ -37,18 +37,20 @@
       <div class="form-name">
         <label for="book_id">所屬</label>
       </div>
-      <div class="form-input">
-        <ng-select 
+      <div class="form-input"  >
+        <ng-select
         [items]="booklist"
         bindValue="book_id"
         bindLabel="name"
         [clearable]="false"
         formControlName="book_id"
         [class.invalid]="isError('book_id')"
-         [notFoundText]="'沒有找到符合的項目'">
+         [notFoundText]="'沒有找到符合的項目'" [readonly]="formData">
       </ng-select>
+       
         <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
       </div>
+     
     </div>
     <div class="form-group">
       <div class="form-name">
