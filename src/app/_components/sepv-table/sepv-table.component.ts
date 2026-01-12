@@ -86,6 +86,12 @@ export class TableComponent implements OnInit, OnChanges {
   ngOnInit(): void {
 
   }
+
+  getValue(element: any, colName: string) {
+  if (!element || !colName) return '';
+  // 支援 a.b.c 的寫法
+  return colName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), element);
+}
  exportToExcel() {
   const filteredData = this.filterStatus(); // 先過濾
 
@@ -93,7 +99,7 @@ export class TableComponent implements OnInit, OnChanges {
     alert('沒有符合條件的資料可匯出');
     return;
   }
-
+  
   // 用 displayName 當欄位名稱
   const exportData = filteredData.map(row => {
     const newRow: any = {};

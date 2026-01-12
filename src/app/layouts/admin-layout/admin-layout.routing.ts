@@ -25,12 +25,14 @@ import { PssurplusinfoComponent } from 'app/pages/maintenance/pssurplusinfo/pssu
 import { PssurplusdataComponent } from 'app/pages/maintenance/pssurplusdata/pssurplusdata.component';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
+import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
   { path: 'dashboard',      component: DashboardComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'icons',          component: IconsComponent},
   { path: 'project/projectplm',      component: projectplmComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'customer/customerplm',      component: customerplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/feemask',          component: FeemaskComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'ps/psbasicinfo',      component: PsbasicInfoComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'ps/pspowernoinfo',      component: PspowernoinfoComponent, canActivate: [AuthGuard, MenuGuard] },

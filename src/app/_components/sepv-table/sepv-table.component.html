@@ -34,7 +34,9 @@
       <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)">
         <ng-container [ngSwitch]="column.templateRef!=undefined ? column.templateRef : 'base'">
           <ng-container *ngSwitchCase="'base'">
-            <div [style.width.px]="column.width" [matTooltip]="element[column.name]">{{ element[column.name] }}</div>
+            <div [style.width.px]="column.width" [matTooltip]="getValue(element, column.name)">
+              {{ getValue(element, column.name) }}
+            </div>
           </ng-container>
           <ng-container *ngSwitchCase="'date'">
             <div [style.width.px]="column.width">{{ element[column.name] | date:'yyyy-MM-dd'}}</div>

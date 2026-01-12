@@ -3,35 +3,31 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  templateUrl: './projectplm-modal.component.html',
+  templateUrl: './customerplm-modal.component.html',
 })
-export class projectplmModalComponent implements OnInit {
+export class customerplmModalComponent implements OnInit {
   @Input() formData: any = {};
   @Input() title: String = "{ERROR}";
-  @Input() cuslist: any[] = []; // 改為接收客戶清單
-  @Input() syslist: any[] = [];
-  @Input() agslist: any[] = [];
-  @Input() userlist: any[] = [];
+  @Input() crmlist: any[] = []; // 改為接收客戶清單
   selected: any = {};
-  // 完整的 ProjectPLM 表單定義
+  // 完整的 customerplm 表單定義
   formGroup = this.fb.group({
-    id: [-1],
-    year: [new Date().getFullYear(), [Validators.required]],
-    quarter: [null],
-    month: [null],
-    close_date: [null],
-    rfq_to_client_amount: [null],
-    net_to_ds_amount: [null],
-    system_inquiry_channel: [null],
-    is_system_checked: [null],
-    is_ags_booking: [false],
-    customer_id: [null, Validators.required], // 必填
-    ags_status: [null],
-    under_control_longshot_year_q: [null],
-    solution_mapping: [null],
-    sales_owner: [null],
-    service_owner: [null]
-  });
+  id: [-1],
+  name: [null, [Validators.required]],
+  tax_id_no: [null],
+  // 聯絡人與電話 1-5
+  contact: [null], telephone: [null],
+  contact2: [null], telephone2: [null],
+  contact3: [null], telephone3: [null],
+  contact4: [null], telephone4: [null],
+  contact5: [null], telephone5: [null],
+  // 其他資訊
+  decision_level: [null],
+  industry_crm: [null],
+  existing_plm: [null],
+  existing_cad: [null],
+  description: [null]
+});
 
   constructor(
     public modal: NgbActiveModal,
@@ -40,15 +36,13 @@ export class projectplmModalComponent implements OnInit {
 
   ngOnInit() {
     // 如果是編輯模式，這會把舊資料填入
-    if (this.formData) {
+    if (this.formData && this.formData.id > 0) {
       // 處理日期格式 (若是字串需轉為 yyyy-MM-dd 以便 HTML5 Date Input 顯示)
-      console.log(this.formData)
-     
+      this.selected = this.formData.customer
       if(this.formData.close_date) {
         this.formData.close_date = this.formData.close_date.split('T')[0];
       }
       this.formGroup.patchValue(this.formData);
-       this.selected = this.formData.customer
     }
   }
   onchange(item: any) {

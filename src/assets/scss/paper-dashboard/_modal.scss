@@ -99,7 +99,9 @@ select {
         width: 100%;
     }
 }
-
+.mat-checkbox-inner-container{
+    margin-top: 5px;
+}
 @media screen and (min-width: 1024px) {
     .form-group {
         width: 50%;

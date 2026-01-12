@@ -72,6 +72,8 @@ import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
 import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
 import { projectplmModalComponent } from 'app/pages/maintenance/projectplm/projectplm-modal/projectplm-modal.component';
+import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
+import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/customerplm-modal/customerplm-modal.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -125,6 +127,8 @@ export const TW_FORMATS = {
     PspowernoinfoModalComponent,
     projectplmComponent,
     projectplmModalComponent,
+    customerplmComponent,
+    customerplmModalComponent,
     PsmeternoinfoComponent,
     PsmeternoinfoModalComponent,
     PpmeternoinfoComponent,

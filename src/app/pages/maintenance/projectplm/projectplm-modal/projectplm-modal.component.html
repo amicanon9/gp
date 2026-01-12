@@ -7,151 +7,161 @@
 
 <div class="modal-body">
   <div class="form" [formGroup]="formGroup">
-    <div style="padding-left: 10px;"> <h2 >重點結單預估日期</h2> </div>
+    <div style="padding-left: 1%"> <h2>重點結單預估日期</h2> </div>
 
     <div class="row">
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >年度</label></div>
+        <div class="form-name"><label for="year">年度</label></div>
         <div class="form-input">
-          <input type="number"  formControlName="year" [class.invalid]="isError('year')" />
+          <input type="number" id="year" formControlName="year" [class.invalid]="isError('year')" />
           <small class="text-danger" *ngIf="errorType('year', 'required')">*必填</small>
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >季度</label></div>
+        <div class="form-name"><label for="quarter">季度</label></div>
         <div class="form-input">
-          <input type="text"  formControlName="quarter" placeholder="如: Q1" />
+          <input type="text" id="quarter" formControlName="quarter" placeholder="如: Q1" />
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >月</label></div>
+        <div class="form-name"><label for="month">月</label></div>
         <div class="form-input">
-          <input type="number"  formControlName="month" min="1" max="12" />
+          <input type="number" id="month" formControlName="month" min="1" max="12" />
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >預計結案日</label></div>
+        <div class="form-name"><label for="close_date">預計結案日</label></div>
         <div class="form-input">
-          <input type="date"  formControlName="close_date" />
+          <input type="date" id="close_date" formControlName="close_date" />
         </div>
       </div>
     </div>
 
-<div style="padding-left: 10px;"> <h2 >License</h2> </div>
+    <div style="padding-left: 1%"> <h2>License</h2> </div>
     <div class="row">
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >RFQ</label></div>
+        <div class="form-name"><label for="rfq_to_client_amount">RFQ to Client</label></div>
         <div class="form-input">
-          <input type="number"  formControlName="rfq_to_client_amount" placeholder="0.00" />
+          <input type="number" id="rfq_to_client_amount" formControlName="rfq_to_client_amount" placeholder="0.00" />
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >DS</label></div>
+        <div class="form-name"><label for="net_to_ds_amount">Net to DS</label></div>
         <div class="form-input">
-          <input type="number"  formControlName="net_to_ds_amount" placeholder="0.00" />
+          <input type="number" id="net_to_ds_amount" formControlName="net_to_ds_amount" placeholder="0.00" />
         </div>
       </div>
     </div>
 
-    <div style="padding-left: 10px;"> <h2 >DS系統</h2> </div>
- <div class="row">
+    <div style="padding-left: 1%"> <h2>DS系統</h2> </div>
+    <div class="row">
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >系統查詢Channel</label></div>
+        <div class="form-name"><label for="system_inquiry_channel">系統查詢</label></div>
         <div class="form-input">
-          <input type="text"  formControlName="system_inquiry_channel" />
+          <ng-select id="system_inquiry_channel" [items]="syslist" bindValue="code" bindLabel="description" [clearable]="true"
+            formControlName="system_inquiry_channel" [class.invalid]="isError('system_inquiry_channel')" [notFoundText]="'查無資料'"  >
+          </ng-select>
         </div>
       </div>
 
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >是否查詢系統</label></div>
-        <div class="form-input">
-          <input type="text"  formControlName="is_system_checked" />
+        <div class="form-name"><label for="is_system_checked">是否查詢系統</label>
+           <mat-checkbox id="is_system_checked" formControlName="is_system_checked"></mat-checkbox>
         </div>
-        
+
       </div>
       
       <div class="col-md-12 form-group">
-        <div class="form-name"><label >AGS是否Booking</label><mat-checkbox formControlName="is_ags_booking"></mat-checkbox></div>
+        <div class="form-name">
+          <label for="is_ags_booking">AGS是否Booking</label>
+          <mat-checkbox id="is_ags_booking" formControlName="is_ags_booking"></mat-checkbox>
+        </div>
       </div>
     </div>
 
-
-<div style="padding-left: 10px;"> <h2 >客戶資訊</h2> </div>
+    <div style="padding-left: 1%"> <h2>客戶資訊</h2> </div>
     <div class="row">
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >客戶名稱</label></div>
+        <div class="form-name"><label for="customer_id">客戶名稱</label></div>
         <div class="form-input">
-          <ng-select [items]="cuslist" bindValue="id" bindLabel="name" [clearable]="true"
-            formControlName="customer_id" [class.invalid]="isError('customer_id')" [notFoundText]="'找不到客戶'">
+          <ng-select id="customer_id" [items]="cuslist" bindValue="id" bindLabel="name" [clearable]="true"
+            formControlName="customer_id" [class.invalid]="isError('customer_id')" [notFoundText]="'查無資料'"  (change)="onchange($event)">
           </ng-select>
           <small class="text-danger" *ngIf="errorType('customer_id', 'required')">*必選</small>
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >產業別 CRM</label></div>
-        <div class="form-input">
-          <input type="text" id="industry_crm" formControlName="industry_crm" />
-        </div>
-      </div>
+    <div class="form-name"><label>產業別 (CRM)</label></div>
+    <div class="form-input">
+      <span class="form-control-plaintext">{{ selected?.industry_crm || '---' }}</span>
     </div>
+  </div>
+
+  <div class="col-md-6 form-group">
+    <div class="form-name"><label>現有 PLM</label></div>
+    <div class="form-input">
+      <span class="form-control-plaintext">{{ selected?.existing_plm || '---' }}</span>
+    </div>
+  </div>
+
+  <div class="col-md-6 form-group">
+    <div class="form-name"><label>現有 CAD</label></div>
+    <div class="form-input">
+      <span class="form-control-plaintext">{{ selected?.existing_cad || '---' }}</span>
+    </div>
+  </div>
+
+   <div class="col-md-6 form-group">
+        <div class="form-name"><label for="contact">主要聯絡人</label></div>
+        <div class="form-input"><span class="form-control-plaintext">{{ selected?.contact || '---' }}</span></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="telephone">聯絡資訊</label></div>
+        <div class="form-input"><span class="form-control-plaintext">{{ selected?.telephone || '---' }}</span></div>
+      </div>
+
+    </div>
+
+    <div style="padding-left: 1%"> <h2>AGS管制點</h2> </div>
 
     <div class="row">
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >現有 PLM</label></div>
+        <div class="form-name"><label for="ags_status">AGS 狀態</label></div>
         <div class="form-input">
-          <input type="text" formControlName="existing_plm" />
+          <ng-select id="ags_status" [items]="agslist" bindValue="code" bindLabel="description" [clearable]="true"
+            formControlName="ags_status" [class.invalid]="isError('ags_status')" [notFoundText]="'查無資料'"  >
+          </ng-select>
         </div>
       </div>
       <div class="col-md-6 form-group">
-        <div class="form-name"><label >現有 CAD</label></div>
+        <div class="form-name"><label for="under_control_longshot_year_q">掌控狀況Year/Q</label></div>
         <div class="form-input">
-          <input type="text"  formControlName="existing_cad" />
+          <input type="text" id="under_control_longshot_year_q" formControlName="under_control_longshot_year_q" />
         </div>
       </div>
-    
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="solution_mapping">解決方案對應</label></div>
+        <div class="form-input">
+          <input type="text" id="solution_mapping" formControlName="solution_mapping" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="sales_owner">業務負責人</label></div>
+        <div class="form-input">
+          <ng-select id="sales_owner" [items]="userlist" bindValue="id" bindLabel="username" [clearable]="true"
+            formControlName="sales_owner" [class.invalid]="isError('sales_owner')" [notFoundText]="'查無資料'"  >
+          </ng-select>
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="service_owner">服務負責人</label></div>
+        <div class="form-input">
+          <ng-select id="service_owner" [items]="userlist" bindValue="id" bindLabel="username" [clearable]="true"
+            formControlName="service_owner" [class.invalid]="isError('service_owner')" [notFoundText]="'查無資料'"  >
+          </ng-select>
+        </div>
+      </div>
     </div>
-
-    <div class="row">
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label >業務負責人 (Sales)</label></div>
-        <div class="form-input">
-          <input type="text"  formControlName="sales_owner" />
-        </div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label >服務負責人 (Service)</label></div>
-        <div class="form-input">
-          <input type="text"  formControlName="service_owner" />
-        </div>
-      </div>
-    </div>
-<div style="padding-left: 10px;"> <h2 >AGS管制點</h2> </div>
-
-    <div class="row">
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label>AGS 狀態</label></div>
-        <div class="form-input">
-          <input type="text" formControlName="ags_status" />
-        </div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label >掌控狀況 (Longshot)</label></div>
-        <div class="form-input">
-          <input type="text"  formControlName="under_control_longshot_year_q" />
-        </div>
-      </div>
-       <div class="col-md-6 form-group">
-        <div class="form-name"><label >解決方案對應</label></div>
-        <div class="form-input">
-          <input type="text"  formControlName="solution_mapping" />
-        </div>
-      </div>
-     
-    </div>
-
-   
-
-
   </div>
 </div>
 

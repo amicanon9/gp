@@ -11,10 +11,10 @@
 
 export const environment = {
   production: true,
-  apiUrl: "https://10.1.3.16/gp_api/api",
+  apiUrl: "https://www.agroups.com.tw/PMS_api/api",
   jwt: {
-    allowedDomains: ['10.1.3.16'],
-    disallowedRoutes: ['https://10.1.3.16/gp_api/api/login'],
+    allowedDomains: ['https://www.agroups.com.tw'],
+    disallowedRoutes: ['https://www.agroups.com.tw/PMS_api/api/login'],
   },
-  reportUrl:'http://10.1.3.16/reports/report/%E5%A0%B1%E5%83%B9%E7%B3%BB%E7%B5%B1%E5%A0%B1%E8%A1%A8'
+  reportUrl:'http://https://www.agroups.com.tw/reports/report/%E5%A0%B1%E5%83%B9%E7%B3%BB%E7%B5%B1%E5%A0%B1%E8%A1%A8'
 };
