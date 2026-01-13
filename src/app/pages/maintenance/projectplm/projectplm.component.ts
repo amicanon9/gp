@@ -13,6 +13,7 @@ import * as XLSX from 'xlsx';
 import { SignalrService } from 'app/_services/signalr.service';
 import { projectplmModalComponent } from './projectplm-modal/projectplm-modal.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { weeklyreportplmModalComponent } from './weeklyreportplm-modal/weeklyreportplm-modal.component';
 @Component({
   selector: 'sepvdb-projectplm',
   templateUrl: './projectplm.component.html',
@@ -43,6 +44,7 @@ export class projectplmComponent implements OnInit {
     },
   columns: [
     // 1. 重點結單預估日期 (時間維度)
+     { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
     { name: 'year', displayName: '年度', width: 80 },
     { name: 'quarter', displayName: '季度', width: 80 },
     { name: 'month', displayName: '月', width: 80 },
@@ -75,7 +77,7 @@ export class projectplmComponent implements OnInit {
     { name: 'service', displayName: '服務負責人', width: 120 },
 
     // 6. 操作
-    { name: 'detail', displayName: '資料維護', templateRef: 'detail', width: 100 },
+   
   ]
   };
   dataSource!: MatTableDataSource<any>;
@@ -109,13 +111,30 @@ export class projectplmComponent implements OnInit {
 
 
   
-  ngOnInit() {
-    this.signalRSvc.StartConnection()
-        this.signalRSvc.ReceiveListener()?.on('projectplm', (data) => {
-          this.onDataRefresh();
-        })
+  async ngOnInit() {
+  try {
+    // 即使多個 Component 都寫這行，Service 內部也會擋掉重複的連線請求
+    await this.signalRSvc.StartConnection();
+
+    // 使用具名函式，方便之後取消監聽
+    this.signalRSvc.Hub.on('projectplm', this.refreshData);
+
     this.loadData();
+  } catch (err) {
+    console.error('初始化失敗', err);
   }
+}
+
+// 使用 Arrow Function 確保 this 指向 Component
+private refreshData = (data: any) => {
+  console.log('收到 SignalR 通知更新');
+  this.onDataRefresh();
+}
+
+ngOnDestroy() {
+  // 記得在 Component 銷毀時移除監聽，避免重複執行 onDataRefresh
+  this.signalRSvc.Hub.off('projectplm', this.refreshData);
+}
 
   onSelect($event: any) {
     this.selected = $event;
@@ -184,11 +203,16 @@ loadData() {
     syslist: this.apiSvc.getCodeLookup('sys'),
     agslist: this.apiSvc.getCodeLookup('ags'),
     userlist:this.apiSvc.getLoginInfo(),
-  }).subscribe(({ cuslist,syslist,agslist,userlist}) => {
+    crmlist : this.apiSvc.getCodeLookup('crm')
+  }).subscribe(({ cuslist,syslist,agslist,userlist,crmlist}) => {
     this.cuslist = cuslist;
     this.syslist= syslist;
     this.agslist = agslist;
     this.userlist = userlist;
+    this.crmlist = crmlist
+    this.cuslist.map(e=>{
+      e['crm']=this.crmlist.find(x=>x.code == e.industry_crm)?.description
+    })
     this.apiSvc.getdata('projectplm')
       .pipe(
         tap((data: any[]) => {
@@ -199,6 +223,7 @@ loadData() {
             e['ags']=this.agslist.find(x=>x.code==e.ags_status)?.description;
             e['sales']=this.userlist.find(x=>x.id==e.sales_owner)?.username;
             e['service']=this.userlist.find(x=>x.id==e.service_owner)?.username;
+            e['button']= [{ name: '編輯週報', type: 'weekly_report' }]
           });
           this.projectplm = data;
           this.dataSource = new MatTableDataSource<any>(data);
@@ -208,6 +233,29 @@ loadData() {
       )
       .subscribe();
   });
+}
+handleTableAction(event: { btn: any, row: any }) {
+  if (event.btn.type === 'weekly_report') {
+    // 開啟週報 Modal，沿用您的 windowClass 與 backdrop 設定
+    const modalRef = this.modalSvc.open(weeklyreportplmModalComponent, { 
+      windowClass: "modal-mySize", 
+      backdrop: 'static' 
+    });
+
+    // 傳送必要參數到 Modal (對應 Modal 內的 @Input)
+    modalRef.componentInstance.title = "週報維護";
+    modalRef.componentInstance.projectId = event.row.id;
+     modalRef.componentInstance.projectName = event.row.customer_name || 
+                                            (event.row.customer ? event.row.customer.name : '');
+    modalRef.result.then((res: any) => {
+      if (res) {
+        // 如果週報 Modal 有回傳資料，這裡可以執行重新讀取父頁面列表的動作
+        // this.loadData(); 
+      }
+    }).catch(() => {
+      // 使用者點擊取消或關閉視窗，不需執行動作
+    });
+  }
 }
 private showSuccessToast(msg: string) {
     this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {

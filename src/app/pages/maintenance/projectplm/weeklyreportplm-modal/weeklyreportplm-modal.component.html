@@ -1,0 +1,81 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }} - {{ projectName }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form-section" [formGroup]="formGroup">
+    <div style="padding-left: 1%"><h2>{{ isEdit ? '編輯週報' : '新增週報' }}</h2></div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>年度</label></div>
+        <div class="form-input">
+          <input type="number" formControlName="year" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>週次</label></div>
+        <div class="form-input">
+          <input type="number" formControlName="week" />
+        </div>
+      </div>
+      
+  
+    </div>
+    <div style="padding-left: 1%"><h2>週報內容</h2></div>
+      <div class="col-md-12">
+        <textarea style="width: 100%;" formControlName="content" rows="4" placeholder="請輸入週報..."></textarea>
+      </div>
+    <div class="text-right mb-3">
+      <button type="button" class="btn btn-secondary" *ngIf="isEdit" (click)="resetForm()">取消編輯</button>
+      <button type="button" class="btn btn-primary" [disabled]="!formGroup.valid" (click)="submit()">
+        {{ isEdit ? '更新週報' : '儲存週報' }}
+      </button>
+    </div>
+  </div>
+
+  <hr>
+
+  <div style="padding-left: 1%"><h2>週報紀錄</h2></div>
+  <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+    <table class="table table-striped">
+      <thead class="thead-light">
+        <tr>
+          <th style="width: 80px;">年度</th>
+          <th style="width: 80px;">週次</th>
+          <th>週報內容</th>
+          <th style="width: 120px;" class="text-center">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of reportList">
+          <td>{{ item.year }}</td>
+          <td>{{ item.week }}</td>
+          <td style="white-space: pre-wrap;">{{ item.content }}</td>
+          <td style="white-space: nowrap; vertical-align: middle;" class="text-center">
+    
+           <button type="button" class="btn btn-outline-primary btn-sm p-1 mr-1" 
+            (click)="editEntry(item)" title="編輯">
+            <mat-icon style="vertical-align: middle;">edit</mat-icon>
+          </button>
+
+          <button type="button" class="btn btn-outline-danger btn-sm p-1" 
+                  (click)="deleteEntry(item.id)" title="刪除">
+            <mat-icon style="vertical-align: middle;">delete</mat-icon>
+          </button>
+            
+          </td>
+        </tr>
+        <tr *ngIf="reportList.length === 0">
+          <td colspan="4" class="text-center">尚無週報紀錄</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">關閉</button>
+</div>

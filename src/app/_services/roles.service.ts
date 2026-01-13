@@ -26,6 +26,8 @@ export class RolesService {
         });
         if (!check) {
           this.router.navigate(['/dashboard'])
+        }else{
+          this.router.navigate(['/project/projectplm'])
         }
       }
       })

@@ -75,6 +75,15 @@
             <button class="btn btn-success" style="padding: 5px;font-size: 12px;" *ngFor="let detail of element[column.name]" (click)="goToDetail(detail)">{{detail.name}}</button>
             </div>
           </ng-container>
+          <ng-container *ngSwitchCase="'button'">
+            <div >
+            <button class="btn btn-success" 
+            style="padding: 5px; font-size: 12px;" 
+            *ngFor="let btn of element[column.name]" 
+            (click)="ToDetail(btn, element)"> {{btn.name}}
+            </button>
+            </div>
+          </ng-container>
         </ng-container>
       </td>
     </ng-container>

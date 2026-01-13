@@ -10,7 +10,6 @@ import { AdminLayoutRoutes } from './admin-layout.routing';
 
 import { DashboardComponent }       from '../../pages/dashboard/dashboard.component';
 import { IconsComponent }           from '../../pages/icons/icons.component';
-import { PsbasicInfoComponent } from '../../pages/maintenance/psbasicinfo/psbasicinfo.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DatePipe } from '@angular/common'
 
@@ -27,7 +26,6 @@ import { TableComponent }           from 'app/_components/sepv-table/sepv-table.
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { PsbasicinfoModalComponent } from 'app/pages/maintenance/psbasicinfo/psbasicinfo-modal/psbasicinfo-modal.component';
 import { SetOfBooksModalComponent } from 'app/pages/manage/setofbooks/setofbooks-modal/setofbooks-modal.component';
 import { SetOfBooksComponent } from 'app/pages/manage/setofbooks/setofbooks.component';
 import { LoginInfoComponent } from 'app/pages/manage/logininfo/logininfo.component';
@@ -40,40 +38,18 @@ import { MatTooltipModule} from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
-import { PpbasicInfoComponent } from 'app/pages/maintenance/ppbasicinfo/ppbasicinfo.component';
-import { PpbasicinfoModalComponent } from 'app/pages/maintenance/ppbasicinfo/ppbasicinfo-modal/ppbasicinfo-modal.component';
+
 import { PspowernoinfoComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo.component';
 import { PspowernoinfoModalComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo-modal/pspowernoinfo-modal.component';
-import { PsmeternoinfoComponent } from 'app/pages/maintenance/psmeternoinfo/psmeternoinfo.component';
-import { PsmeternoinfoModalComponent } from 'app/pages/maintenance/psmeternoinfo/psmeternoinfo-modal/psmeternoinfo-modal.component';
-import { PpmeternoinfoComponent } from 'app/pages/maintenance/ppmeternoinfo/ppmeternoinfo.component';
-import { PpmeternoinfoModalComponent } from 'app/pages/maintenance/ppmeternoinfo/ppmeternoinfo-modal/ppmeternoinfo-modal.component';
-import { PppowernoinfoComponent } from 'app/pages/maintenance/pppowernoinfo/pppowernoinfo.component';
-import { PppowernoinfoModalComponent } from 'app/pages/maintenance/pppowernoinfo/pppowernoinfo-modal/pppowernoinfo-modal.component';
-import { ServicenoinfoComponent } from 'app/pages/maintenance/servicenoinfo/servicenoinfo.component';
-import { ServicenoinfoModalComponent } from 'app/pages/maintenance/servicenoinfo/servicenoinfo-modal/servicenoinfo-modal.component';
-import { ServicenodetailinfoComponent } from 'app/pages/maintenance/servicenodetailinfo/servicenodetailinfo.component';
-import { ServicenodetailinfoModalComponent } from 'app/pages/maintenance/servicenodetailinfo/servicenodetailinfo-modal/servicenodetailinfo-modal.component';
-import { ServicenodetaildataComponent } from 'app/pages/maintenance/servicenodetaildata/servicenodetaildata.component';
-import { ServicenodetaildataModalComponent } from 'app/pages/maintenance/servicenodetaildata/servicenodetaildata-modal/servicenodetaildata-modal.component';
-import { PsbankdataComponent } from 'app/pages/maintenance/psbankdata/psbankdata.component';
-import { PsbankdataModalComponent } from 'app/pages/maintenance/psbankdata/psbankdata-modal/psbankdata-modal.component';
-import { BankbranchinfoComponent } from 'app/pages/maintenance/bankbranchinfo/bankbranchinfo.component';
-import { BankbranchinfoModalComponent } from 'app/pages/maintenance/bankbranchinfo/bankbranchinfo-modal/bankbranchinfo-modal.component';
-import { BankinfoComponent } from 'app/pages/maintenance/bankinfo/bankinfo.component';
-import { BankinfoModalComponent } from 'app/pages/maintenance/bankinfo/bankinfo-modal/bankinfo-modal.component';
-import { PssurplusinfoComponent } from 'app/pages/maintenance/pssurplusinfo/pssurplusinfo.component';
-import { PssurplusinfoModalComponent } from 'app/pages/maintenance/pssurplusinfo/pssurplusinfo-modal/pssurplusinfo-modal.component';
-import { PssurplusdataComponent } from 'app/pages/maintenance/pssurplusdata/pssurplusdata.component';
-import { PssurplusdataModalComponent } from 'app/pages/maintenance/pssurplusdata/pssurplusdata-modal/pssurplusdata-modal.component';
+
 import { HasPermissionDirective } from 'app/permission.directive';
-import { ServicenodetailinfoExportComponent } from 'app/pages/maintenance/servicenodetailinfo/servicenodetailinfo-export/servicenodetailinfo-export.component';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
 import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
 import { projectplmModalComponent } from 'app/pages/maintenance/projectplm/projectplm-modal/projectplm-modal.component';
 import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
 import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/customerplm-modal/customerplm-modal.component';
+import { weeklyreportplmModalComponent } from 'app/pages/maintenance/projectplm/weeklyreportplm-modal/weeklyreportplm-modal.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -121,24 +97,17 @@ export const TW_FORMATS = {
     DashboardComponent,
     TableComponent,
     IconsComponent,
-    PsbasicInfoComponent,
-    PpbasicInfoComponent,
+
     PspowernoinfoComponent,
     PspowernoinfoModalComponent,
     projectplmComponent,
     projectplmModalComponent,
     customerplmComponent,
     customerplmModalComponent,
-    PsmeternoinfoComponent,
-    PsmeternoinfoModalComponent,
-    PpmeternoinfoComponent,
-    PpmeternoinfoModalComponent,
-    PppowernoinfoComponent,
-    PppowernoinfoModalComponent,
+    weeklyreportplmModalComponent,
     SetOfBooksComponent,
     TableComponent,
-    PsbasicinfoModalComponent,
-    PpbasicinfoModalComponent,
+
     SetOfBooksModalComponent,
     LoginInfoComponent,
     LoginInfoModalComponent,
@@ -147,23 +116,6 @@ export const TW_FORMATS = {
     ChangePasswordModalComponent,
     MultiSelectComponent,
     FileUploadComponent,
-    ServicenoinfoComponent,
-    ServicenoinfoModalComponent,
-    ServicenodetailinfoComponent,
-    ServicenodetailinfoModalComponent,
-    ServicenodetailinfoExportComponent,
-    ServicenodetaildataComponent,
-    ServicenodetaildataModalComponent,
-    PsbankdataComponent,
-    PsbankdataModalComponent,
-    PssurplusinfoComponent,
-    PssurplusinfoModalComponent,
-    PssurplusdataComponent,
-    PssurplusdataModalComponent,
-    BankbranchinfoComponent,
-    BankbranchinfoModalComponent,
-    BankinfoComponent,
-    BankinfoModalComponent,
     FeemaskComponent
   ],
   exports:[

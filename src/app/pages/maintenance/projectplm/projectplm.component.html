@@ -17,7 +17,7 @@
         讀取中...
       </ng-container>
       <sepv-table #namiTable [search]="search" [config]="table_config" [maxTableHeight]="maxTableHeight" 
-        [minTableHeight]="minTableHeight" [dataSource]="dataSource" (select)="onSelect($event)" [hidden]="!loaded" [status]="infolist"  [stype]="stype" [stype_filter]="stype_filter">
+        [minTableHeight]="minTableHeight" [dataSource]="dataSource" (select)="onSelect($event)" [hidden]="!loaded" [status]="infolist"  [stype]="stype" [stype_filter]="stype_filter" (actionClick)="handleTableAction($event)">
       </sepv-table>
     </mat-card-content>
   </mat-card>

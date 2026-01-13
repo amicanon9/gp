@@ -40,14 +40,30 @@ export class LoginInfoComponent implements OnInit {
     public signalRSvc: SignalrService, 
   ) { }
 
-  ngOnInit() {
-    this.signalRSvc.StartConnection()
-        this.signalRSvc.ReceiveListener()?.on('login_info', (data) => {
-          this.onDataRefresh();
-        })
+ async ngOnInit() {
+  try {
+    // 即使多個 Component 都寫這行，Service 內部也會擋掉重複的連線請求
+    await this.signalRSvc.StartConnection();
+
+    // 使用具名函式，方便之後取消監聽
+    this.signalRSvc.Hub.on('login_info', this.refreshData);
+
     this.loadData();
-    
+  } catch (err) {
+    console.error('初始化失敗', err);
   }
+}
+
+// 使用 Arrow Function 確保 this 指向 Component
+private refreshData = (data: any) => {
+  console.log('收到 SignalR 通知更新');
+  this.onDataRefresh();
+}
+
+ngOnDestroy() {
+  // 記得在 Component 銷毀時移除監聽，避免重複執行 onDataRefresh
+  this.signalRSvc.Hub.off('login_info', this.refreshData);
+}
 
   onSelect($event: any) {
     this.selected = $event;

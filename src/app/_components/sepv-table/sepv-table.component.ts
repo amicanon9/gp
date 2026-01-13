@@ -74,7 +74,16 @@ export class TableComponent implements OnInit, OnChanges {
 
   @Input() dataSource!: any;
   @Input() displayedColumns!: string[];
-
+  @Output() actionClick = new EventEmitter<{btn: any, row: any}>();
+  ToDetail(btn: any, row: any) {
+  if (btn.url) {
+    // 原有的跳轉邏輯
+    this.router.navigate([btn.url], { queryParams: { id: btn.id } });
+  } else {
+    // 丟出事件給父元件處理彈窗
+    this.actionClick.emit({ btn: btn, row: row });
+  }
+}
   translate_back: Map<string, string> | null = null;
   compareById = (a: any, b: any) => +a === +b;
 

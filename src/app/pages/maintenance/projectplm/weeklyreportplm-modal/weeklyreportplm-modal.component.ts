@@ -1,0 +1,131 @@
+import { Component, Input, OnInit } from "@angular/core";
+import { FormBuilder, Validators } from "@angular/forms";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { ApiService } from "app/_services/api.service"; 
+import { ToastrService } from "ngx-toastr";
+import { throwError } from "rxjs";
+import { catchError } from "rxjs/operators";
+
+@Component({
+  selector: 'weeklyreportplm-modal',
+  templateUrl: './weeklyreportplm-modal.component.html',
+})
+export class weeklyreportplmModalComponent implements OnInit {
+  @Input() projectId: number = -1;
+  @Input() projectName: string = "";
+  @Input() title: string = "週報維護";
+
+  reportList: any[] = [];
+  isEdit: boolean = false;
+  apiName: string = 'weeklyreportplm'; // 對應後端 Controller 名稱
+
+  formGroup = this.fb.group({
+    id: [0],
+    project_id: [-1, [Validators.required]],
+    year: [new Date().getFullYear(), [Validators.required]],
+    week: [1, [Validators.required]],
+    content: [null, [Validators.required]]
+  });
+
+  constructor(
+    public modal: NgbActiveModal,
+    private fb: FormBuilder,
+    private apiSvc: ApiService ,
+    private toastr: ToastrService,
+    private snackbar: MatSnackBar,
+  ) { }
+
+  ngOnInit() {
+    if (this.projectId > 0) {
+      this.formGroup.patchValue({ project_id: this.projectId });
+      this.loadHistory();
+    }
+  }
+
+  loadHistory() {
+    this.apiSvc.getdatabyid(`${this.apiName}`,this.projectId).subscribe(res => {
+      this.reportList = res;
+    });
+  }
+
+  // 2. 儲存或更新
+  submit() {
+    if (this.formGroup.valid) {
+      const data = this.formGroup.getRawValue();
+      
+      if (this.isEdit) {
+        // 編輯：使用您的 updatedata(name, id, data)
+        this.apiSvc.updatedata(this.apiName, data.id.toString(), data).subscribe(() => {
+          this.loadHistory();
+          this.resetForm();
+        });
+      } else {
+        // 新增：使用您的 createdata(name, data)
+        this.apiSvc.createdata(this.apiName, data).subscribe(() => {
+          this.loadHistory();
+          this.resetForm();
+        });
+      }
+    }
+  }
+
+ deleteEntry(id: number) {
+  // 使用 MatSnackBar 開啟刪除確認視窗
+  const ref = this.snackbar.open('你確定要刪除此週報嗎?', '確定', {
+    duration: 3000,
+    panelClass: ['alert-danger', 'alert'],
+    verticalPosition: 'bottom',
+    horizontalPosition: 'center',
+  });
+
+  // 當使用者點擊「確定」時執行
+  ref.onAction().subscribe(() => {
+    this.apiSvc.deletedata(this.apiName, id.toString()).pipe(
+      catchError(err => {
+        // 使用您現有的 Toast 提示
+        this.showErrorToast('刪除失敗，請檢查關聯資料');
+        return throwError(err);
+      })
+    ).subscribe(() => {
+      this.showSuccessToast('刪除成功');
+      // 刪除成功後重新載入歷史列表
+      this.loadHistory();
+      
+      // 如果剛好正在編輯這一筆，則重置表單
+      if (this.formGroup.get('id')?.value === id) {
+        this.resetForm();
+      }
+    });
+  });
+}
+
+  // 表單重置與編輯模式切換
+  editEntry(item: any) {
+    this.isEdit = true;
+    this.formGroup.patchValue(item);
+  }
+  private showSuccessToast(msg: string) {
+    this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {
+      timeOut: 3000, closeButton: true, enableHtml: true,
+      toastClass: "alert alert-success alert-with-icon", positionClass: "toast-top-center"
+    });
+  }
+
+  private showErrorToast(msg: string) {
+    this.toastr.error(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {
+      timeOut: 3000, closeButton: true, enableHtml: true,
+      toastClass: "alert alert-error alert-with-icon", positionClass: "toast-top-center"
+    });
+  }
+  resetForm() {
+    this.isEdit = false;
+    this.formGroup.reset({
+      id: 0,
+      project_id: this.projectId,
+      year: new Date().getFullYear(),
+      week: 1,
+      content: null
+    });
+  }
+}

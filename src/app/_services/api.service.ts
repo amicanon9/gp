@@ -31,7 +31,9 @@ export class ApiService {
   return this.http.get<any[]>(apiUrl +`/${name}`);
  }
 
-
+public getdatabyid (name:string,id:any){
+  return this.http.get<any[]>(apiUrl +`/${name}/` + id);
+ }
   public updatedata(name:string,id: string, data: any) {
     return this.http.patch(apiUrl +`/${name}/` + id, data);
   }
