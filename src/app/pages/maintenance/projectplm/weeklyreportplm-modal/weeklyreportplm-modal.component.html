@@ -9,24 +9,34 @@
   <div class="form-section" [formGroup]="formGroup">
     <div style="padding-left: 1%"><h2>{{ isEdit ? '編輯週報' : '新增週報' }}</h2></div>
     <div class="row">
-      <div class="col-md-6 form-group">
+      <div class="col-md-4 form-group">
         <div class="form-name"><label>年度</label></div>
         <div class="form-input">
           <input type="number" formControlName="year" />
         </div>
       </div>
-      <div class="col-md-6 form-group">
+      <div class="col-md-4 form-group">
         <div class="form-name"><label>週次</label></div>
         <div class="form-input">
           <input type="number" formControlName="week" />
         </div>
       </div>
-      
+      <div class="col-md-4 form-group">
+        <div class="form-name"><label for="ags_status">AGS 狀態</label></div>
+        <div class="form-input">
+          <ng-select id="ags_status" [items]="agslist" bindValue="code" bindLabel="description" [clearable]="true"
+            formControlName="ags_status"  [notFoundText]="'查無資料'"  >
+          </ng-select>
+        </div>
+      </div>
   
     </div>
     <div style="padding-left: 1%"><h2>週報內容</h2></div>
-      <div class="col-md-12">
-        <textarea style="width: 100%;" formControlName="content" rows="4" placeholder="請輸入週報..."></textarea>
+    <div class="col-md-12">
+       <input type="text" formControlName="content" placeholder="請輸入週報主旨..." />
+      </div>
+      <div class="col-md-12" style="padding-top: 10px;">
+        <textarea style="width: 100%;padding: 5px 10px;border-radius: 5px;" formControlName="content_detail" rows="4" placeholder="請輸入週報內容..."></textarea>
       </div>
     <div class="text-right mb-3">
       <button type="button" class="btn btn-secondary" *ngIf="isEdit" (click)="resetForm()">取消編輯</button>
@@ -43,17 +53,21 @@
     <table class="table table-striped">
       <thead class="thead-light">
         <tr>
-          <th style="width: 80px;">年度</th>
-          <th style="width: 80px;">週次</th>
+          <th style="width: 80px;" class="text-center">年度</th>
+          <th style="width: 50px;" class="text-center">週次</th>
+          <th style="width: 80px;" class="text-center">AGS狀態</th>
+          <th style="width: 240px;">週報主旨</th>
           <th>週報內容</th>
           <th style="width: 120px;" class="text-center">操作</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of reportList">
-          <td>{{ item.year }}</td>
-          <td>{{ item.week }}</td>
+          <td class="text-center">{{ item.year }}</td>
+          <td class="text-center">{{ item.week }}</td>
+          <td class="text-center">{{ item.ags_status }}</td>
           <td style="white-space: pre-wrap;">{{ item.content }}</td>
+          <td style="white-space: pre-wrap;">{{ item.content_detail }}</td>
           <td style="white-space: nowrap; vertical-align: middle;" class="text-center">
     
            <button type="button" class="btn btn-outline-primary btn-sm p-1 mr-1" 

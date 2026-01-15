@@ -159,19 +159,39 @@ export class TableComponent implements OnInit, OnChanges {
   }
     return test.data;
   }
-  applyFilter(value) {
-    if(!value){
-      value=''
-    }
-    const filterValue = value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+applyFilter(value: string) {
+  // 1. 如果 dataSource 還沒準備好，就先跳出，避免噴錯
+  if (!this.dataSource) {
+    return;
   }
+
+  const filterValue = value || '';
+  
+  // 2. 定義篩選邏輯
+  this.dataSource.filterPredicate = (data: any, filter: string) => {
+    console.log(data)
+    if (!filter) return true;
+
+    const keywords = filter.replace(/，/g, ',').split(',').map(k => k.trim().toLowerCase()).filter(k => k !== '');
+
+    // 合併 CustomerPLM 的所有欄位進行搜尋
+    const dataStr = Object.keys(data)
+      .map(key => data[key])
+      .join(' ')
+      .toLowerCase();
+
+    return keywords.every(keyword => dataStr.includes(keyword));
+  };
+
+  // 3. 執行過濾
+  this.dataSource.filter = filterValue.trim().toLowerCase();
+}
   ngOnChanges(changes: SimpleChanges): void {
 
-    if (changes.search){
-      if(changes.search.currentValue!==undefined){
-        this.applyFilter(changes.search.currentValue)
-      }
+    if (changes.search) {
+    // 確保即使是 null 也能處理，觸發 applyFilter
+      const currentValue = changes.search.currentValue;
+      this.applyFilter(currentValue !== undefined ? currentValue : '');
     }
     if (this.translate_table !== null) {
       this.translate_back = this.reverseMap(this.translate_table);

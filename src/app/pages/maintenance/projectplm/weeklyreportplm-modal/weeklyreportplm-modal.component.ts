@@ -15,7 +15,7 @@ export class weeklyreportplmModalComponent implements OnInit {
   @Input() projectId: number = -1;
   @Input() projectName: string = "";
   @Input() title: string = "週報維護";
-
+  @Input() agslist:any;
   reportList: any[] = [];
   isEdit: boolean = false;
   apiName: string = 'weeklyreportplm'; // 對應後端 Controller 名稱
@@ -25,7 +25,9 @@ export class weeklyreportplmModalComponent implements OnInit {
     project_id: [-1, [Validators.required]],
     year: [new Date().getFullYear(), [Validators.required]],
     week: [1, [Validators.required]],
-    content: [null, [Validators.required]]
+    content: [null],
+    content_detail: [null],
+    ags_status:[null]
   });
 
   constructor(
@@ -125,7 +127,7 @@ export class weeklyreportplmModalComponent implements OnInit {
       project_id: this.projectId,
       year: new Date().getFullYear(),
       week: 1,
-      content: null
+      content: null,
     });
   }
 }

@@ -44,7 +44,7 @@ export class projectplmComponent implements OnInit {
     },
   columns: [
     // 1. 重點結單預估日期 (時間維度)
-     { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
+    { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
     { name: 'year', displayName: '年度', width: 80 },
     { name: 'quarter', displayName: '季度', width: 80 },
     { name: 'month', displayName: '月', width: 80 },
@@ -53,12 +53,12 @@ export class projectplmComponent implements OnInit {
     // 2. 客戶資訊
     { name: 'customer_name', displayName: '客戶名稱', width: 200 },
      // 2. 聯絡資訊 (顯示主要聯絡人)
-    { name: 'customer.contact', displayName: '聯絡人', width: 120 },
-    { name: 'customer.telephone', displayName: '電話', width: 150 },
+    { name: 'contact', displayName: '聯絡人', width: 120 },
+    { name: 'telephone', displayName: '電話', width: 150 },
     
     // 3. 技術現況
-    { name: 'customer.existing_plm', displayName: '現有 PLM', width: 150 },
-    { name: 'customer.existing_cad', displayName: '現有 CAD', width: 150 },
+    { name: 'existing_plm', displayName: '現有 PLM', width: 150 },
+    { name: 'existing_cad', displayName: '現有 CAD', width: 150 },
 
     // 3. License (金額資訊)
     { name: 'rfq_to_client_amount', displayName: 'RFQ to Client', width: 120 },
@@ -216,9 +216,13 @@ loadData() {
     this.apiSvc.getdata('projectplm')
       .pipe(
         tap((data: any[]) => {
-   
            data.map(e => {
-            e['customer']=this.cuslist.find(x=>x.id==e.customer_id);
+            var customer = this.cuslist.find(x=>x.id==e.customer_id);
+            e['customer']= customer
+            e['contact']= customer.contact
+            e['telephone']= customer.telephone
+            e['existing_plm']= customer.existing_plm
+            e['existing_cad']= customer.existing_cad
             e['sys']=this.syslist.find(x=>x.code==e.system_inquiry_channel)?.description;
             e['ags']=this.agslist.find(x=>x.code==e.ags_status)?.description;
             e['sales']=this.userlist.find(x=>x.id==e.sales_owner)?.username;
@@ -245,7 +249,8 @@ handleTableAction(event: { btn: any, row: any }) {
     // 傳送必要參數到 Modal (對應 Modal 內的 @Input)
     modalRef.componentInstance.title = "週報維護";
     modalRef.componentInstance.projectId = event.row.id;
-     modalRef.componentInstance.projectName = event.row.customer_name || 
+    modalRef.componentInstance.agslist = JSON.parse(JSON.stringify(this.agslist));
+    modalRef.componentInstance.projectName = event.row.customer_name || 
                                             (event.row.customer ? event.row.customer.name : '');
     modalRef.result.then((res: any) => {
       if (res) {
