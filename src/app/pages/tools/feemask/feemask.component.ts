@@ -133,110 +133,89 @@ async convertToImagePdf(buffer: ArrayBuffer, targetNos: string[]) {
   const newPdfDoc = await PDFDocument.create();
 
   this.totalPages = pdf.numPages;
-  if (this.totalPages <= this.pageFilter) {
-    this.toastr.warning(
-      '<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message">該 PDF 檔案頁數不足，無法去除前兩頁</span>',
-      "",
-      { enableHtml: true, toastClass: "alert alert-warning alert-with-icon", positionClass: "toast-top-center" }
-    );
-    return;
-  }
-
-  // 目標電號陣列
   const cleanTargetNos = targetNos.map(no => no.replace(/-/g, ''));
-  // 從第 3 頁開始處理
-  for (let i = this.pageFilter+1; i <= pdf.numPages; i++) {
+
+  // 建立一個重複利用的 canvas，避免一直建立新物件
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { alpha: false })!; // 關閉 alpha 通道可節省記憶體
+
+  for (let i = this.pageFilter + 1; i <= pdf.numPages; i++) {
     this.currentPage = i;
-    const processedPages = i - this.pageFilter;
     const totalToProcess = pdf.numPages - this.pageFilter;
-    this.processPercent = (processedPages / totalToProcess) * 100;
+    this.processPercent = ((i - this.pageFilter) / totalToProcess) * 100;
 
     const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const items = textContent.items as any[];
-    
-    const scale = 3.0;
+    const scale = 2.0; // 建議調低 scale (例如 2.0)，3.0 在 1200 頁會太巨大
     const viewport = page.getViewport({ scale });
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
+    // 渲染頁面
     await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-    const targetYRanges: { top: number, bottom: number }[] = [];
-    const rowTolerance = 3; // 行高容許誤差值，避免字體偏移
 
+    // --- 遮蓋邏輯 (保持你原本的邏輯，但建議抽出來) ---
+    const textContent = await page.getTextContent();
+    const items = textContent.items as any[];
+    const targetYRanges: { top: number, bottom: number }[] = [];
+    const rowTolerance = 3;
+
+    // 第一輪：找目標座標
     items.forEach((item: any) => {
       const cleanText = item.str.replace(/-/g, '').trim();
-      console.log(item)
-      // 檢查此區塊是否包含任何一個目標電號
       const isTarget = cleanTargetNos.some(target => cleanText.includes(target));
-
       if (isTarget) {
         const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-        const y = tx[5]; // Y 座標
-        const h = item.height * scale;
-        // 記錄此行的垂直範圍
         targetYRanges.push({ 
-          top: y + rowTolerance, 
-          bottom: y - h - rowTolerance 
+          top: tx[5] + rowTolerance, 
+          bottom: tx[5] - (item.height * scale) - rowTolerance 
         });
       }
     });
 
+    // 第二輪：執行遮蓋
+    items.forEach((item: any) => {
+      const rawText = item.str.trim();
+      if (rawText.includes('-')) return;
+      const cleanText = rawText.replace(/\s+/g, '');
+      const isPureMeterNo = cleanText.length >= 8 && /\d/.test(cleanText) && !/[\u4e00-\u9fa5]/.test(rawText);
 
-items.forEach((item: any) => {
-  const rawText = item.str.trim();
-    // 服務編號排除
-  if (rawText.includes('-')) {
-    return;
-  }
-  const cleanText = rawText.replace(/\s+/g, '');
-  // 判定是否為電號格式
-  const isPureMeterNo = cleanText.length >= 8 && 
-                        /\d/.test(cleanText) && 
-                        !/[\u4e00-\u9fa5]/.test(rawText);
+      if (isPureMeterNo) {
+        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
+        const isInTargetRow = targetYRanges.some(range => tx[5] <= range.top && tx[5] >= range.bottom);
+        if (!isInTargetRow) {
+          ctx.fillStyle = 'black';
+          const maskWidth = (item.width * scale) + (204 * scale);
+          ctx.fillRect(tx[4] - 5, tx[5] - (item.height * scale) - 2, maskWidth, (item.height * scale) + 5);
+        }
+      }
+    });
 
-  if (isPureMeterNo) {
-    const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-    const x = tx[4];
-    const y = tx[5];
-    const h = item.height * scale;
-    const w = item.width * scale;
-
-
-
-
-    // 檢查目前是否落在「目標行」的範圍內
-    const isInTargetRow = targetYRanges.some(range => 
-      y <= range.top && y >= range.bottom
-    );
-
-    if (!isInTargetRow) {
-      ctx.fillStyle = 'black';
-      
+    // --- 關鍵優化處 ---
+    // 1. 改用 jpeg 並降低品質 (0.75)
+    const imageData = canvas.toDataURL('image/jpeg', 0.75); 
+    const jpgImage = await newPdfDoc.embedJpg(imageData);
     
-      const tableRightPadding = 204 * scale; // 根據 scale 調整，確保蓋到最後一個欄位
-      const maskWidth = w + tableRightPadding; 
-      
-      // 執行遮蓋：從 X 座標開始往右蓋到表格結束
-      ctx.fillRect(x - 5, y - h - 2, maskWidth, h + 5);
-    }
-  }
-});
-
-    // 轉回 PDF 頁面
-    const imageData = canvas.toDataURL('image/png');
-    const pngImage = await newPdfDoc.embedPng(imageData);
     const newPage = newPdfDoc.addPage([viewport.width / scale, viewport.height / scale]);
-    newPage.drawImage(pngImage, {
+    newPage.drawImage(jpgImage, {
       x: 0,
       y: 0,
       width: viewport.width / scale,
       height: viewport.height / scale,
     });
+
+    // 2. 釋放目前頁面的引用
+    page.cleanup(); 
+    
+    // 3. 每處理 50 頁強制暫停一下，讓瀏覽器有機會進行垃圾回收 (GC)
+    if (i % 50 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
+
+  // 清空畫布資源
+  canvas.width = 0;
+  canvas.height = 0;
 
   const pdfBytes = await newPdfDoc.save();
   this.downloadFile(pdfBytes, `${this.selectedPsName}_遮罩處理.pdf`);
