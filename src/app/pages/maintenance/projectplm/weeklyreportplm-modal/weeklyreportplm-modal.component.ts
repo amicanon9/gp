@@ -6,7 +6,9 @@ import { ApiService } from "app/_services/api.service";
 import { ToastrService } from "ngx-toastr";
 import { throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
-
+import dayjs from 'dayjs';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+dayjs.extend(weekOfYear);
 @Component({
   selector: 'weeklyreportplm-modal',
   templateUrl: './weeklyreportplm-modal.component.html',
@@ -24,7 +26,7 @@ export class weeklyreportplmModalComponent implements OnInit {
     id: [0],
     project_id: [-1, [Validators.required]],
     year: [new Date().getFullYear(), [Validators.required]],
-    week: [1, [Validators.required]],
+    week: [dayjs().week(), [Validators.required]],
     content: [null],
     content_detail: [null],
     ags_status:[null]
@@ -47,6 +49,11 @@ export class weeklyreportplmModalComponent implements OnInit {
 
   loadHistory() {
     this.apiSvc.getdatabyid(`${this.apiName}`,this.projectId).subscribe(res => {
+      res.map(e=>{
+        var ags = this.agslist.find(x=>x.code == e.ags_status)
+      e['ags_description']=ags.description
+      e['ags']=ags
+    })
       this.reportList = res;
     });
   }
@@ -126,8 +133,9 @@ export class weeklyreportplmModalComponent implements OnInit {
       id: 0,
       project_id: this.projectId,
       year: new Date().getFullYear(),
-      week: 1,
+      week: dayjs().week(),
       content: null,
+      content_detail:null
     });
   }
 }

@@ -2,6 +2,17 @@
   font-size: 18px !important;  /* 這裡改大 */
   max-width:  500px!important;
 }
+.ags-badge-main {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 50px; // 藥丸形狀
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+}
 .nami-table-container {
   width: 100%;
   overflow: auto;
@@ -30,10 +41,10 @@
         text-align: left;
         div {
           white-space: nowrap;
-          padding: 5px 15px;
+          padding: 1px 15px;
           overflow: hidden;
           text-overflow: ellipsis;
-          width: 150px;
+         
         }
         &.mat-column-checkbox {
           width: 50px;
@@ -76,4 +87,50 @@ th{
 .ng-select.custom .ng-select-container  {
     min-height: 0px;
     border-radius: 0;
+}
+
+.week-multi-wrapper {
+  display: flex;
+  flex-direction: column; // 讓週報由上而下排列
+  gap: 4px; // 每筆週報之間的間距
+  padding: 4px 0;
+
+  .week-row-item {
+    cursor: help;
+    font-size: 12px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      .week-content-text {
+        color: #51bcce;
+      }
+    }
+  }
+
+  .badge {
+    margin-right: 6px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    min-width: 65px; // 確保 2025/W1 寬度一致，視覺上比較整齊
+    text-align: center;
+    flex-shrink: 0; // 防止標籤被文字擠壓
+  }
+
+  .week-content-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* 確保 Tooltip 效果 (維持之前設定) */
+::ng-deep .nami-tooltip-multiline {
+  white-space: pre-wrap !important;
+  max-width: 350px !important;
+  font-size: 13px;
+  padding: 12px;
 }

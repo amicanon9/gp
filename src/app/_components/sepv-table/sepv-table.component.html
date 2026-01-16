@@ -1,7 +1,7 @@
 <!-- 基礎style 資料 排序 -->
 <div class="nami-table-container" [style.maxHeight]="maxTableHeight" [style.minHeight]="minTableHeight">
 
-<!-- <button type="button" class="btn btn-primary" (click)="exportToExcel()">
+  <!-- <button type="button" class="btn btn-primary" (click)="exportToExcel()">
   匯出 Excel
 </button> -->
 
@@ -12,13 +12,10 @@
       <option *ngFor="let item of status" [ngValue]="item[stype.key]">{{item[stype.display_name]}}</option>
     </select>
   </ng-container>
- 
-  <mat-table [dataSource]="innerDataSource" matSort
-    [matSortActive]="config.sort && config.sort.active"
-    [matSortDisabled]="!config.serverSide"
-    [matSortDirection]="config.sort && config.sort.direction"
-    [matSortDisableClear]="config.sort && config.sort.disableClear"
-    [class.disabled]="disabled">
+
+  <mat-table [dataSource]="innerDataSource" matSort [matSortActive]="config.sort && config.sort.active"
+    [matSortDisabled]="!config.serverSide" [matSortDirection]="config.sort && config.sort.direction"
+    [matSortDisableClear]="config.sort && config.sort.disableClear" [class.disabled]="disabled">
 
     <!-- 隱藏的checkbox -->
     <ng-container matColumnDef="checkbox">
@@ -29,7 +26,8 @@
     </ng-container>
 
     <!-- 動態欄位 -->
-    <ng-container [matColumnDef]="column.name" *ngFor="let column of config.columns" [sticky]="column.sticky" [stickyEnd]="column.stickyEnd">
+    <ng-container [matColumnDef]="column.name" *ngFor="let column of config.columns" [sticky]="column.sticky"
+      [stickyEnd]="column.stickyEnd">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{column.displayName}}</th>
       <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)">
         <ng-container [ngSwitch]="column.templateRef!=undefined ? column.templateRef : 'base'">
@@ -66,29 +64,82 @@
             </span>
           </ng-container>
           <ng-container *ngSwitchCase="'permissions'">
-          <span class="item" style="margin-left: 15px;">
-            {{ permissionMap[element[column.name]] || '未知' }}
-          </span>
-        </ng-container>
+            <span class="item" style="margin-left: 15px;">
+              {{ permissionMap[element[column.name]] || '未知' }}
+            </span>
+          </ng-container>
           <ng-container *ngSwitchCase="'detail'">
-            <div >
-            <button class="btn btn-success" style="padding: 5px;font-size: 12px;" *ngFor="let detail of element[column.name]" (click)="goToDetail(detail)">{{detail.name}}</button>
+            <div>
+              <button class="btn btn-success" style="padding: 5px;font-size: 12px;"
+                *ngFor="let detail of element[column.name]" (click)="goToDetail(detail)">{{detail.name}}</button>
             </div>
           </ng-container>
           <ng-container *ngSwitchCase="'button'">
-            <div >
-            <button class="btn btn-success" 
-            style="padding: 5px; font-size: 12px;" 
-            *ngFor="let btn of element[column.name]" 
-            (click)="ToDetail(btn, element)"> {{btn.name}}
-            </button>
+            <div>
+              <button class="btn btn-success" style="padding: 5px; font-size: 12px;"
+                *ngFor="let btn of element[column.name]" (click)="ToDetail(btn, element)"> {{btn.name}}
+              </button>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'ags_status'">
+            <div [style.width.px]="column.width" class="text-left">
+              <ng-container *ngIf="element[column.name] as ags">
+                <span class="badge ags-badge-main" [ngStyle]="{
+                    'background-color': 
+                      ags.code === 'A6' ? '#6c757d' : 
+                      ags.code === 'A5' ? '#adb5bd' : 
+                      ags.code === 'A4' ? '#90ee90' : '#e9ecef',
+                    'color': ags.code === 'A4' ? '#000' : 
+                            (ags.code === 'A5' || ags.code === 'A6') ? '#fff' : '#495057'
+                  }">
+                  {{ ags.description || ags.code }}
+                </span>
+              </ng-container>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'week_content'">
+            <div [style.width.px]="column.width" class="week-multi-wrapper">
+              <ng-container *ngIf="element.week && element.week.length > 0; else noWeek">
+
+                <div *ngFor="let w of element.week" class="week-row-item text-truncate" [matTooltip]="w.content_detail"
+                  matTooltipClass="nami-tooltip-multiline">
+
+                  <span class="badge" [ngStyle]="{
+                        'background-color': 
+                          w.ags_status === 'A6' ? '#6c757d' : 
+                          w.ags_status === 'A5' ? '#adb5bd' : 
+                          w.ags_status === 'A4' ? '#90ee90' : '#6c757d',
+                        'color': w.ags_status === 'A4' ? '#000' : '#fff'
+                      }">
+                    {{w.year}}/W{{w.week}}
+                  </span>
+
+                  <span class="week-content-text">{{ w.content }}</span>
+                </div>
+              </ng-container>
+              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'this_week_content'">
+            <div [style.width.px]="column.width" class="week-cell-wrapper">
+              <ng-container *ngIf="element && element.this_week.length > 0; else noWeek">
+                <div class="text-truncate week-text" 
+                    [matTooltip]="element.this_week[0].content_detail"
+                    matTooltipClass="nami-tooltip-multiline">
+                  <span class="badge badge-secondary">
+                    {{element.this_week[0].year}}/W{{element.this_week[0].week}}
+                  </span>
+                   {{ element.this_week[0].content }}
+                </div>
+              </ng-container>
+              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
             </div>
           </ng-container>
         </ng-container>
       </td>
     </ng-container>
 
-  
+
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" [class.selected]="i === selectedId"></tr>
