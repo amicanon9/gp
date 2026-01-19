@@ -1,0 +1,92 @@
+.checkin-card {
+  border-top: 4px solid #3f51b5; // Material Primary Color
+  border-radius: 8px;
+}
+.header-icon{
+  font-size: 30px;
+}
+.header-image {
+  background-color: #e8eaf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.select-all-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  margin-bottom: 5px;
+}
+
+.history-card {
+  border-radius: 8px;
+  overflow: hidden;
+  .table {
+    font-size: 0.9rem;
+    th { background-color: #f8f9fa; }
+  }
+}
+
+.form-label {
+  color: #555;
+  font-size: 0.95rem;
+  mat-icon {
+    font-size: 1.2rem;
+    width: 20px;
+    height: 20px;
+  }
+}
+.gap-1 {
+  gap: 0.25rem !important;
+}
+
+.badge {
+  font-weight: 500;
+  &.bg-light {
+    color: #555 !important;
+    background-color: #f8f9fa !important;
+  }
+}
+
+.history-card {
+  .table {
+    th {
+      font-weight: 600;
+      color: #666;
+      border-top: none;
+    }
+    td {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+  }
+}
+
+// 強制將右側元件推到盡頭
+.flex-spacer {
+  flex: 1 1 auto;
+}
+
+// 修正 mat-card-header 的預設行為，確保寬度 100%
+mat-card-header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  
+  // 移除 Angular Material 可能帶有的內距干擾
+  ::ng-deep .mat-card-header-text {
+    margin: 0 !important;
+    display: none; // 隱藏預設的 text container，因為我們已經手動寫了 title
+  }
+}
+
+.mode-toggle {
+  // 讓切換按鈕稍微有一點圓角感，比較好看
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}

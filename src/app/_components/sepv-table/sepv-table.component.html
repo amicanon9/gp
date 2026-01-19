@@ -97,31 +97,33 @@
               </ng-container>
             </div>
           </ng-container>
-          <ng-container *ngSwitchCase="'week_content'">
-            <div [style.width.px]="column.width" class="week-multi-wrapper">
-              <ng-container *ngIf="element.week && element.week.length > 0; else noWeek">
+         <ng-container *ngSwitchCase="'week_content'">
+  <div class="week-multi-wrapper week-flex-container">
+    <ng-container *ngIf="element.week && element.week.length > 0; else noWeek">
 
-                <div *ngFor="let w of element.week" class="week-row-item text-truncate" [matTooltip]="w.content_detail"
-                  matTooltipClass="nami-tooltip-multiline">
+      <span *ngFor="let w of element.week" 
+            class="week-row-item week-item" 
+            [matTooltip]="w.content_detail"
+            matTooltipClass="nami-tooltip-multiline">
 
-                  <span class="badge" [ngStyle]="{
-                        'background-color': 
-                          w.ags_status === 'A6' ? '#6c757d' : 
-                          w.ags_status === 'A5' ? '#adb5bd' : 
-                          w.ags_status === 'A4' ? '#90ee90' : '#6c757d',
-                        'color': w.ags_status === 'A4' ? '#000' : '#fff'
-                      }">
-                    {{w.year}}/W{{w.week}}
-                  </span>
+        <span class="badge" [ngStyle]="{
+              'background-color': 
+                w.ags_status === 'A6' ? '#6c757d' : 
+                w.ags_status === 'A5' ? '#adb5bd' : 
+                w.ags_status === 'A4' ? '#90ee90' : '#6c757d',
+              'color': w.ags_status === 'A4' ? '#000' : '#fff'
+            }">
+          {{w.year}}/W{{w.week}}
+        </span>
 
-                  <span class="week-content-text">{{ w.content }}</span>
-                </div>
-              </ng-container>
-              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
-            </div>
-          </ng-container>
+        <span class="week-content-text">{{ w.content }}</span>
+      </span>
+    </ng-container>
+    <ng-template #noWeek><span class="text-muted">-</span></ng-template>
+  </div>
+</ng-container>
           <ng-container *ngSwitchCase="'this_week_content'">
-            <div [style.width.px]="column.width" class="week-cell-wrapper">
+            <div  class="week-cell-wrapper">
               <ng-container *ngIf="element && element.this_week.length > 0; else noWeek">
                 <div class="text-truncate week-text" 
                     [matTooltip]="element.this_week[0].content_detail"

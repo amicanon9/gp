@@ -38,10 +38,10 @@ import { MatTooltipModule} from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
-
+import { MatRadioModule } from '@angular/material/radio'; 
 import { PspowernoinfoComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo.component';
 import { PspowernoinfoModalComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo-modal/pspowernoinfo-modal.component';
-
+import { MatDividerModule } from '@angular/material/divider'; // 1. 匯入模組
 import { HasPermissionDirective } from 'app/permission.directive';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
@@ -50,6 +50,7 @@ import { projectplmModalComponent } from 'app/pages/maintenance/projectplm/proje
 import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
 import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/customerplm-modal/customerplm-modal.component';
 import { weeklyreportplmModalComponent } from 'app/pages/maintenance/projectplm/weeklyreportplm-modal/weeklyreportplm-modal.component';
+import { checkinComponent } from 'app/pages/tools/checkin/checkin.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -75,6 +76,7 @@ export const TW_FORMATS = {
     NgbModule,
     NgSelectModule,
     // Material
+    MatRadioModule,
     MatSelectModule,
     MatTableModule,
     MatSortModule,
@@ -90,14 +92,15 @@ export const TW_FORMATS = {
     MatMomentDateModule,
     MatTooltipModule,
     MatButtonToggleModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatDividerModule
   ],
   declarations: [
     HasPermissionDirective,
     DashboardComponent,
     TableComponent,
     IconsComponent,
-
+    checkinComponent,
     PspowernoinfoComponent,
     PspowernoinfoModalComponent,
     projectplmComponent,

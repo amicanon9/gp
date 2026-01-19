@@ -126,7 +126,39 @@ th{
     white-space: nowrap;
   }
 }
+/* 外層容器：強制水平且不換行 */
+.week-flex-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important; /* 絕對不換行 */
+  align-items: center;
+  overflow-x: auto;            /* 超出寬度時顯示水平滾動條 */
+  white-space: nowrap;         /* 雙重保險：強制文字不換行 */
+  gap: 10px;                   /* 每個週次之間的間距 */
+  width: 100%;                 /* 視情況決定是否固定寬度 */
+}
 
+/* 內層項目：防止被壓縮 */
+.week-item {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;              /* 重要：設為 0 才不會因為容器太窄被擠扁 */
+  white-space: nowrap;
+}
+
+.week-content-text {
+  margin-left: 4px;
+  margin-right: 8px;           /* 讓內容跟下一個週次拉開距離 */
+}
+
+/* 隱藏捲軸但保留滾動功能 (選用) */
+.week-flex-container::-webkit-scrollbar {
+  height: 4px;
+}
+.week-flex-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
 /* 確保 Tooltip 效果 (維持之前設定) */
 ::ng-deep .nami-tooltip-multiline {
   white-space: pre-wrap !important;

@@ -1,0 +1,161 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-xl-11 col-lg-11">
+
+      <mat-card class="checkin-card shadow-sm">
+       <mat-card-header class="custom-card-header" style="padding-bottom: 10px;">
+  <div class="header-left">
+    <div class="header-icon" [class.backfill-mode]="isBackfill">
+      <mat-icon  color="primary">{{ 'fingerprint' }}</mat-icon>
+       <span class="header-title">專案打卡工具</span>
+    </div>
+   
+  </div>
+
+  <span class="flex-spacer"></span>
+
+  <div class="header-right">
+    <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle">
+      <mat-button-toggle value="normal">一般打卡</mat-button-toggle>
+      <mat-button-toggle value="backfill">補打紀錄</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</mat-card-header>
+
+        <mat-divider></mat-divider>
+
+        <mat-card-content class="p-4">
+          <div class="time-section mb-4 p-3 rounded" [class.backfill-bg]="isBackfill">
+            <div *ngIf="!isBackfill" class="d-flex align-items-center">
+              <mat-icon class="text-primary me-2">access_time</mat-icon>
+              <span class="fs-5 fw-bold text-primary">
+                現在時間：{{ currentTime | date:'yyyy-MM-dd HH:mm:ss' }}
+              </span>
+            </div>
+
+            <div *ngIf="isBackfill" class="row g-3 align-items-center">
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                  <mat-label>補打日期</mat-label>
+                  <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                  <mat-label>補打時間</mat-label>
+                  <input matInput type="time" [(ngModel)]="backfillTime">
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-12">
+              <label class="form-label fw-bold mb-2">
+                <mat-icon class="align-middle me-1">assignment</mat-icon> 選擇專案 (可多選)
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>請選擇參與專案</mat-label>
+                <mat-select [(ngModel)]="selectedProject" multiple>
+                  <mat-option *ngFor="let p of Pjlist" [value]="p.id">
+                    <span class="fw-bold">({{ p.id }})</span>{{ p.customer_name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="p-3 bg-light d-flex justify-content-between align-items-center">
+          <div class="ms-3">
+            <div *ngIf="isBackfill" class="d-flex align-items-center">
+              <span class="me-3 fw-bold">補打狀態：</span>
+              <mat-radio-group [(ngModel)]="checkinStatus" color="warn">
+                <mat-radio-button value="上班" class="me-3 text-success">上班</mat-radio-button>
+                <mat-radio-button value="下班" class="text-secondary">下班</mat-radio-button>
+              </mat-radio-group>
+            </div>
+
+            <div *ngIf="!isBackfill" class="text-muted small d-flex align-items-center">
+              <mat-icon class="me-1" style="font-size: 18px; width: 18px; height: 18px;">info</mat-icon>
+              系統將根據今日紀錄自動判定為 [上班] 或 [下班]
+            </div>
+          </div>
+
+          <div>
+            <button mat-button (click)="resetForm()" [disabled]="isProcessing">重置</button>
+            <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'" class="px-5 ms-2"
+              [disabled]="isProcessing || selectedProject.length === 0" (click)="submitCheckin()">
+              <mat-icon class="me-1">check_circle</mat-icon>
+              {{ isBackfill ? '確認補打' + checkinStatus : '執行打卡' }}
+            </button>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+
+      <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="text-muted mb-0"><mat-icon class="align-middle me-1">history</mat-icon> 最近打卡紀錄</h5>
+          <button mat-icon-button color="primary" (click)="getHistory()" matTooltip="重新整理">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+
+        <mat-card class="history-card shadow-sm border-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th class="ps-4">日期</th>
+                  <th>時間</th>
+                  <th>專案 ID</th>
+                  <th>模式</th>
+                  <th class="text-center">狀態</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!displayedHistory?.length">
+                  <td colspan="5" class="text-center text-muted py-5">
+                    <mat-icon style="font-size: 48px; width: 48px; height: 48px;"
+                      class="mb-2">history_toggle_off</mat-icon>
+                    <p>尚無任何打卡紀錄</p>
+                  </td>
+                </tr>
+
+                <tr *ngFor="let item of displayedHistory">
+                  <td class="ps-4">{{ item.checkin_time | date:'yyyy-MM-dd' }}</td>
+                  <td class="fw-bold">{{ item.checkin_time | date:'HH:mm' }}</td>
+                  <td>
+                    <div class="d-flex flex-wrap gap-1">
+                      <span *ngFor="let name of item.project_names" class="badge bg-light text-dark border">
+                        {{ name }}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill"
+                      [ngClass]="item.mode === 'backfill' ? 'bg-warning text-dark' : 'bg-info text-white'">
+                      {{ item.mode === 'backfill' ? '補打' : '一般' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span [class.text-success]="item.status === '上班'" [class.text-secondary]="item.status === '下班'"
+                      class="fw-bold">
+                      <mat-icon class="align-middle me-1" style="font-size: 18px; width: 18px; height: 18px;">
+                        {{ item.status === '上班' ? 'login' : 'logout' }}
+                      </mat-icon>
+                      {{ item.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-card>
+      </div>
+
+    </div>
+  </div>
+</div>
