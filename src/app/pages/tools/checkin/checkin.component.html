@@ -2,30 +2,33 @@
   <div class="row justify-content-center">
     <div class="col-xl-11 col-lg-11">
 
-      <mat-card class="checkin-card shadow-sm">
-       <mat-card-header class="custom-card-header" style="padding-bottom: 10px;">
-  <div class="header-left">
-    <div class="header-icon" [class.backfill-mode]="isBackfill">
-      <mat-icon  color="primary">{{ 'fingerprint' }}</mat-icon>
-       <span class="header-title">專案打卡工具</span>
-    </div>
-   
-  </div>
+      <mat-card class="checkin-card shadow-sm" [class.backfill-card]="isBackfill">
+        <mat-card-header class="custom-card-header" style="padding-bottom: 10px;">
+          <div class="header-left">
+            <div class="header-icon" [class.backfill-mode]="isBackfill">
+              <mat-icon color="primary">{{ 'fingerprint' }}</mat-icon>
+              <span class="header-title">專案打卡工具</span>
+            </div>
 
-  <span class="flex-spacer"></span>
+          </div>
 
-  <div class="header-right">
-    <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle">
-      <mat-button-toggle value="normal">一般打卡</mat-button-toggle>
-      <mat-button-toggle value="backfill">補打紀錄</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
-</mat-card-header>
+          <span class="flex-spacer"></span>
+
+          <div class="header-right">
+            <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle"
+              [class.is-backfill-active]="isBackfill">
+
+              <mat-button-toggle value="normal">一般打卡</mat-button-toggle>
+              <mat-button-toggle value="backfill">補打卡</mat-button-toggle>
+
+            </mat-button-toggle-group>
+          </div>
+        </mat-card-header>
 
         <mat-divider></mat-divider>
 
-        <mat-card-content class="p-4">
-          <div class="time-section mb-4 p-3 rounded" [class.backfill-bg]="isBackfill">
+        <mat-card-content class="p-1">
+          <div class="time-section mb-4 p-1 rounded" [class.backfill-bg]="isBackfill">
             <div *ngIf="!isBackfill" class="d-flex align-items-center">
               <mat-icon class="text-primary me-2">access_time</mat-icon>
               <span class="fs-5 fw-bold text-primary">
@@ -35,17 +38,16 @@
 
             <div *ngIf="isBackfill" class="row g-3 align-items-center">
               <div class="col-md-6">
-                <mat-form-field appearance="outline" class="w-100 hide-subscript">
-                  <mat-label>補打日期</mat-label>
-                  <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-form-field appearance="outline" class="w-100 custom-form-field">
+                  <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate" placeholder="選擇日期">
+                  <mat-datepicker-toggle matSuffix [for]="picker" class="large-icon-toggle"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
               </div>
+
               <div class="col-md-6">
-                <mat-form-field appearance="outline" class="w-100 hide-subscript">
-                  <mat-label>補打時間</mat-label>
-                  <input matInput type="time" [(ngModel)]="backfillTime">
+                <mat-form-field appearance="outline" class="w-100 custom-form-field">
+                  <input matInput type="time" [(ngModel)]="backfillTime" class="time-input">
                 </mat-form-field>
               </div>
             </div>
@@ -68,28 +70,30 @@
           </div>
         </mat-card-content>
 
-        <mat-card-actions class="p-3 bg-light d-flex justify-content-between align-items-center">
-          <div class="ms-3">
-            <div *ngIf="isBackfill" class="d-flex align-items-center">
-              <span class="me-3 fw-bold">補打狀態：</span>
-              <mat-radio-group [(ngModel)]="checkinStatus" color="warn">
-                <mat-radio-button value="上班" class="me-3 text-success">上班</mat-radio-button>
-                <mat-radio-button value="下班" class="text-secondary">下班</mat-radio-button>
+        <mat-card-actions class="p-1 bg-light d-flex flex-column align-items-start">
+          <div class="mb-3 w-100">
+            <div *ngIf="isBackfill" class="d-flex align-items-center flex-wrap">
+
+              <mat-radio-group [(ngModel)]="checkinStatus" color="warn" class="ms-4 custom-radio-group">
+                <mat-radio-button value="上班" class="radio-item text-success fw-bold">上班</mat-radio-button>
+                <mat-radio-button value="下班" class="radio-item text-secondary fw-bold">下班</mat-radio-button>
               </mat-radio-group>
             </div>
 
-            <div *ngIf="!isBackfill" class="text-muted small d-flex align-items-center">
-              <mat-icon class="me-1" style="font-size: 18px; width: 18px; height: 18px;">info</mat-icon>
+            <div *ngIf="!isBackfill" class="text-muted d-flex align-items-center">
+              <mat-icon class="me-1" style="font-size: 20px;">info</mat-icon>
               系統將根據今日紀錄自動判定為 [上班] 或 [下班]
             </div>
           </div>
 
-          <div>
-            <button mat-button (click)="resetForm()" [disabled]="isProcessing">重置</button>
-            <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'" class="px-5 ms-2"
-              [disabled]="isProcessing || selectedProject.length === 0" (click)="submitCheckin()">
-              <mat-icon class="me-1">check_circle</mat-icon>
-              {{ isBackfill ? '確認補打' + checkinStatus : '執行打卡' }}
+          <div class="w-100 d-flex gap-2">
+
+
+            <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'"
+              class="btn-main-action-full shadow flex-grow-1" [disabled]="isProcessing || selectedProject.length === 0"
+              (click)="submitCheckin()">
+              <mat-icon class="me-2">check_circle</mat-icon>
+              <span class="fs-5">{{ isBackfill ? '確認補打' + checkinStatus : '執行打卡' }}</span>
             </button>
           </div>
         </mat-card-actions>

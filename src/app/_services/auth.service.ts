@@ -32,7 +32,7 @@ export class AuthService {
         }
     }
 
-    trySetSignInState(token: string | null, returnUrl?: string) {
+    trySetSignInState(token: string | null, returnUrl?: string ,login?: boolean) {
         if (token) {
             if (this.jwtSvc.isTokenExpired(token)) {
                 this.trySetSignInState(null);
@@ -42,7 +42,10 @@ export class AuthService {
                 this.state=state
                 console.log(state)
                 this.signInState$.next(state);
-                if (returnUrl) {
+                if(returnUrl == '/'){
+                     this.router.navigateByUrl('/tools/checkin');
+                }
+                else if (returnUrl) {
                     this.router.navigateByUrl(returnUrl);
                 }
             }
@@ -60,7 +63,7 @@ export class AuthService {
         return this.apiSvc.loginGetToken(user, pass).pipe(
             map(t => {
                 if (t) {
-                    this.trySetSignInState(t.token, returnUrl);
+                    this.trySetSignInState(t.token, returnUrl,true);
                 }
                 return t;
             }),
