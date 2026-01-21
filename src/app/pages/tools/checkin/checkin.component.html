@@ -7,7 +7,7 @@
           <div class="header-left">
             <div class="header-icon" [class.backfill-mode]="isBackfill">
               <mat-icon color="primary">{{ 'fingerprint' }}</mat-icon>
-              <span class="header-title">專案打卡工具</span>
+              <span class="header-title">打卡工具</span>
             </div>
 
           </div>
@@ -112,11 +112,12 @@
             <table class="table table-hover align-middle mb-0">
               <thead class="bg-light">
                 <tr>
-                  <th class="ps-4">日期</th>
+                  <th >日期</th>
                   <th>時間</th>
-                  <th>專案 ID</th>
                   <th>模式</th>
                   <th class="text-center">狀態</th>
+                  <th>專案</th>
+                  
                 </tr>
               </thead>
               <tbody>
@@ -132,13 +133,6 @@
                   <td class="ps-4">{{ item.checkin_time | date:'yyyy-MM-dd' }}</td>
                   <td class="fw-bold">{{ item.checkin_time | date:'HH:mm' }}</td>
                   <td>
-                    <div class="d-flex flex-wrap gap-1">
-                      <span *ngFor="let name of item.project_names" class="badge bg-light text-dark border">
-                        {{ name }}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
                     <span class="badge rounded-pill"
                       [ngClass]="item.mode === 'backfill' ? 'bg-warning text-dark' : 'bg-info text-white'">
                       {{ item.mode === 'backfill' ? '補打' : '一般' }}
@@ -153,6 +147,14 @@
                       {{ item.status }}
                     </span>
                   </td>
+                  <td>
+                    <div class="d-flex flex-wrap gap-1">
+                      <span *ngFor="let name of item.project_names" class="badge bg-light text-dark border">
+                        {{ name }}
+                      </span>
+                    </div>
+                  </td>
+                  
                 </tr>
               </tbody>
             </table>

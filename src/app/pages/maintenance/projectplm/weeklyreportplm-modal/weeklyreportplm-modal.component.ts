@@ -51,8 +51,13 @@ export class weeklyreportplmModalComponent implements OnInit {
     this.apiSvc.getdatabyid(`${this.apiName}`,this.projectId).subscribe(res => {
       res.map(e=>{
         var ags = this.agslist.find(x=>x.code == e.ags_status)
-      e['ags_description']=ags.description
-      e['ags']=ags
+        if(ags){
+          e['ags_description']=ags.description
+          e['ags']=ags
+        }else{
+          e['ags_description']=null
+          e['ags']=null
+        }
     })
       this.reportList = res;
     });
