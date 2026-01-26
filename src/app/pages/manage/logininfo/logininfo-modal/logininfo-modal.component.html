@@ -9,6 +9,7 @@
     <div class="form-group" [hidden]="true">
       <input type="number" id="id" formControlName="id" readonly />
     </div>
+    
     <div class="form-group">
       <div class="form-name">
         <label for="username">使用者名稱</label>
@@ -18,6 +19,7 @@
         <small class="text-danger" *ngIf="errorType('username', 'required')">*必填欄位</small>
       </div>
     </div>
+
     <div class="form-group">
       <div class="form-name">
         <label for="password">使用者密碼</label>
@@ -37,21 +39,21 @@
       <div class="form-name">
         <label for="book_id">所屬</label>
       </div>
-      <div class="form-input"  >
+      <div class="form-input">
         <ng-select
-        [items]="booklist"
-        bindValue="book_id"
-        bindLabel="name"
-        [clearable]="false"
-        formControlName="book_id"
-        [class.invalid]="isError('book_id')"
-         [notFoundText]="'沒有找到符合的項目'" [readonly]="formData">
-      </ng-select>
-       
+          [items]="booklist"
+          bindValue="book_id"
+          bindLabel="name"
+          [clearable]="false"
+          formControlName="book_id"
+          [class.invalid]="isError('book_id')"
+          [notFoundText]="'沒有找到符合的項目'" 
+          [readonly]="formData">
+        </ng-select>
         <small class="text-danger" *ngIf="errorType('book_id', 'required')">*必填欄位</small>
       </div>
-     
     </div>
+
     <div class="form-group">
       <div class="form-name">
         <label for="description">說明</label>
@@ -61,9 +63,37 @@
         <small class="text-danger" *ngIf="errorType('description', 'required')">*必填欄位</small>
       </div>
     </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="dept_id">所屬部門</label>
+      </div>
+      <div class="form-input">
+        <ng-select
+          [items]="deplist"
+          bindValue="id"
+          bindLabel="dept_name"
+          [clearable]="true"
+          formControlName="dept_id"
+          [class.invalid]="isError('dept_id')"
+          [notFoundText]="'沒有找到符合的部門'">
+        </ng-select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-name">
+        <label for="joined_date">到職日</label>
+      </div>
+      <div class="form-input">
+        <input type="date" id="joined_date" formControlName="joined_date" [class.invalid]="isError('joined_date')" />
+      </div>
+    </div>
+
     <div class="form-group">
       <mat-checkbox formControlName="disabled">是否停用</mat-checkbox>
     </div>
+
     <div style="padding: 2.5%">
       <label for="description">角色職位</label>
       <lib-multi-select [pureValue]="false" [dataSource]="roles" [valueProperty]="'id'" [textProperty]="'role_name'"

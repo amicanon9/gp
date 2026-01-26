@@ -1,0 +1,130 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-xl-11 col-lg-11">
+      <mat-card class="leave-card shadow-sm">
+        <mat-card-header class="custom-card-header bg-gradient-primary text-white">
+          <div class="header-left">
+            <div class="header-icon">
+              <mat-icon>event_note</mat-icon>
+              <span class="header-title">請假申請系統</span>
+            </div>
+          </div>
+          <span class="flex-spacer"></span>
+          <div class="header-right d-flex align-items-center">
+            <span class="me-3 small">到職日：{{ userJoinedDate | date:'yyyy-MM-dd' }}</span>
+          </div>
+        </mat-card-header>
+
+        <mat-divider></mat-divider>
+
+        <mat-card-content class="p-4">
+          <div class="quota-section row mb-4">
+            <div class="col-md-3">
+              <div class="quota-box border rounded p-3 text-center bg-light">
+                <div class="text-muted small">特休剩餘</div>
+                <div class="fs-4 fw-bold text-primary">{{ annualLeaveRemaining }} 小時</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="quota-box border rounded p-3 text-center bg-light">
+                <div class="text-muted small">補休剩餘</div>
+                <div class="fs-4 fw-bold text-success">{{ compensatoryRemaining }} 小時</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-secondary small mb-1">假別選擇</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select [(ngModel)]="applyData.leave_type" placeholder="選擇假別">
+                  <mat-option value="Annual">特休 (Annual)</mat-option>
+                  <mat-option value="Sick">病假 (Sick)</mat-option>
+                  <mat-option value="Personal">事假 (Personal)</mat-option>
+                  <mat-option value="Compensatory">補休 (Compensatory)</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-secondary small mb-1">開始時間</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput [matDatetimepicker]="startPicker" [(ngModel)]="applyData.start_time" placeholder="選擇日期時間">
+                <mat-datetimepicker-toggle matSuffix [for]="startPicker"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #startPicker type="datetime"></mat-datetimepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-secondary small mb-1">結束時間</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput [matDatetimepicker]="endPicker" [(ngModel)]="applyData.end_time" placeholder="選擇日期時間">
+                <mat-datetimepicker-toggle matSuffix [for]="endPicker"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #endPicker type="datetime"></mat-datetimepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label fw-bold text-secondary small mb-1">請假事由</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <textarea matInput [(ngModel)]="applyData.reason" rows="3" placeholder="請輸入請假原因..."></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="p-3 bg-light d-flex justify-content-between align-items-center">
+          <div class="text-muted small">
+            <mat-icon class="align-middle me-1" style="font-size: 18px;">info</mat-icon>
+            申請將送至部門主管：<strong>{{ managerName }}</strong>
+          </div>
+          <button mat-raised-button color="primary" class="px-5 shadow"
+            [disabled]="!isFormValid() || isProcessing"
+            (click)="submitLeave()">
+            <mat-icon class="me-2">send</mat-icon>
+            提交申請
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <div class="mt-5">
+        <h5 class="text-muted mb-3"><mat-icon class="align-middle me-1">history</mat-icon> 請假申請紀錄</h5>
+        <mat-card class="history-card shadow-sm border-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>假別</th>
+                  <th>開始時間</th>
+                  <th>結束時間</th>
+                  <th>總時數</th>
+                  <th class="text-center">狀態</th>
+                  <th>主管評語</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!leaveHistory?.length">
+                  <td colspan="6" class="text-center text-muted py-5">目前尚無請假紀錄</td>
+                </tr>
+                <tr *ngFor="let item of leaveHistory">
+                  <td>
+                    <span class="fw-bold">{{ translateLeaveType(item.leave_type) }}</span>
+                  </td>
+                  <td>{{ item.start_time | date:'yyyy-MM-dd HH:mm' }}</td>
+                  <td>{{ item.end_time | date:'yyyy-MM-dd HH:mm' }}</td>
+                  <td>{{ item.total_hours }} hr</td>
+                  <td class="text-center">
+                    <span class="badge rounded-pill" [ngClass]="getStatusClass(item.status)">
+                      {{ translateStatus(item.status) }}
+                    </span>
+                  </td>
+                  <td class="small text-muted">{{ item.manager_remark || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

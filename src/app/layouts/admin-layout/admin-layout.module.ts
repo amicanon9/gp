@@ -53,6 +53,7 @@ import { customerplmComponent } from 'app/pages/maintenance/customerplm/customer
 import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/customerplm-modal/customerplm-modal.component';
 import { weeklyreportplmModalComponent } from 'app/pages/maintenance/projectplm/weeklyreportplm-modal/weeklyreportplm-modal.component';
 import { checkinComponent } from 'app/pages/tools/checkin/checkin.component';
+import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/leaveapplications.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -96,6 +97,7 @@ export const TW_FORMATS = {
     MatButtonToggleModule,
     MatProgressBarModule,
     MatSliderModule,
+    MatNativeDateModule,
     MatDividerModule
   ],
   declarations: [
@@ -113,7 +115,7 @@ export const TW_FORMATS = {
     weeklyreportplmModalComponent,
     SetOfBooksComponent,
     TableComponent,
-
+    leaveapplicationsComponent,
     SetOfBooksModalComponent,
     LoginInfoComponent,
     LoginInfoModalComponent,

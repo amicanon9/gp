@@ -53,7 +53,7 @@ export class projectplmComponent implements OnInit {
       { name: 'year', displayName: '年度', width: 80 },
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },
-      { name: 'close_date', displayName: '預計結案日', width: 120 },
+      { name: 'close_date', displayName: '預計結案日', width: 120 , templateRef: 'date' },
 
       // 2. 客戶資訊
       { name: 'customer_name', displayName: '客戶名稱', width: 200 },
@@ -213,7 +213,7 @@ export class projectplmComponent implements OnInit {
 
       syslist: this.apiSvc.getCodeLookup('sys'),
       agslist: this.apiSvc.getCodeLookup('ags'),
-      userlist: this.apiSvc.getLoginInfo(),
+      userlist: this.apiSvc.getdata('logininfo'),
       crmlist: this.apiSvc.getCodeLookup('crm'),
       weeklist: this.apiSvc.getdata('weeklyreportplm'),
     }).subscribe(({ cuslist, syslist, agslist, userlist, crmlist, weeklist }) => {

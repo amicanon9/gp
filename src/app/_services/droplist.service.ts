@@ -3,7 +3,6 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Currency } from "app/_models/currency";
 import { Invoices } from "app/_models/invoices";
-import { LoginInfo } from "app/_models/logininfo";
 import { LoginRoles } from "app/_models/loginroles";
 import { Organizations } from "app/_models/organizations";
 import { ProformaInvoices } from "app/_models/proformainvoices";
@@ -57,22 +56,6 @@ export class DroplistService {
 
 
 
-  /**
-   * @description
-   * LoginInfo Read methods
-   * if input id is all, return all LoginInfo data
-   * if input id is number, return LoginInfo data with this id
-   *
-   * @param id default "all"
-   * @returns Observable<LoginInfo[] | LoginInfo>
-   */
-  public getLoginInfo(
-    id: string = "all"
-  ): Observable<LoginInfo[] | LoginInfo> {
-    if (id !== "all")
-      return this.http.get<LoginInfo>(apiUrl + "/LoginInfo/" + id);
-    return this.http.get<LoginInfo[]>(apiUrl + "/LoginInfo");
-  }
 
   /**
    * @description

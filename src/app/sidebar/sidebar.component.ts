@@ -1,5 +1,4 @@
 import { Menus } from './../_models/loginmenus';
-import { LoginInfo } from './../_models/logininfo';
 import { RolesService } from '../_services/roles.service';
 import { Component, OnInit } from '@angular/core';
 

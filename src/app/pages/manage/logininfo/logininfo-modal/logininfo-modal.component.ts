@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
-import { LoginInfo } from "app/_models/logininfo";
 import { SetOfBooks } from "app/_models/setofbooks";
 import { ApiService } from "app/_services/api.service";
 import { AuthService } from "app/_services/auth.service";
@@ -12,10 +11,11 @@ import { AuthService } from "app/_services/auth.service";
   templateUrl: './logininfo-modal.component.html'
 })
 export class LoginInfoModalComponent implements OnInit {
-  @Input() formData!: LoginInfo;
+  @Input() formData!: any;
   @Input() roles!: SetOfBooks[];
   @Input() title: String = '{"ERROR}';
   @Input() booklist:any;
+  @Input() deplist:any;
   formGroup = this.fb.group({
     id: [null],
     username: ["", Validators.required],
@@ -24,7 +24,9 @@ export class LoginInfoModalComponent implements OnInit {
     description: [""],
     disabled: [false, Validators.required],
     company_name:[null],
-    roles:[null]
+    roles:[null],
+    dept_id: [null],
+    joined_date: [null]
   });
 
   constructor(
@@ -34,8 +36,12 @@ export class LoginInfoModalComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    
     if (this.title.includes('編輯')) {
-      this.formGroup.setValue(this.formData);
+      if(this.formData.joined_date) {
+        this.formData.joined_date = this.formData.joined_date.split('T')[0];
+      }
+      this.formGroup.patchValue(this.formData);
     }
   }
 

@@ -5,8 +5,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { TableComponent } from 'app/_components/sepv-table/sepv-table.component';
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { from, throwError } from 'rxjs';
-import { LoginInfo, LoginInfoTableConfig } from "app/_models/logininfo";
+import { forkJoin, from, throwError } from 'rxjs';
 import { LoginInfoModalComponent } from './logininfo-modal/logininfo-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,12 +15,31 @@ import { SignalrService } from 'app/_services/signalr.service';
   templateUrl: './logininfo.component.html',
   styleUrls: ['./logininfo.component.scss']
 })
+
 export class LoginInfoComponent implements OnInit {
   search: string;
   data: any;
   roles: any;
   booklist:any;
-  table_config: any = LoginInfoTableConfig;
+  table_config: any = {
+  checkable: true,
+  serverSide: true,
+  sort: {
+    active: true,
+    direction: 'desc',
+    diableClear: true
+  },
+  columns: [
+    // { name: 'id', displayName: '使用者ID' },
+    { name: 'username', displayName: '使用者名稱' },
+    { name: 'description', displayName: '說明' },
+    { name: 'company_name', displayName: '所屬' },
+    { name: 'dept_name', displayName: '部門名稱' },
+    { name: 'joined_date', displayName: '到職日', templateRef: 'date' },  
+    { name: 'roles', displayName: '角色職位', templateRef: 'roles' },
+    { name: 'disabled', displayName: '是否停用', templateRef:'disabled'},
+  ]
+};
   dataSource!: MatTableDataSource<any>;
   subs: any;
   ticket: any;
@@ -30,6 +48,7 @@ export class LoginInfoComponent implements OnInit {
   selected: any;
   @ViewChild('namiTable') namiTable!: TableComponent;
   loaded = false;
+  deplist: any;
 
   constructor(
     private apiSvc: ApiService,
@@ -73,8 +92,9 @@ ngOnDestroy() {
     modalRef.componentInstance.title = "新增使用者資訊";
     modalRef.componentInstance.roles = JSON.parse(JSON.stringify(this.roles));
     modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
+    modalRef.componentInstance.deplist = JSON.parse(JSON.stringify(this.deplist));
     modalRef.result.then((res: any) => {
-      let data: LoginInfo = res;
+      let data= res;
       this.apiSvc.createLoginInfo(data).pipe(
         catchError(err => {
           var errorMessage = '無法連接伺服器，請聯絡管理人員';
@@ -120,9 +140,10 @@ ngOnDestroy() {
     modalRef.componentInstance.title = "編輯使用者資訊";
     modalRef.componentInstance.roles = JSON.parse(JSON.stringify(this.roles));
     modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
+    modalRef.componentInstance.deplist = JSON.parse(JSON.stringify(this.deplist));
     modalRef.componentInstance.formData = JSON.parse(JSON.stringify(this.selected));
     modalRef.result.then((res: any) => {
-      let data: LoginInfo = res;
+      let data= res;
       console.log(data);
       this.apiSvc.updateLoginInfo(this.selected.id, data).pipe(
         catchError(err => {
@@ -215,17 +236,33 @@ ngOnDestroy() {
     this.selected = null;
     this.loadData()
   }
-  loadData() {
-    this.apiSvc.getLoginRoles().subscribe(data => this.roles = data);
-    this.apiSvc.getSetOfBooks().subscribe(data=>this.booklist=data)
-    this.apiSvc.getLoginInfo()
-      .pipe(
-        tap((data: LoginInfo[]) => {
-          this.dataSource = new MatTableDataSource<any>(data);
-          this.loaded = true;
-        })
-      )
-      .subscribe()
-  }
+ loadData() {
+  forkJoin({
+    deplist: this.apiSvc.getdata('Departments'),
+    roles: this.apiSvc.getLoginRoles(),
+    booklist: this.apiSvc.getSetOfBooks(),
+    userlist: this.apiSvc.getdata('Logininfo'),
+  }).subscribe(({ deplist, roles, booklist, userlist }) => {
+    // 1. 賦值基礎清單
+    this.deplist = deplist;
+    this.roles = roles;
+    this.booklist = booklist;
+
+    // 2. 處理 userlist 的資料映射 (Mapping)
+    const mappedUsers = userlist.map(e => {
+      // 找到對應的部門物件
+      const dept = this.deplist.find(x => x.id === e.dept_id);
+      return {
+        ...e,
+        // 建議直接存字串方便表格顯示，若原本邏輯是存物件則維持 e['dept_name'] = dept
+        dept_name: dept ? dept.dept_name : '未指定'
+      };
+    });
+
+    // 3. 設定 Table Data
+    this.dataSource = new MatTableDataSource<any>(mappedUsers);
+    this.loaded = true;
+  });
+}
 
 }

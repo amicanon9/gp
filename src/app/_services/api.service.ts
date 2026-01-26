@@ -4,7 +4,6 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Currency } from "app/_models/currency";
 import { Invoices } from "app/_models/invoices";
-import { LoginInfo } from "app/_models/logininfo";
 import { LoginRoles } from "app/_models/loginroles";
 import { Organizations } from "app/_models/organizations";
 import { ProformaInvoices } from "app/_models/proformainvoices";
@@ -32,7 +31,7 @@ export class ApiService {
  }
 
 public getdatabyid (name:string,id:any){
-  return this.http.get<any[]>(apiUrl +`/${name}/` + id);
+  return this.http.get<any>(apiUrl +`/${name}/` + id);
  }
   public updatedata(name:string,id: string, data: any) {
     return this.http.patch(apiUrl +`/${name}/` + id, data);
@@ -461,25 +460,11 @@ public getpsmeternoinfo(
    * @param data
    * @returns
    */
-  public createLoginInfo(data: LoginInfo) {
+  public createLoginInfo(data: any) {
     return this.http.post(apiUrl + "/LoginInfo", data);
   }
 
-  /**
-   * @description
-   * if input id is all, return all LoginInfo data
-   * if input id is number, return LoginInfo data with this id
-   *
-   * @param id default "all"
-   * @returns Observable<LoginInfo[] | LoginInfo>
-   */
-  public getLoginInfo(
-    id: string = "all"
-  ): Observable<LoginInfo[] | LoginInfo> {
-    if (id !== "all")
-      return this.http.get<LoginInfo>(apiUrl + "/LoginInfo/" + id);
-    return this.http.get<LoginInfo[]>(apiUrl + "/LoginInfo");
-  }
+
 
   /**
    * @description
