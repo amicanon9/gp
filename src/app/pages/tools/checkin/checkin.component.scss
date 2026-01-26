@@ -1,262 +1,199 @@
+/* ==========================================================================
+   打卡工具 完整樣式表
+   ========================================================================== */
+
+// 顏色變數定義 (方便管理)
+$color-primary: #55B8DA;  // 一般模式-藍色
+$color-backfill: #F9C55C; // 補打模式-黃色
+$color-disabled: #e0e0e0; // 禁用狀態-灰色
+$color-text-dark: #333333;
+
+/* 1. 卡片外框與模式切換 */
 .checkin-card {
-  // 一般打卡時的顏色
-  border-top: 4px solid #55B8DA; 
+  border-top: 4px solid $color-primary; // 預設藍色
   border-radius: 8px;
-  transition: border-color 0.3s ease; // 讓顏色切換時有個平滑的過渡感
+  transition: all 0.3s ease;
 
-  // 當同時擁有 backfill-card 類別時 (補打卡)
   &.backfill-card {
-    border-top-color: #F9C55C;
+    border-top-color: $color-backfill; // 補打模式切換為黃色
   }
 }
+/* 移除切換按鈕選中或點擊時的黑色外框與焦點底色 */
+::ng-deep {
+  .mat-button-toggle-focus-overlay {
+    display: none !important; /* 移除點擊後的灰色/黑色半透明底層 */
+  }
 
-// 如果你希望標題圖示的背景顏色也跟著連動 (選配)
-.header-icon {
-  
-  &.backfill-mode {
-    mat-icon {
-      color: #F9C55C; // 補打模式圖示顏色
-    }
+  .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+    line-height: 48px !important; /* 確保內容垂直置中，不被預設框線影響 */
+  }
+
+  /* 移除按鈕在 Focus 狀態下的 outline (黑框) */
+  .mat-button-toggle-button {
+    outline: none !important;
   }
 }
-.header-icon{
-  font-size: 30px;
-}
-.header-image {
-  background-color: #e8eaf6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.select-all-container {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: white;
-  margin-bottom: 5px;
-}
-
-.history-card {
-  border-radius: 8px;
-  overflow: hidden;
-  .table {
-    font-size: 0.9rem;
-    th { background-color: #f8f9fa; }
-  }
-}
-
-.form-label {
-  color: #555;
-  font-size: 0.95rem;
-  mat-icon {
-    font-size: 1.2rem;
-    width: 20px;
-    height: 20px;
-  }
-}
-.gap-1 {
-  gap: 0.25rem !important;
-}
-
-.badge {
-  font-weight: 500;
-  &.bg-light {
-    color: #555 !important;
-    background-color: #f8f9fa !important;
-  }
-}
-
-.history-card {
-  .table {
-    th {
-      font-weight: 600;
-      color: #666;
-      border-top: none;
-    }
-    td {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-    }
-  }
-}
-
-// 強制將右側元件推到盡頭
-.flex-spacer {
-  flex: 1 1 auto;
-}
-
-// 修正 mat-card-header 的預設行為，確保寬度 100%
-mat-card-header {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  
-  // 移除 Angular Material 可能帶有的內距干擾
-  ::ng-deep .mat-card-header-text {
-    margin: 0 !important;
-    display: none; // 隱藏預設的 text container，因為我們已經手動寫了 title
-  }
-}
-
+/* 2. 切換按鈕 (Toggle Group) 顏色邏輯 */
 .mode-toggle {
-  // 讓切換按鈕稍微有一點圓角感，比較好看
+  border: 1px solid #ddd;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid #ddd;
+
+  // 一般打卡選中 (第一個按鈕)
+  mat-button-toggle:first-child.mat-button-toggle-checked {
+    background-color: $color-primary !important;
+    color: white !important;
+  }
+
+  // 補打卡選中 (第二個按鈕)
+  mat-button-toggle:last-child.mat-button-toggle-checked {
+    background-color: $color-backfill !important;
+    color: $color-text-dark !important;
+  }
 }
-// 滿版大按鈕樣式
+
+/* 3. 日曆樣式自定義 (方形設計) */
+::ng-deep {
+  // 方形-有紀錄日期 (藍色)
+  .has-checkin-date {
+    background-color: $color-primary !important;
+    border-radius: 4px !important;
+    color: white !important;
+    
+    .mat-calendar-body-cell-content {
+      border-radius: 4px !important;
+      color: white !important;
+    }
+    
+    &:hover {
+      background-color: darken($color-primary, 10%) !important;
+    }
+  }
+
+  // 方形-目前選中日期 (黃色)
+  .mat-calendar-body-selected {
+    background-color: $color-backfill !important;
+    color: $color-text-dark !important;
+    border-radius: 4px !important;
+    border-color: $color-backfill !important;
+  }
+
+  // 當選中的正好是有紀錄的日期 (優先顯示選中的黃色，加個藍邊框區分)
+  .has-checkin-date.mat-calendar-body-selected {
+    background-color: $color-backfill !important;
+    box-shadow: inset 0 0 0 2px $color-primary !important;
+  }
+}
+
+/* 4. 滿版主動作按鈕 (確認打卡) */
 .btn-main-action-full {
-  height: 60px !important; // 增加高度
+  width: 100%;
+  height: 60px !important;
   font-weight: 600 !important;
   font-size: 1.3rem !important;
   border-radius: 8px !important;
   transition: all 0.2s;
 
+  // 一般模式 (mat-primary)
+  &.mat-primary {
+    background-color: $color-primary !important;
+    color: white !important;
+  }
+
+  // 補打模式 (mat-warn 改為黃色)
+  &.mat-warn {
+    background-color: $color-backfill !important;
+    color: $color-text-dark !important;
+  }
+
+  // 禁用狀態 (disabled)
+  &:disabled, &[disabled] {
+    background-color: $color-disabled !important;
+    color: #9e9e9e !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+    
+    mat-icon { color: #9e9e9e !important; }
+  }
+
+  // 懸停動畫
   &:not([disabled]):hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
   }
 }
 
-// 重置按鈕樣式
-.btn-reset {
-  height: 60px !important;
-  padding: 0 25px !important;
-  border-color: #ccc !important;
-  color: #666 !important;
+/* 5. 表單輸入框優化 */
+.custom-form-field {
+  ::ng-deep .mat-form-field-wrapper { padding-bottom: 0 !important; }
+  ::ng-deep .mat-form-field-flex {
+    align-items: center !important;
+    height: 60px;
+  }
 }
 
-// 修正 actions 內部的 padding
-mat-card-actions {
-  margin: 0 !important; // 移除 Material 預設 margin
+.time-input {
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 24px;
+  }
 }
 
-// 針對補打狀態這一整列
-.label-text {
-  font-size: 1.1rem;
-  line-height: 1; // 確保文字不影響對齊
+/* 6. 其他佈局與元件 */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  &.backfill-mode mat-icon { color: $color-backfill; }
+}
+
+.flex-spacer { flex: 1 1 auto; }
+
+mat-card-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  ::ng-deep .mat-card-header-text { display: none; }
 }
 
 .custom-radio-group {
   display: inline-flex;
   align-items: center;
-  gap: 30px;             // 「上班」跟「下班」按鈕之間的距離
-  
-  // 核心修正：解決「太靠上」的問題
-  // 視情況調整 2px ~ 4px，讓圓圈中心點對齊文字中心點
-  transform: translateY(2px); 
-
-  // 讓按鈕內部的文字也稍微拉開一點距離
-  ::ng-deep .mat-radio-label-content {
-    padding-left: 12px !important;
-  }
+  gap: 30px;
+  transform: translateY(2px);
+  ::ng-deep .mat-radio-label-content { padding-left: 12px !important; }
 }
 
-// 歷史紀錄表格樣式 (保留之前給你的)
+/* 7. 歷史紀錄表格 */
 .history-card {
   border-radius: 8px;
   overflow: hidden;
+  border: none;
   .table {
     font-size: 0.95rem;
-    th { background-color: #f8f9fa; font-weight: 600; color: #666; }
+    margin-bottom: 0;
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #666;
+      border-top: none;
+    }
     td { padding: 1rem; }
   }
 }
 
-// 滿版大按鈕 (維持之前的加大設定)
-.btn-main-action-full {
-  height: 60px !important;
-  font-weight: 600 !important;
-  font-size: 1.3rem !important;
-  border-radius: 8px !important;
-  width: 100%; // 確保佔滿
-}
-
-// 1. 統一表單高度與對齊
-.custom-form-field {
-  ::ng-deep {
-    .mat-form-field-wrapper {
-      padding-bottom: 0 !important; // 移除下方空白
-    }
-    .mat-form-field-flex {
-      align-items: center !important; // 強制內容垂直居中
-      height: 60px; // 稍微增加高度，讓輸入框更有質感
-    }
-   
-  }
-}
-
-
-// 3. 放大原生時間選擇器按鈕 (Chrome/Edge/Safari)
-.time-input {
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    font-size: 24px; // 關鍵：這會放大那個時鐘點擊區域
-
-  }
-}
-
-
-.mode-toggle {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-
-  // 當選中「一般打卡」時的背景
-  ::ng-deep .mat-button-toggle-checked {
-    background-color: #55B8DA !important; 
-    color: white !important; // 字體變白色才清楚
-  }
-}
-
-// 2. 補打模式 (黃色 #F9C55C)
-.is-backfill-active {
-  // 當選中「補打卡」時的背景
-  ::ng-deep .mat-button-toggle-checked {
-    background-color: #F9C55C !important;
-    color: #333 !important; // 黃底配深色字比較好讀
-  }
-}
-
-// 3. 順便讓滑鼠滑過去的時候有個淡淡的背景感
-::ng-deep .mat-button-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.btn-main-action-full {
-  height: 60px !important;
-  font-weight: 600 !important;
-  font-size: 1.3rem !important;
-  border-radius: 8px !important;
-  width: 100%;
-  transition: all 0.2s;
-
-  // 1. 一般模式的藍色
-  &.mat-primary {
-    background-color: #55B8DA !important;
-    color: white !important;
-  }
-
-  // 2. 補打模式的黃色
-  &.mat-warn {
-    background-color: #F9C55C !important;
-    color: #333 !important;
-  }
-
-  // 3. 關鍵：當按鈕被禁用時 (disabled)
-  // 使用 &:disabled 或是 [disabled] 屬性選取器
-  &:disabled, &[disabled] {
-    background-color: #e0e0e0 !important; // 標準灰色
-    color: #9e9e9e !important;           // 淺灰色文字
-    cursor: not-allowed;                  // 游標變成禁止符號
-    box-shadow: none !important;          // 移除陰影，視覺上看起來是扁平的
-    transform: none !important;           // 移除懸停位移效果
-    
-    mat-icon {
-      color: #9e9e9e !important;
-    }
+.gap-1 { gap: 0.25rem !important; }
+.badge {
+  font-weight: 500;
+  &.bg-light {
+    color: #555 !important;
+    background-color: #f8f9fa !important;
   }
 }

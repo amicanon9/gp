@@ -1,51 +1,45 @@
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
     <div class="col-xl-11 col-lg-11">
-
       <mat-card class="checkin-card shadow-sm" [class.backfill-card]="isBackfill">
-        <mat-card-header class="custom-card-header" style="padding-bottom: 10px;">
+        <mat-card-header class="custom-card-header">
           <div class="header-left">
             <div class="header-icon" [class.backfill-mode]="isBackfill">
-              <mat-icon color="primary">{{ 'fingerprint' }}</mat-icon>
+              <mat-icon color="primary">fingerprint</mat-icon>
               <span class="header-title">打卡工具</span>
             </div>
-
           </div>
-
           <span class="flex-spacer"></span>
-
           <div class="header-right">
-            <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle"
-              [class.is-backfill-active]="isBackfill">
-
+            <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle">
               <mat-button-toggle value="normal">一般打卡</mat-button-toggle>
               <mat-button-toggle value="backfill">補打卡</mat-button-toggle>
-
             </mat-button-toggle-group>
           </div>
         </mat-card-header>
 
         <mat-divider></mat-divider>
+        <mat-card-content class="p-4">
+          <div class="time-section mb-4 rounded" [class.backfill-bg]="isBackfill">
 
-        <mat-card-content class="p-1">
-          <div class="time-section mb-4 p-1 rounded" [class.backfill-bg]="isBackfill">
             <div *ngIf="!isBackfill" class="d-flex align-items-center">
               <mat-icon class="text-primary me-2">access_time</mat-icon>
-              <span class="fs-5 fw-bold text-primary">
-                現在時間：{{ currentTime | date:'yyyy-MM-dd HH:mm:ss' }}
-              </span>
+              <span class="fs-5 fw-bold text-primary">現在時間：{{ currentTime | date:'yyyy-MM-dd HH:mm:ss' }}</span>
             </div>
 
             <div *ngIf="isBackfill" class="row g-3 align-items-center">
               <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary small mb-1">補打日期 (有紀錄者顯示深色)</label>
                 <mat-form-field appearance="outline" class="w-100 custom-form-field">
-                  <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate" placeholder="選擇日期">
+                  <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate" placeholder="選擇日期" readonly
+                    (click)="picker.open()">
                   <mat-datepicker-toggle matSuffix [for]="picker" class="large-icon-toggle"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
+                  <mat-datepicker #picker [dateClass]="dateClass"></mat-datepicker>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary small mb-1">補打時間</label>
                 <mat-form-field appearance="outline" class="w-100 custom-form-field">
                   <input matInput type="time" [(ngModel)]="backfillTime" class="time-input">
                 </mat-form-field>
@@ -53,23 +47,30 @@
             </div>
           </div>
 
-          <div class="row g-4">
-            <div class="col-md-12">
-              <label class="form-label fw-bold mb-2">
-                <mat-icon class="align-middle me-1">assignment</mat-icon> 選擇專案 (可多選)
-              </label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>請選擇參與專案</mat-label>
-                <mat-select [(ngModel)]="selectedProject" multiple>
-                  <mat-option *ngFor="let p of Pjlist" [value]="p.id">
-                    <span class="fw-bold">({{ p.id }})</span>{{ p.customer_name }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+          <div class="project-section">
+            <label class="form-label fw-bold mb-3">
+              <mat-icon class="align-middle">assignment</mat-icon> 專案工時分配 (需滿 100%)
+            </label>
+
+            <mat-form-field appearance="outline" class="w-100 mb-3">
+              <mat-label>選擇專案 (可多選)</mat-label>
+              <mat-select [(ngModel)]="selectedProjectIds" multiple (selectionChange)="onProjectSelectChange()">
+                <mat-option *ngFor="let p of Pjlist" [value]="p.id">({{p.id}}) {{p.customer_name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div *ngFor="let item of projectAssignments" class="slider-item p-2 mb-2 border rounded shadow-sm bg-white">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold text-truncate" style="max-width: 70%;">{{item.name}}</span>
+                <span style="font-size: 16px;"
+                  class="badge rounded-pill bg-info text-white fs-6">{{item.percentage}}%</span>
+              </div>
+              <mat-slider class="w-100" min="0" max="100" step="1" [value]="item.percentage"
+                (input)="onSliderInput($event, item)">
+              </mat-slider>
             </div>
           </div>
         </mat-card-content>
-
         <mat-card-actions class="p-1 bg-light d-flex flex-column align-items-start">
           <div class="mb-3 w-100">
             <div *ngIf="isBackfill" class="d-flex align-items-center flex-wrap">
@@ -90,15 +91,15 @@
 
 
             <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'"
-              class="btn-main-action-full shadow flex-grow-1" [disabled]="isProcessing || selectedProject.length === 0"
+              class="btn-main-action-full shadow flex-grow-1"
+              [disabled]="isProcessing || totalPercentage !== 100 || projectAssignments.length === 0"
               (click)="submitCheckin()">
               <mat-icon class="me-2">check_circle</mat-icon>
-              <span class="fs-5">{{ isBackfill ? '確認補打' + checkinStatus : '執行打卡' }}</span>
+              <span class="fs-5"> {{ isBackfill ? '補打' + checkinStatus : '打卡' + autoStatus }}</span>
             </button>
           </div>
         </mat-card-actions>
       </mat-card>
-
       <div class="mt-4">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h5 class="text-muted mb-0"><mat-icon class="align-middle me-1">history</mat-icon> 最近打卡紀錄</h5>
@@ -112,12 +113,13 @@
             <table class="table table-hover align-middle mb-0">
               <thead class="bg-light">
                 <tr>
-                  <th >日期</th>
+                  <th>日期</th>
                   <th>時間</th>
+                  <th>實際時間</th>
                   <th>模式</th>
                   <th class="text-center">狀態</th>
                   <th>專案</th>
-                  
+
                 </tr>
               </thead>
               <tbody>
@@ -131,6 +133,7 @@
 
                 <tr *ngFor="let item of displayedHistory">
                   <td class="ps-4">{{ item.checkin_time | date:'yyyy-MM-dd' }}</td>
+                  <td class="fw-bold">{{ item.fake_time | date:'HH:mm' }}</td>
                   <td class="fw-bold">{{ item.checkin_time | date:'HH:mm' }}</td>
                   <td>
                     <span class="badge rounded-pill"
@@ -154,14 +157,13 @@
                       </span>
                     </div>
                   </td>
-                  
+
                 </tr>
               </tbody>
             </table>
           </div>
         </mat-card>
       </div>
-
     </div>
   </div>
 </div>

@@ -63,26 +63,25 @@
     </thead>
     <tbody>
       <tr *ngFor="let item of reportList"
-          [ngStyle]="{
-            'background-color': 
-              item.ags.code.code === 'A6' ? 'rgba(108, 117, 125, 0.15)' : 
-              item.ags.code === 'A5' ? 'rgba(173, 181, 189, 0.15)' : 
-              item.ags.code === 'A4' ? 'rgba(144, 238, 144, 0.2)' : 'transparent'
-          }">
+    [ngStyle]="{
+      'background-color': 
+        item.ags?.code === 'A6' ? 'rgba(108, 117, 125, 0.15)' : 
+        item.ags?.code === 'A5' ? 'rgba(173, 181, 189, 0.15)' : 
+        item.ags?.code === 'A4' ? 'rgba(144, 238, 144, 0.2)' : 'transparent'
+    }">
         
         <td class="text-center" style="vertical-align: middle;">{{ item.year }}</td>
         <td class="text-center" style="vertical-align: middle;">{{ item.week }}</td>
         
         <td class="text-center" style="vertical-align: middle;">
-          <span class="badge" 
-            [ngStyle]="{
-              'background-color': 
-                item.ags.code === 'A6' ? '#6c757d' : 
-                item.ags.code === 'A5' ? '#adb5bd' : 
-                item.ags.code === 'A4' ? '#90ee90' : '#6c757d',
-              'color': item.ags.code === 'A4' ? '#000' : '#fff'
-            }" style="padding: 5px 10px; min-width: 50px;">
-            {{ item.ags.description }}
+          <span *ngIf="item.ags" class="badge" [ngStyle]="{
+            'background-color': 
+              item.ags?.code === 'A6' ? '#6c757d' : 
+              item.ags?.code === 'A5' ? '#adb5bd' : 
+              item.ags?.code === 'A4' ? '#90ee90' : '#6c757d',
+            'color': item.ags?.code === 'A4' ? '#000' : '#fff'
+          }" style="padding: 5px 10px; min-width: 50px;">
+            {{ item.ags?.description }}
           </span>
         </td>
 

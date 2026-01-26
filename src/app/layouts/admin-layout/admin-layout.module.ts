@@ -12,6 +12,8 @@ import { DashboardComponent }       from '../../pages/dashboard/dashboard.compon
 import { IconsComponent }           from '../../pages/icons/icons.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DatePipe } from '@angular/common'
+import {MatSliderModule} from '@angular/material/slider';
+
 
 import { NgbModule }                from '@ng-bootstrap/ng-bootstrap';
 import { MatTableModule }           from '@angular/material/table';
@@ -93,6 +95,7 @@ export const TW_FORMATS = {
     MatTooltipModule,
     MatButtonToggleModule,
     MatProgressBarModule,
+    MatSliderModule,
     MatDividerModule
   ],
   declarations: [
