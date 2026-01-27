@@ -3,18 +3,22 @@ import { ApiService } from 'app/_services/api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/_services/auth.service';
 import { forkJoin } from 'rxjs';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 
 @Component({
   selector: 'sepvdb-leaveapplications',
   templateUrl: './leaveapplications.component.html',
-  styleUrls: ['./leaveapplications.component.scss']
+  styleUrls: ['./leaveapplications.component.scss'],
+  providers: [
+    // 在這裡強制指定語系為英文，下拉選單就會變成純數字
+    { provide: MAT_DATE_LOCALE, useValue: 'en-US' }
+  ]
 })
 export class leaveapplicationsComponent implements OnInit, OnDestroy {
   // 基礎清單
   deplist: any[] = [];
   leaveHistory: any[] = [];
   
-  // 假別設定 (對應後端 LeaveType 欄位)
   leaveTypes = [
     { value: 'Annual', label: '特休' },
     { value: 'Sick', label: '病假' },
@@ -22,29 +26,33 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     { value: 'Compensatory', label: '補休' }
   ];
 
-  // 申請表單變數
-  applyData = {
+  // 申請表單變數 (配合 HTML 拆分日期與時間)
+  applyData: any = {
     leave_type: 'Personal',
-    start_time: new Date(),
-    end_time: new Date(),
+    start_date: new Date(),
+    start_time_only: '08:30',
+    end_date: new Date(),
+    end_time_only: '17:30',
     reason: '',
     total_hours: 0
   };
 
-  // 使用者資訊
+  // 使用者資訊與統計
+  userInfo: any = null;
   userJoinedDate: Date | null = null;
+  userDeptName: string = '';
+  seniority: string = ''; // 年資文字
   managerName: string = '未指定';
   managerId: number | null = null;
 
-  // 狀態變數
+  // 額度顯示
+  annualLeaveTotal = 0;     // 總特休
+  annualLeaveUsed = 0;      // 已休特休
+  annualLeaveRemaining = 0; // 剩餘特休
+
   isProcessing = false;
   loaded = false;
-  currentTime = new Date();
   private timer: any;
-
-  // 額度顯示 (模擬)
-  annualLeaveRemaining = 0;
-  compensatoryRemaining = 0;
 
   constructor(
     private apiSvc: ApiService,
@@ -54,7 +62,8 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadData();
-    this.timer = setInterval(() => this.currentTime = new Date(), 1000);
+    // 監聽時間變化以自動計算時數
+    this.timer = setInterval(() => {}, 1000); 
   }
 
   ngOnDestroy() { 
@@ -62,7 +71,6 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
   }
 
   loadData() {
-    // 使用 forkJoin 確保所有基礎資料到位
     forkJoin({
       deplist: this.apiSvc.getdata('Departments'),
       userinfo: this.apiSvc.getdatabyid('LoginInfo', this.authSvc.state.user_id),
@@ -70,40 +78,74 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     }).subscribe(({ deplist, userinfo, history }) => {
       this.deplist = deplist;
       this.leaveHistory = history;
+      this.userInfo = userinfo;
 
-      // 1. 設定使用者到職日
       if (userinfo) {
-        this.userJoinedDate = userinfo.joined_date;
-        // 2. 找到所屬部門主管
+        this.userJoinedDate = new Date(userinfo.joined_date);
+        this.calculateSeniority(this.userJoinedDate);
+        
+        // 設定部門與主管
         const dept = this.deplist.find(x => x.id === userinfo.dept_id);
         if (dept) {
+          this.userDeptName = dept.name;
           this.managerName = dept.manager_name;
           this.managerId = dept.manager_id;
         }
+
+        // 模擬計算特休 (實際應用中應從後端 API 取得)
+        this.annualLeaveTotal = userinfo.annual_leave_quota || 0;
+        this.calculateUsedLeave(history);
       }
 
+      this.onTimeChange(); // 初始化時數計算
       this.loaded = true;
     });
   }
 
-  getHistory() {
-    this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id).subscribe(res => {
-      this.leaveHistory = res;
-    });
+  // 計算年資
+  calculateSeniority(joinedDate: Date) {
+    const today = new Date();
+    let years = today.getFullYear() - joinedDate.getFullYear();
+    let months = today.getMonth() - joinedDate.getMonth();
+    if (months < 0 || (months === 0 && today.getDate() < joinedDate.getDate())) {
+      years--;
+      months += 12;
+    }
+    this.seniority = `${years} 年 ${months} 個月`;
   }
 
-  // 自動計算總時數 (可視需求加入午休扣除邏輯)
+  // 計算已休時數
+  calculateUsedLeave(history: any[]) {
+    this.annualLeaveUsed = history
+      .filter(x => x.leave_type === 'Annual' && x.status === 'Approved')
+      .reduce((sum, item) => sum + item.total_hours, 0);
+    
+    this.annualLeaveRemaining = this.annualLeaveTotal - this.annualLeaveUsed;
+    
+  }
+
+  // 自動計算總時數 (合併日期與時間字串)
   onTimeChange() {
-    const start = new Date(this.applyData.start_time).getTime();
-    const end = new Date(this.applyData.end_time).getTime();
+    if (!this.applyData.start_date || !this.applyData.end_date) return;
+
+    const start = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only);
+    const end = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only);
 
     if (end > start) {
-      const diffMs = end - start;
-      const hours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10; // 取小數第一位
+      const diffMs = end.getTime() - start.getTime();
+      const hours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
       this.applyData.total_hours = hours;
     } else {
       this.applyData.total_hours = 0;
     }
+  }
+
+  // 輔助：合併 Date 物件與 "HH:mm" 字串
+  combineDateAndTime(date: Date, timeStr: string): Date {
+    const d = new Date(date);
+    const [hours, minutes] = timeStr.split(':');
+    d.setHours(+hours, +minutes, 0, 0);
+    return d;
   }
 
   isFormValid(): boolean {
@@ -122,50 +164,59 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
 
     this.isProcessing = true;
 
-    // 格式化日期為 sv-SE (YYYY-MM-DDTHH:mm:ss) 符合你原本的習慣
-    const startTimeStr = new Date(this.applyData.start_time).toLocaleString('sv-SE').replace(' ', 'T');
-    const endTimeStr = new Date(this.applyData.end_time).toLocaleString('sv-SE').replace(' ', 'T');
+    // 合併最終要送出的 ISO 字串
+    const startIso = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only)
+                      .toLocaleString('sv-SE').replace(' ', 'T');
+    const endIso = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only)
+                      .toLocaleString('sv-SE').replace(' ', 'T');
 
     const payload = {
       user_id: this.authSvc.state.user_id,
       leave_type: this.applyData.leave_type,
-      start_time: startTimeStr,
-      end_time: endTimeStr,
+      start_time: startIso,
+      end_time: endIso,
       total_hours: this.applyData.total_hours,
       reason: this.applyData.reason,
-      status: 'Pending', // 預設待審
+      status: 'Pending',
       manager_id: this.managerId,
       created_at: new Date().toLocaleString('sv-SE').replace(' ', 'T')
     };
 
     this.apiSvc.createdata('LeaveApplications', payload).subscribe({
       next: () => {
-        this.toastr.success('申請已送出，請靜候主管審核', '成功');
+        this.toastr.success('申請已送出', '成功');
         this.resetForm();
         this.getHistory();
       },
-      error: () => this.toastr.error('送出失敗，請檢查網路連線', '錯誤'),
+      error: () => this.toastr.error('送出失敗', '錯誤'),
       complete: () => this.isProcessing = false
+    });
+  }
+
+  getHistory() {
+    this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id).subscribe(res => {
+      this.leaveHistory = res;
+      this.calculateUsedLeave(res);
     });
   }
 
   resetForm() {
     this.applyData = {
       leave_type: 'Personal',
-      start_time: new Date(),
-      end_time: new Date(),
+      start_date: new Date(),
+      start_time_only: '09:00',
+      end_date: new Date(),
+      end_time_only: '18:00',
       reason: '',
       total_hours: 0
     };
   }
 
-  // 輔助函式：翻譯狀態
   translateStatus(status: string) {
     const map = { 'Pending': '待審核', 'Approved': '已核准', 'Rejected': '已駁回' };
     return map[status] || status;
   }
 
-  // 輔助函式：狀態標籤樣式
   getStatusClass(status: string) {
     switch (status) {
       case 'Pending': return 'bg-warning text-dark';
@@ -175,7 +226,6 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // 輔助函式：假別文字
   translateLeaveType(type: string) {
     const item = this.leaveTypes.find(t => t.value === type);
     return item ? item.label : type;
