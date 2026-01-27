@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from 'app/_services/api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/_services/auth.service';
+import { forkJoin } from 'rxjs';
 
 interface ProjectAssign {
   id: number;
@@ -26,13 +27,15 @@ export class checkinComponent implements OnInit, OnDestroy {
   selectedProjectIds: number[] = [];
   projectAssignments: ProjectAssign[] = [];
   totalPercentage = 0;
-
+  checkedInDates = new Set<string>();
+  approvedLeaves = new Set<string>();
+  pendingLeaves = new Set<string>();  
   // 狀態判定
   autoStatus: '上班' | '下班' = '上班';
   checkinStatus: string = '上班'; // 補打用
 
   backfillDate = new Date();
-  backfillTime = "09:00";
+  backfillTime = "08:30";
   private timer: any;
 
   constructor(
@@ -55,48 +58,69 @@ export class checkinComponent implements OnInit, OnDestroy {
     this.apiSvc.getdata('projectplm').subscribe(res => this.Pjlist = res);
   }
 
-  // 1. 宣告一個儲存日期字串的 Set，方便快速比對
-  checkedInDates = new Set<string>();
 
   // 2. 在獲取歷史紀錄後，更新這個 Set
   getHistory() {
-    this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id).subscribe({
-      next: (res: any[]) => {
-        this.displayedHistory = this.groupHistory(res);
+    forkJoin({
+    checkin: this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id),
+    leave: this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id)
+  }).subscribe({
+    next: ({ checkin, leave }) => {
+      // 1. 處理打卡歷史 (原本的邏輯)
+      this.displayedHistory = this.groupHistory(checkin);
+      this.checkedInDates.clear();
+      checkin.forEach(item => {
+        const dateStr = new Date(item.checkin_time).toDateString();
+        this.checkedInDates.add(dateStr);
+      });
+      this.determineAutoStatus();
 
-        // 更新已打卡日期清單
-        this.checkedInDates.clear();
-        res.forEach(item => {
-          // 將日期轉為 YYYY-MM-DD 格式存入
-          const dateStr = new Date(item.checkin_time).toDateString();
-          this.checkedInDates.add(dateStr);
-        });
-
-        this.determineAutoStatus();
-      }
-    });
+      // 2. 處理請假歷史 (新邏輯)
+      this.processLeaveDates(leave);
+    }
+  });
   }
 
-  // 3. 定義給 Datepicker 用的 class 函數
-  dateClass = (d: any): string => { // 將型別改為 any 以相容不同的 Date Adapter
-    if (!d) return '';
+// 處理請假日期分類 (支援跨天變色)
+processLeaveDates(history: any[]) {
+  this.approvedLeaves.clear();
+  this.pendingLeaves.clear();
 
-    try {
-      // 1. 強制轉換為原生 Date 物件，無論傳進來的是 Moment 還是 Date 字串
-      const date = (d instanceof Date) ? d : new Date(d);
+  history.forEach(item => {
+    let start = new Date(item.start_time);
+    let end = new Date(item.end_time);
+    
+    // 確保只取出日期部分進行迴圈
+    let current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    let endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
-      // 2. 檢查轉換後的日期是否合法 (避免 Invalid Date)
-      if (isNaN(date.getTime())) return '';
-
-      const dateStr = date.toDateString();
-
-      // 3. 比對 Set 中的日期
-      return this.checkedInDates.has(dateStr) ? 'has-checkin-date' : '';
-    } catch (e) {
-      console.error('Date conversion error:', e);
-      return '';
+    while (current <= endDate) {
+      const dateStr = current.toDateString();
+      if (item.status === 'Approved') {
+        this.approvedLeaves.add(dateStr);
+      } else if (item.status === 'Pending') {
+        this.pendingLeaves.add(dateStr);
+      }
+      current.setDate(current.getDate() + 1);
     }
-  };
+  });
+}
+
+// dateClass 判定 (補打卡的日曆會呼叫這個)
+dateClass = (d: any): string => {
+  if (!d) return '';
+  const date = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(date.getTime())) return '';
+
+  const dateStr = date.toDateString();
+  
+  // 優先權判斷：已核准(紫色) > 待審核(黃色) > 已打卡(藍色方形)
+  if (this.approvedLeaves.has(dateStr)) return 'leave-approved-date';
+  if (this.pendingLeaves.has(dateStr)) return 'leave-pending-date';
+  if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
+  
+  return '';
+};
 
   // 判定當前應該是上班還是下班
   determineAutoStatus() {

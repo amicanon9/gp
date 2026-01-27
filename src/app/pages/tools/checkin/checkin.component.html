@@ -10,7 +10,7 @@
             </div>
           </div>
           <span class="flex-spacer"></span>
-          <div class="header-right">
+          <div class="header-right" style="padding-bottom: 5px;">
             <mat-button-toggle-group [(ngModel)]="checkinMode" (change)="onModeChange()" class="mode-toggle">
               <mat-button-toggle value="normal">一般打卡</mat-button-toggle>
               <mat-button-toggle value="backfill">補打卡</mat-button-toggle>
@@ -19,7 +19,7 @@
         </mat-card-header>
 
         <mat-divider></mat-divider>
-        <mat-card-content class="p-4">
+        <mat-card-content class="p-3">
           <div class="time-section mb-4 rounded" [class.backfill-bg]="isBackfill">
 
             <div *ngIf="!isBackfill" class="d-flex align-items-center">
@@ -29,7 +29,7 @@
 
             <div *ngIf="isBackfill" class="row g-3 align-items-center">
               <div class="col-md-6">
-                <label class="form-label fw-bold text-secondary small mb-1">補打日期 (有紀錄者顯示深色)</label>
+                <label class="form-label fw-bold text-secondary mb-1">補打日期 (有紀錄者顯示深色)</label>
                 <mat-form-field appearance="outline" class="w-100 custom-form-field">
                   <input matInput [matDatepicker]="picker" [(ngModel)]="backfillDate" placeholder="選擇日期" readonly
                     (click)="picker.open()">
@@ -39,7 +39,7 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-bold text-secondary small mb-1">補打時間</label>
+                <label class="form-label fw-bold text-secondary mb-1">補打時間</label>
                 <mat-form-field appearance="outline" class="w-100 custom-form-field">
                   <input matInput type="time" [(ngModel)]="backfillTime" class="time-input">
                 </mat-form-field>

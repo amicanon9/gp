@@ -5,36 +5,36 @@
         <mat-card-header class="custom-card-header">
           <div class="header-left">
             <div class="header-icon">
-              <mat-icon color="primary">event_note</mat-icon>
-              <span style="margin-top: -10px;" class="header-title">請假申請</span>
+              <mat-icon style="color: #6bd098;">event_note</mat-icon>
+              <span style="margin-top: -10px;" class="header-title">請假單</span>
             </div>
           </div>
           <span class="flex-spacer"></span>
-          <div class="header-right d-flex flex-column align-items-end">
-            <div class="small fw-bold">{{ userDeptName }} | 年資：{{ seniority }}</div>
-            <div class="small opacity-75">到職日：{{ userJoinedDate | date:'yyyy-MM-dd' }}</div>
+          <div class="header-right d-flex flex-column align-items-end" style="padding-bottom: 5px;">
+            <div class="fw-bold">{{ userDeptName }} 年資：{{ seniority }}</div>
+            <div class="opacity-75">到職日：{{ userJoinedDate | date:'yyyy-MM-dd' }}</div>
           </div>
         </mat-card-header>
 
         <mat-divider></mat-divider>
 
-        <mat-card-content class="p-4">
+        <mat-card-content class="p-3">
           <div class="quota-section row mb-4 text-center">
             <div class="col-md-4">
               <div class="quota-box border rounded p-3 bg-light shadow-sm">
-                <div class="text-muted small">總特休額度</div>
+                <div class="text-muted">總特休時數</div>
                 <div class="fs-4 fw-bold text-dark">{{ annualLeaveTotal }} <small class="fs-6">hr</small></div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="quota-box border rounded p-3 bg-light shadow-sm">
-                <div class="text-muted small">已休特休時數</div>
+                <div class="text-muted">已休特休時數</div>
                 <div class="fs-4 fw-bold text-danger">{{ annualLeaveUsed }} <small class="fs-6">hr</small></div>
               </div>
             </div>
             <div class="col-md-4">
                <div class="quota-box border rounded p-3 bg-light shadow-sm">
-                <div class="text-muted small">剩餘特休時數</div>
+                <div class="text-muted">剩餘特休時數</div>
                 <div class="fs-4 fw-bold text-primary">{{ annualLeaveRemaining }} <small class="fs-6">hr</small></div>
               </div>
             </div>
@@ -43,7 +43,7 @@
 
           <div class="form-section row g-3">
             <div class="col-md-12">
-              <label class="form-label fw-bold text-secondary small mb-1">假別選擇</label>
+              <label class="form-label fw-bold text-secondary mb-1">假別選擇</label>
               <mat-form-field appearance="outline" class="w-100">
                 <mat-select [(ngModel)]="applyData.leave_type" (selectionChange)="onTimeChange()">
                   <mat-option *ngFor="let type of leaveTypes" [value]="type.value">
@@ -54,47 +54,41 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label fw-bold text-secondary small mb-1">開始日期</label>
+              <label class="form-label fw-bold text-secondary mb-1">開始日期</label>
               <mat-form-field appearance="outline" class="w-100 custom-form-field">
                 <input matInput [matDatepicker]="sp" [(ngModel)]="applyData.start_date" 
                        (dateChange)="onTimeChange()" placeholder="選擇日期" readonly (click)="sp.open()">
                 <mat-datepicker-toggle matSuffix [for]="sp"></mat-datepicker-toggle>
-                <mat-datepicker #sp></mat-datepicker>
+                <mat-datepicker #sp [dateClass]="dateClass"></mat-datepicker>
               </mat-form-field>
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-bold text-secondary small mb-1">開始時間</label>
+              <label class="form-label fw-bold text-secondary mb-1">開始時間</label>
               <mat-form-field appearance="outline" class="w-100 custom-form-field">
                 <input matInput type="time" [(ngModel)]="applyData.start_time_only" (change)="onTimeChange()" class="time-input">
               </mat-form-field>
             </div>
 
             <div class="col-md-3">
-              <label class="form-label fw-bold text-secondary small mb-1">結束日期</label>
+              <label class="form-label fw-bold text-secondary mb-1">結束日期</label>
               <mat-form-field appearance="outline" class="w-100 custom-form-field">
                 <input matInput [matDatepicker]="ep" [(ngModel)]="applyData.end_date" 
                        (dateChange)="onTimeChange()" placeholder="選擇日期" readonly (click)="ep.open()">
                 <mat-datepicker-toggle matSuffix [for]="ep"></mat-datepicker-toggle>
-                <mat-datepicker #ep></mat-datepicker>
+                <mat-datepicker #ep [dateClass]="dateClass"></mat-datepicker>
               </mat-form-field>
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-bold text-secondary small mb-1">結束時間</label>
+              <label class="form-label fw-bold text-secondary mb-1">結束時間</label>
               <mat-form-field appearance="outline" class="w-100 custom-form-field">
                 <input matInput type="time" [(ngModel)]="applyData.end_time_only" (change)="onTimeChange()" class="time-input">
               </mat-form-field>
             </div>
 
-            <div class="col-md-12 text-end">
-              <div class="p-2 bg-light border-start border-4 border-info d-inline-block rounded shadow-sm">
-                <span class="text-muted small me-2">預計請假總時數：</span>
-                <span class="fs-5 fw-bold text-info">{{ applyData.total_hours }}</span>
-                <span class="ms-1 small">小時</span>
-              </div>
-            </div>
+           
 
             <div class="col-md-12">
-              <label class="form-label fw-bold text-secondary small mb-1">請假事由</label>
+              <label class="form-label fw-bold text-secondary mb-1">請假事由</label>
               <mat-form-field appearance="outline" class="w-100">
                 <textarea matInput [(ngModel)]="applyData.reason" rows="3" placeholder="請詳細輸入請假原因..."></textarea>
               </mat-form-field>
@@ -103,10 +97,17 @@
         </mat-card-content>
 
         <mat-card-actions class="p-3 bg-light d-flex justify-content-between align-items-center">
-          <div class="text-muted small">
+          <div class="text-muted">
             <mat-icon class="align-middle me-1" style="font-size: 18px;">info</mat-icon>
             申請將送至部門主管：<strong>{{ managerName }}</strong>
           </div>
+           <div class="col-md-5 text-center">
+              <div class="p-2 bg-light border-start border-4 border-info d-inline-block rounded shadow-sm">
+                <span class="text-muted  me-2">預計請假總時數：</span>
+                <span class="fs-5 fw-bold text-info">{{ applyData.total_hours }}</span>
+                <span class="ms-1">小時</span>
+              </div>
+            </div>
           <button mat-raised-button color="primary" class="px-5 shadow"
             [disabled]="!isFormValid() || isProcessing"
             (click)="submitLeave()">
@@ -128,7 +129,7 @@
                   <th>結束時間</th>
                   <th class="text-center">總時數</th>
                   <th class="text-center">狀態</th>
-                  <th>主管評語</th>
+                  <th>備註</th>
                 </tr>
               </thead>
               <tbody>
@@ -147,8 +148,8 @@
                       {{ translateStatus(item.status) }}
                     </span>
                   </td>
-                  <td class="small text-muted text-truncate" style="max-width: 200px;">
-                    {{ item.manager_remark || '-' }}
+                  <td class="text-muted text-truncate" style="max-width: 200px;">
+                    {{ item.reason || '-' }}
                   </td>
                 </tr>
               </tbody>

@@ -38,7 +38,7 @@ import { MultiSelectComponent } from 'app/_components/multi-select/multi-select.
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule} from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatRadioModule } from '@angular/material/radio'; 
 import { PspowernoinfoComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo.component';
@@ -97,7 +97,6 @@ export const TW_FORMATS = {
     MatButtonToggleModule,
     MatProgressBarModule,
     MatSliderModule,
-    MatNativeDateModule,
     MatDividerModule
   ],
   declarations: [
