@@ -49,7 +49,7 @@ export class projectplmComponent implements OnInit {
     },
     columns: [
       // 1. 重點結單預估日期 (時間維度)
-
+      {name:'id', displayName: '專案ID'},
       { name: 'year', displayName: '年度', width: 80 },
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },

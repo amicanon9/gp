@@ -92,7 +92,6 @@
 
             <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'"
               class="btn-main-action-full shadow flex-grow-1"
-              [disabled]="isProcessing || totalPercentage !== 100 || projectAssignments.length === 0"
               (click)="submitCheckin()">
               <mat-icon class="me-2">check_circle</mat-icon>
               <span class="fs-5"> {{ isBackfill ? '補打' + checkinStatus : '打卡' + autoStatus }}</span>

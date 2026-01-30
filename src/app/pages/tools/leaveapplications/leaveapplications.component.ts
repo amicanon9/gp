@@ -18,17 +18,13 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
   // 基礎清單
   deplist: any[] = [];
   leaveHistory: any[] = [];
-  
-  leaveTypes = [
-    { value: 'Annual', label: '特休' },
-    { value: 'Sick', label: '病假' },
-    { value: 'Personal', label: '事假' },
-    { value: 'Compensatory', label: '補休' }
-  ];
+  isOtherSelected = false;
+  customLeaveName = '';
+  leaveTypes = ['特休', '病假', '事假', '公假', '婚假', '喪假', '產假', '其他'];
 
   // 申請表單變數 (配合 HTML 拆分日期與時間)
   applyData: any = {
-    leave_type: 'Annual',
+    leave_type: '特休',
     start_date: new Date(),
     start_time_only: '08:30',
     end_date: new Date(),
@@ -66,41 +62,60 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadData();
     // 監聽時間變化以自動計算時數
-    this.timer = setInterval(() => {}, 1000); 
+    this.timer = setInterval(() => { }, 1000);
   }
 
-  ngOnDestroy() { 
-    if (this.timer) clearInterval(this.timer); 
+  ngOnDestroy() {
+    if (this.timer) clearInterval(this.timer);
   }
-calculateLaborLawQuota(joinedDate: Date): number {
-  const today = new Date();
+  onLeaveTypeChange() {
+  // 檢查選中的值是否為 '其他'
+  if (this.applyData.leave_type === '其他') {
+    this.isOtherSelected = true;
+    // 先清空 leave_type，讓使用者接下來輸入的東西成為最終值
+    this.applyData.leave_type = ''; 
+  } else {
+    this.isOtherSelected = false;
+    this.customLeaveName = '';
+  }
   
-  // 計算總月數年資
-  let totalMonths = (today.getFullYear() - joinedDate.getFullYear()) * 12 + (today.getMonth() - joinedDate.getMonth());
-  if (today.getDate() < joinedDate.getDate()) {
-    totalMonths--; // 未滿一個月不計
+  if (this.onTimeChange) {
+    this.onTimeChange();
   }
-
-  let totalDays = 0;
-
-  if (totalMonths >= 6 && totalMonths < 12) {
-    totalDays = 3;
-  } else if (totalMonths >= 12) {
-    const years = Math.floor(totalMonths / 12);
-    
-    if (years === 1) totalDays = 7;
-    else if (years === 2) totalDays = 10;
-    else if (years >= 3 && years < 5) totalDays = 14;
-    else if (years >= 5 && years < 10) totalDays = 15;
-    else if (years >= 10) {
-      // 滿 10 年後，每一年加 1 天，上限 30 天
-      totalDays = Math.min(16 + (years - 10), 30);
-    }
-  }
-
-  // 假設一天 8 小時，回傳總小時數
-  return totalDays * 8;
 }
+
+updateOtherValue() {
+  this.applyData.leave_type = this.customLeaveName;
+}
+  calculateLaborLawQuota(joinedDate: Date): number {
+    const today = new Date();
+
+    // 計算總月數年資
+    let totalMonths = (today.getFullYear() - joinedDate.getFullYear()) * 12 + (today.getMonth() - joinedDate.getMonth());
+    if (today.getDate() < joinedDate.getDate()) {
+      totalMonths--; // 未滿一個月不計
+    }
+
+    let totalDays = 0;
+
+    if (totalMonths >= 6 && totalMonths < 12) {
+      totalDays = 3;
+    } else if (totalMonths >= 12) {
+      const years = Math.floor(totalMonths / 12);
+
+      if (years === 1) totalDays = 7;
+      else if (years === 2) totalDays = 10;
+      else if (years >= 3 && years < 5) totalDays = 14;
+      else if (years >= 5 && years < 10) totalDays = 15;
+      else if (years >= 10) {
+        // 滿 10 年後，每一年加 1 天，上限 30 天
+        totalDays = Math.min(16 + (years - 10), 30);
+      }
+    }
+
+    // 假設一天 8 小時，回傳總小時數
+    return totalDays * 8;
+  }
   loadData() {
     forkJoin({
       deplist: this.apiSvc.getdata('Departments'),
@@ -114,14 +129,14 @@ calculateLaborLawQuota(joinedDate: Date): number {
       if (userinfo) {
         this.userJoinedDate = new Date(userinfo.joined_date);
         this.calculateSeniority(this.userJoinedDate);
-        
+
         // 設定部門與主管
         const dept = this.deplist.find(x => x.id === userinfo.dept_id);
         if (dept) {
           this.userDeptName = dept.name;
           this.managerName = dept.manager_name;
           this.managerId = dept.manager_id;
-          this.deptId=dept.id;
+          this.deptId = dept.id;
         }
 
         // 模擬計算特休 (實際應用中應從後端 API 取得)
@@ -132,59 +147,59 @@ calculateLaborLawQuota(joinedDate: Date): number {
       this.onTimeChange(); // 初始化時數計算
       this.loaded = true;
     });
-   this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id).subscribe({
-    next: (res: any[]) => {
-      this.checkedInDates.clear();
-      res.forEach(item => {
-        const dateStr = new Date(item.checkin_time).toDateString();
-        this.checkedInDates.add(dateStr);
-      });
-    }
-  });
+    this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id).subscribe({
+      next: (res: any[]) => {
+        this.checkedInDates.clear();
+        res.forEach(item => {
+          const dateStr = new Date(item.checkin_time).toDateString();
+          this.checkedInDates.add(dateStr);
+        });
+      }
+    });
   }
   // 抽取成獨立方法，方便重新載入時呼叫
-processLeaveDates(history: any[]) {
-  this.approvedLeaves.clear();
-  this.pendingLeaves.clear();
-  history.forEach(item => {
-    const dateStr = new Date(item.start_time).toDateString(); // 以開始日期為準
-    if (item.status === 'Approved') {
-      this.approvedLeaves.add(dateStr);
-    } else if (item.status === 'Pending') {
-      this.pendingLeaves.add(dateStr);
+  processLeaveDates(history: any[]) {
+    this.approvedLeaves.clear();
+    this.pendingLeaves.clear();
+    history.forEach(item => {
+      const dateStr = new Date(item.start_time).toDateString(); // 以開始日期為準
+      if (item.status === 'Approved') {
+        this.approvedLeaves.add(dateStr);
+      } else if (item.status === 'Pending') {
+        this.pendingLeaves.add(dateStr);
+      }
+    });
+  }
+
+  // 修正後的 dateClass
+  dateClass = (d: any): string => {
+    if (!d) return '';
+    const date = (d instanceof Date) ? d : new Date(d);
+    if (isNaN(date.getTime())) return '';
+
+    const dateStr = date.toDateString();
+
+    // 優先權判斷：已核准(紫色) > 待審核(黃色) > 已打卡(圓點/綠色)
+    if (this.approvedLeaves.has(dateStr)) {
+      return 'leave-approved-date'; // 紫色
     }
-  });
-}
+    if (this.pendingLeaves.has(dateStr)) {
+      return 'leave-pending-date'; // 黃色
+    }
+    if (this.checkedInDates.has(dateStr)) {
+      return 'has-checkin-date';
+    }
+    return '';
+  };
 
-// 修正後的 dateClass
-dateClass = (d: any): string => {
-  if (!d) return '';
-  const date = (d instanceof Date) ? d : new Date(d);
-  if (isNaN(date.getTime())) return '';
-
-  const dateStr = date.toDateString();
-  
-  // 優先權判斷：已核准(紫色) > 待審核(黃色) > 已打卡(圓點/綠色)
-  if (this.approvedLeaves.has(dateStr)) {
-    return 'leave-approved-date'; // 紫色
+  // getHistory 也要記得更新 Set
+  getHistory() {
+    this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id).subscribe(res => {
+      this.leaveHistory = res;
+      this.calculateUsedLeave(res);
+      this.processLeaveDates(res); // 重要：更新日曆顏色
+    });
   }
-  if (this.pendingLeaves.has(dateStr)) {
-    return 'leave-pending-date'; // 黃色
-  }
-  if (this.checkedInDates.has(dateStr)) {
-    return 'has-checkin-date';
-  }
-  return '';
-};
-
-// getHistory 也要記得更新 Set
-getHistory() {
-  this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id).subscribe(res => {
-    this.leaveHistory = res;
-    this.calculateUsedLeave(res);
-    this.processLeaveDates(res); // 重要：更新日曆顏色
-  });
-}
   // 計算年資
   calculateSeniority(joinedDate: Date) {
     const today = new Date();
@@ -200,53 +215,53 @@ getHistory() {
   // 計算已休時數
   calculateUsedLeave(history: any[]) {
     this.annualLeaveUsed = history
-      .filter(x => x.leave_type === 'Annual' && x.status === 'Approved')
+      .filter(x => x.leave_type === '特休' && x.status === 'Approved')
       .reduce((sum, item) => sum + item.total_hours, 0);
-    
+
     this.annualLeaveRemaining = this.annualLeaveTotal - this.annualLeaveUsed;
-    
+
   }
 
   // 自動計算總時數 (合併日期與時間字串)
   onTimeChange() {
-  if (!this.applyData.start_date || !this.applyData.end_date || 
+    if (!this.applyData.start_date || !this.applyData.end_date ||
       !this.applyData.start_time_only || !this.applyData.end_time_only) return;
 
-  const start = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only);
-  const end = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only);
+    const start = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only);
+    const end = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only);
 
-  if (end > start) {
-    let diffMs = end.getTime() - start.getTime();
-    let hours = diffMs / (1000 * 60 * 60);
+    if (end > start) {
+      let diffMs = end.getTime() - start.getTime();
+      let hours = diffMs / (1000 * 60 * 60);
 
-    // --- 午休扣除邏輯 (12:30 - 13:30) ---
-    // 建立當天的午休開始與結束時間物件
-    const lunchStart = new Date(start);
-    lunchStart.setHours(12, 30, 0, 0);
+      // --- 午休扣除邏輯 (12:30 - 13:30) ---
+      // 建立當天的午休開始與結束時間物件
+      const lunchStart = new Date(start);
+      lunchStart.setHours(12, 30, 0, 0);
 
-    const lunchEnd = new Date(start);
-    lunchEnd.setHours(13, 30, 0, 0);
+      const lunchEnd = new Date(start);
+      lunchEnd.setHours(13, 30, 0, 0);
 
-    // 判斷是否跨越午休時段 (且必須是同一天請假，若跨天邏輯會更複雜)
-    // 邏輯：開始時間早於午休結束，且結束時間晚於午休開始
-    if (start < lunchEnd && end > lunchStart) {
-      // 計算重疊的毫秒數，如果是整點請假 (如 09:00 - 18:00)，這裡會扣掉剛好 1 小時
-      // 如果只請到 13:00，則只會扣掉 12:30 - 13:00 的 30 分鐘
-      const overlapStart = start > lunchStart ? start.getTime() : lunchStart.getTime();
-      const overlapEnd = end < lunchEnd ? end.getTime() : lunchEnd.getTime();
-      
-      const overlapMs = overlapEnd - overlapStart;
-      if (overlapMs > 0) {
-        diffMs -= overlapMs;
+      // 判斷是否跨越午休時段 (且必須是同一天請假，若跨天邏輯會更複雜)
+      // 邏輯：開始時間早於午休結束，且結束時間晚於午休開始
+      if (start < lunchEnd && end > lunchStart) {
+        // 計算重疊的毫秒數，如果是整點請假 (如 09:00 - 18:00)，這裡會扣掉剛好 1 小時
+        // 如果只請到 13:00，則只會扣掉 12:30 - 13:00 的 30 分鐘
+        const overlapStart = start > lunchStart ? start.getTime() : lunchStart.getTime();
+        const overlapEnd = end < lunchEnd ? end.getTime() : lunchEnd.getTime();
+
+        const overlapMs = overlapEnd - overlapStart;
+        if (overlapMs > 0) {
+          diffMs -= overlapMs;
+        }
       }
-    }
 
-    // 重新計算最終小時數
-    this.applyData.total_hours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
-  } else {
-    this.applyData.total_hours = 0;
+      // 重新計算最終小時數
+      this.applyData.total_hours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
+    } else {
+      this.applyData.total_hours = 0;
+    }
   }
-}
   // 輔助：合併 Date 物件與 "HH:mm" 字串
   combineDateAndTime(date: Date, timeStr: string): Date {
     const d = new Date(date);
@@ -273,14 +288,14 @@ getHistory() {
 
     // 合併最終要送出的 ISO 字串
     const startIso = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only)
-                      .toLocaleString('sv-SE').replace(' ', 'T');
+      .toLocaleString('sv-SE').replace(' ', 'T');
     const endIso = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only)
-                      .toLocaleString('sv-SE').replace(' ', 'T');
+      .toLocaleString('sv-SE').replace(' ', 'T');
 
     const payload = {
-      dept_id :this.deptId,
+      dept_id: this.deptId,
       user_id: this.authSvc.state.user_id,
-      leave_type: this.applyData.leave_type,
+      leave_type: this.isOtherSelected ? this.customLeaveName : this.applyData.leave_type,
       start_time: startIso,
       end_time: endIso,
       total_hours: this.applyData.total_hours,
@@ -292,11 +307,19 @@ getHistory() {
 
     this.apiSvc.createdata('LeaveApplications', payload).subscribe({
       next: () => {
-        this.toastr.success('申請已送出', '成功');
+        this.toastr.success('申請已送出', '', {
+          timeOut: 3000,
+          closeButton: true,
+          positionClass: "toast-top-center"
+        });
         this.resetForm();
         this.getHistory();
       },
-      error: () => this.toastr.error('送出失敗', '錯誤'),
+      error: () => this.toastr.error('送出失敗', '', {
+        timeOut: 3000,
+        closeButton: true,
+        positionClass: "toast-top-center"
+      }),
       complete: () => this.isProcessing = false
     });
   }
@@ -314,7 +337,7 @@ getHistory() {
     };
   }
 
-  
+
   translateStatus(status: string) {
     const map = { 'Pending': '待審核', 'Approved': '已核准', 'Rejected': '已駁回' };
     return map[status] || status;
@@ -329,8 +352,5 @@ getHistory() {
     }
   }
 
-  translateLeaveType(type: string) {
-    const item = this.leaveTypes.find(t => t.value === type);
-    return item ? item.label : type;
-  }
+
 }

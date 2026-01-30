@@ -461,6 +461,14 @@
    
 
     .nav-open{
+          .navbar {
+      /* 重要：當側邊欄展開 (260px) 時，Navbar 寬度應扣除側邊欄寬度 */
+      width: calc(100% - 260px) !important;
+      /* 視您的佈局決定是否需要位移 */
+    }
+
+  
+   
         .main-panel{
             right: 0;
             @include transform-translate-x(260px);
@@ -602,7 +610,6 @@
       width: 100%;
     }
 
-   
 }
 
 @media screen and (max-width: 768px){

@@ -18,6 +18,8 @@ import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm
 import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
 import { checkinComponent } from 'app/pages/tools/checkin/checkin.component';
 import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/leaveapplications.component';
+import { leavemanagementComponent } from 'app/pages/tools/leavemanagement/leavemanagement.component';
+import { departmentsComponent } from 'app/pages/manage/departments/departments.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
@@ -27,10 +29,12 @@ export const AdminLayoutRoutes: Routes = [
   { path: 'customer/customerplm',      component: customerplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/checkin',          component: checkinComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leaveapplications',          component: leaveapplicationsComponent, canActivate: [AuthGuard, MenuGuard]},
+  { path: 'tools/leavemanagement',          component: leavemanagementComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'ps/pspowernoinfo',      component: PspowernoinfoComponent, canActivate: [AuthGuard, MenuGuard] },
   
   { path: 'manage/setofbooks',     component: SetOfBooksComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'manage/logininfo', component: LoginInfoComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'manage/loginroles', component: LoginRolesComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'manage/departments', component: departmentsComponent, canActivate: [AuthGuard, MenuGuard] },
   
   ];

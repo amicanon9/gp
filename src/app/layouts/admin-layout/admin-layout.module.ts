@@ -54,6 +54,9 @@ import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/cus
 import { weeklyreportplmModalComponent } from 'app/pages/maintenance/projectplm/weeklyreportplm-modal/weeklyreportplm-modal.component';
 import { checkinComponent } from 'app/pages/tools/checkin/checkin.component';
 import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/leaveapplications.component';
+import { leavemanagementComponent } from 'app/pages/tools/leavemanagement/leavemanagement.component';
+import { departmentsComponent } from 'app/pages/manage/departments/departments.component';
+import { departmentsModalComponent } from 'app/pages/manage/departments/departments-modal/departments-modal.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -115,9 +118,12 @@ export const TW_FORMATS = {
     SetOfBooksComponent,
     TableComponent,
     leaveapplicationsComponent,
+    leavemanagementComponent,
     SetOfBooksModalComponent,
     LoginInfoComponent,
     LoginInfoModalComponent,
+    departmentsComponent,
+    departmentsModalComponent,
     LoginRolesComponent,
     LoginRolesModalComponent,
     ChangePasswordModalComponent,

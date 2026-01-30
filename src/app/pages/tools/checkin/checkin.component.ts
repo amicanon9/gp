@@ -239,8 +239,8 @@ dateClass = (d: any): string => {
     // 簡單加總，這時總和應該會自動鎖定在 100 (除非只有一個專案且你不准他拉動)
     this.totalPercentage = this.projectAssignments.reduce((sum, p) => sum + Number(p.percentage || 0), 0);
   }
-  submitCheckin() {
-  let finalTime: Date = new Date(); // 預設當前時間
+ submitCheckin() {
+  let finalTime: Date = new Date();
 
   if (this.isBackfill) {
     const [hours, minutes] = this.backfillTime.split(':');
@@ -250,7 +250,6 @@ dateClass = (d: any): string => {
 
   const status = this.isBackfill ? this.checkinStatus : this.autoStatus;
 
-  // --- 關鍵修復：直接基於 finalTime 進行偏移，不要用 toLocaleString 字串去 new Date ---
   const fakeDate = new Date(finalTime.getTime()); 
   const randomMin = Math.floor(Math.random() * 15);
   const randomSec = Math.floor(Math.random() * 60);
@@ -261,41 +260,60 @@ dateClass = (d: any): string => {
     fakeDate.setHours(17, 31 + randomMin, randomSec);
   }
 
-  // 格式化 checkin_time (存檔用字串)
   const timeString = finalTime.toLocaleString('sv-SE', { hour12: false }).replace(' ', 'T'); 
-  // 格式化 fake_time (建議也轉成字串，否則 JSON 傳輸會變 UTC 格式)
   const fakeTimeString = fakeDate.toLocaleString('sv-SE', { hour12: false }).replace(' ', 'T');
 
-  const payload = this.projectAssignments.map(p => ({
-    user_id: this.authSvc.state.user_id,
-    book_id: 1,
-    project_id: p.id,
-    checkin_time: timeString, // 實際打卡時間
-    fake_time: fakeTimeString, // 模擬時間
-    mode: this.checkinMode,
-    status: status,
-    work_percentage: p.percentage
-  }));
+  // --- 核心修改：判斷有無專案分配 ---
+  let payload: any[] = [];
 
-    this.isProcessing = true;
-    this.apiSvc.createdata('CheckinLogs', payload).subscribe({
-      next: () => {
-        this.toastr.success('打卡成功', '', {
-          timeOut: 3000,
-          closeButton: true,
-          positionClass: "toast-top-center"
-        });
-        this.resetForm();
-        this.getHistory();
-      },
-      error: (err) => this.toastr.error('失敗', '', {
+  if (this.projectAssignments && this.projectAssignments.length > 0) {
+    // 有選專案時，依照專案比例產出多筆資料
+    payload = this.projectAssignments.map(p => ({
+      user_id: this.authSvc.state.user_id,
+      book_id: 1,
+      project_id: p.id,
+      checkin_time: timeString,
+      fake_time: fakeTimeString,
+      mode: this.checkinMode,
+      status: status,
+      work_percentage: p.percentage
+    }));
+  } else {
+    // 沒選專案時，送出一筆預設打卡（project_id 設為 null 或 0）
+    payload = [{
+      user_id: this.authSvc.state.user_id,
+      book_id: 1,
+      project_id: null, // 或是根據後端需求給 0
+      checkin_time: timeString,
+      fake_time: fakeTimeString,
+      mode: this.checkinMode,
+      status: status,
+      work_percentage: 100 // 沒分專案通常視為 100% 投入
+    }];
+  }
+
+  this.isProcessing = true;
+  this.apiSvc.createdata('CheckinLogs', payload).subscribe({
+    next: () => {
+      this.toastr.success('打卡成功', '', {
         timeOut: 3000,
         closeButton: true,
         positionClass: "toast-top-center"
-      }),
-      complete: () => this.isProcessing = false
-    });
-  }
+      });
+      this.resetForm();
+      this.getHistory();
+    },
+    error: (err) => {
+      this.toastr.error('失敗', '', {
+        timeOut: 3000,
+        closeButton: true,
+        positionClass: "toast-top-center"
+      });
+      this.isProcessing = false;
+    },
+    complete: () => this.isProcessing = false
+  });
+}
 
   groupHistory(data: any[]) {
     const groups = data.reduce((acc, obj) => {
@@ -310,20 +328,18 @@ dateClass = (d: any): string => {
           raw_projects: [] // 保存原始資料供下班引用
         };
       }
-      acc[timeKey].project_names.push(`${obj.project_name} (${obj.work_percentage}%)`);
-      acc[timeKey].raw_projects.push(obj);
+      if(obj.project_name)
+      {
+        acc[timeKey].project_names.push(`${obj.project_name} (${obj.work_percentage}%)`);
+        acc[timeKey].raw_projects.push(obj);
+      }
+      
       return acc;
     }, {});
     return (Object as any).values(groups).sort((a: any, b: any) =>
       new Date(b.checkin_time).getTime() - new Date(a.checkin_time).getTime())
   }
 
-  private getBackfillTime() {
-    const [h, m] = this.backfillTime.split(':');
-    const d = new Date(this.backfillDate);
-    d.setHours(+h, +m, 0);
-    return d.toLocaleString('zh-TW', { hour12: false });
-  }
 
   resetForm() {
     this.selectedProjectIds = [];

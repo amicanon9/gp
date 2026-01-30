@@ -3,7 +3,7 @@
    ========================================================================== */
 
 // 顏色變數定義 (方便管理)
-$color-primary: #6bd098;  // 一般模式-藍色
+$color-primary: #e4965f;  // 一般模式-藍色
 $color-backfill: #F9C55C; // 補打模式-黃色
 $color-disabled: #e0e0e0; // 禁用狀態-灰色
 $color-text-dark: #333333;
@@ -72,8 +72,8 @@ $color-text-dark: #333333;
   // 2. 請假已核准 (紫色)
   .leave-approved-date {
     @extend %square-date;
-    background-color: #6bd098 !important;
-    &:hover { background-color: darken(#6bd098, 10%) !important; }
+    background-color: #e4965f !important;
+    &:hover { background-color: darken(#e4965f, 10%) !important; }
   }
 
   // 3. 請假待審核 (黃色 - 注意文字顏色改深色較清楚)
@@ -212,3 +212,6 @@ mat-card-header {
   }
 }
 
+::ng-deep .mat-simple-snackbar-action {
+  color: white
+}
