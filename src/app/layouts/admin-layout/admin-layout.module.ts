@@ -57,6 +57,8 @@ import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/le
 import { leavemanagementComponent } from 'app/pages/tools/leavemanagement/leavemanagement.component';
 import { departmentsComponent } from 'app/pages/manage/departments/departments.component';
 import { departmentsModalComponent } from 'app/pages/manage/departments/departments-modal/departments-modal.component';
+import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
+import { ProjectInternalModalComponent } from 'app/pages/maintenance/projectinternal/projectinternal-modal/projectinternal-modal.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -119,6 +121,8 @@ export const TW_FORMATS = {
     TableComponent,
     leaveapplicationsComponent,
     leavemanagementComponent,
+    projectinternalComponent,
+    ProjectInternalModalComponent,
     SetOfBooksModalComponent,
     LoginInfoComponent,
     LoginInfoModalComponent,

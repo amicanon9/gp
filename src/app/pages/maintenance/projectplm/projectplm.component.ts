@@ -232,7 +232,7 @@ export class projectplmComponent implements OnInit {
             data.map(e => {
               var customer = this.cuslist.find(x => x.id == e.customer_id);
               var ags = this.agslist.find(x => x.code == e.ags_status);
-              var week = this.weeklist.filter(x => x.project_id == e.id);
+              
               e['customer'] = customer
               e['contact'] = customer.contact
               e['telephone'] = customer.telephone
@@ -244,7 +244,14 @@ export class projectplmComponent implements OnInit {
               e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
               e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
               e['button'] = [{ name: '編輯週報', type: 'weekly_report' }]
-              e['week'] = week;
+              
+              var week = this.weeklist.filter(x => x.project_id == e.id);
+              e['week'] = week.sort((a, b) => {
+                if (a.year !== b.year) {
+                  return a.year - b.year; // 先比年份 (由小到大)
+                }
+                return a.week - b.week;   // 年份相同再比週數 (由小到大)
+              });
               const found = week?.find(e => e.year == this.year && e.week == this.week);
               e['this_week'] = found ? [found] : []; // 強制轉成陣列格式，方便 HTML 統一處理
             });

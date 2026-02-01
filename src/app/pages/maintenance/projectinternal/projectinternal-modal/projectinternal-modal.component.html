@@ -1,0 +1,35 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    
+    <div style="padding-left: 1%"><h2>專案資訊</h2></div>
+    <div class="row">
+      <div class="col-md-12 form-group">
+        <div class="form-name"><label for="name">專案名稱</label></div>
+        <div class="form-input">
+          <input type="text" id="name" formControlName="name" [class.invalid]="isError('name')" placeholder="請輸入內部專案名稱" />
+          <small class="text-danger" *ngIf="errorType('name', 'required')">*必填</small>
+        </div>
+      </div>
+
+      <div class="col-md-12 form-group">
+        <div class="form-name"><label for="description">敘述</label></div>
+        <div class="form-input">
+          <textarea style="width: 100%;" id="description" formControlName="description" rows="5" placeholder="請輸入專案相關說明..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認保存</button>
+</div>

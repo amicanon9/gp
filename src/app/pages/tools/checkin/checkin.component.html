@@ -53,11 +53,13 @@
             </label>
 
             <mat-form-field appearance="outline" class="w-100 mb-3">
-              <mat-label>選擇專案 (可多選)</mat-label>
-              <mat-select [(ngModel)]="selectedProjectIds" multiple (selectionChange)="onProjectSelectChange()">
-                <mat-option *ngFor="let p of Pjlist" [value]="p.id">({{p.id}}) {{p.customer_name}}</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <mat-label>選擇專案 (可選 PLM 或 內部專案)</mat-label>
+            <mat-select [(ngModel)]="selectedProjectKeys" multiple (selectionChange)="onProjectSelectChange()">
+              <mat-option *ngFor="let p of Pjlist" [value]="p.uniqueKey">
+                {{ p.displayName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
             <div *ngFor="let item of projectAssignments" class="slider-item p-2 mb-2 border rounded shadow-sm bg-white">
               <div class="d-flex justify-content-between align-items-center mb-1">
@@ -91,6 +93,7 @@
 
 
             <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'"
+             [disabled]="isProcessing || totalPercentage !== 100 || projectAssignments.length === 0"
               class="btn-main-action-full shadow flex-grow-1"
               (click)="submitCheckin()">
               <mat-icon class="me-2">check_circle</mat-icon>
@@ -113,7 +116,7 @@
               <thead class="bg-light">
                 <tr>
                   <th>日期</th>
-                  <th>時間</th>
+                  <th>打卡時間</th>
                   <th>實際時間</th>
                   <th>模式</th>
                   <th class="text-center">狀態</th>
@@ -123,7 +126,7 @@
               </thead>
               <tbody>
                 <tr *ngIf="!displayedHistory?.length">
-                  <td colspan="5" class="text-center text-muted py-5">
+                  <td colspan="6" class="text-center text-muted py-5">
                     <mat-icon style="font-size: 48px; width: 48px; height: 48px;"
                       class="mb-2">history_toggle_off</mat-icon>
                     <p>尚無任何打卡紀錄</p>

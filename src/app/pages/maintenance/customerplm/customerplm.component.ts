@@ -55,7 +55,7 @@ export class customerplmComponent implements OnInit {
     { name: 'existing_plm', displayName: '現有 PLM', width: 150 },
     { name: 'existing_cad', displayName: '現有 CAD', width: 150 },
     
-    // 4. 其他描述
+    // 4. 其他敘述
     { name: 'decision_level', displayName: '決策層級', width: 120 },
     { name: 'description', displayName: '備註說明', width: 250 },
 

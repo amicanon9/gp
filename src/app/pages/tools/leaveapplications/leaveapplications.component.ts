@@ -279,11 +279,6 @@ updateOtherValue() {
   }
 
   submitLeave() {
-    if (!this.isFormValid()) {
-      this.toastr.warning('請完整填寫申請內容', '提示');
-      return;
-    }
-
     this.isProcessing = true;
 
     // 合併最終要送出的 ISO 字串

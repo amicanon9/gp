@@ -46,7 +46,13 @@ function getJwtConfig(): JwtConfig {
     }),
     SidebarModule,
     NavbarModule,
-    ToastrModule.forRoot(),
+    ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-top-center', // 這裡設定全局位置
+      preventDuplicates: true,           // 防止重複彈出 (選配)
+      closeButton: true,                 // 預設顯示關閉按鈕
+      enableHtml: true                   // 讓 HTML 標籤生效 (這對你的圖示很重要)
+    }),
     FooterModule,
     FixedPluginModule,
     CommonModule,

@@ -29,7 +29,9 @@ export class ApiService {
  public getdata (name:string){
   return this.http.get<any[]>(apiUrl +`/${name}`);
  }
-
+ public getdatabyrole (name:string){
+  return this.http.get<any[]>(apiUrl +`/${name}/ByRole`);
+ }
 public getdatabyid (name:string,id:any){
   return this.http.get<any>(apiUrl +`/${name}/` + id);
  }
