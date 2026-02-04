@@ -1,15 +1,32 @@
+.file-upload-card {
+  border-radius: 8px;
+  .preview-box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 4px;
+    overflow: hidden;
 
-.mat-icon {
-   vertical-align: middle;
-}
-.default{
-   height:200;
-   width:300;
-}
-ul,
-li {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-}
+    .preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      &:hover { opacity: 0.8; }
+    }
 
+    .file-icon { font-size: 24px; width: 24px; height: 24px; }
+  }
+
+  .file-name-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+}

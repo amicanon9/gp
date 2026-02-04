@@ -21,12 +21,15 @@ import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/le
 import { leavemanagementComponent } from 'app/pages/tools/leavemanagement/leavemanagement.component';
 import { departmentsComponent } from 'app/pages/manage/departments/departments.component';
 import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
+import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc.component';
+import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
   { path: 'dashboard',      component: DashboardComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'icons',          component: IconsComponent},
   { path: 'project/projectplm',      component: projectplmComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'project/projectsvc',      component: projectsvcComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectinternal',      component: projectinternalComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'customer/customerplm',      component: customerplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/checkin',          component: checkinComponent, canActivate: [AuthGuard, MenuGuard]},
@@ -39,4 +42,5 @@ export const AdminLayoutRoutes: Routes = [
   { path: 'manage/loginroles', component: LoginRolesComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'manage/departments', component: departmentsComponent, canActivate: [AuthGuard, MenuGuard] },
   
+  { path: 'task/taskmaster', component: taskmasterComponent, canActivate: [AuthGuard, MenuGuard] },
   ];

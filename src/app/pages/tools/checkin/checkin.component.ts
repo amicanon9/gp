@@ -8,7 +8,7 @@ interface ProjectAssign {
   id: number;
   name: string;
   percentage: number;
-  type: string; 
+  type: string;
 }
 
 @Component({
@@ -17,24 +17,26 @@ interface ProjectAssign {
   styleUrls: ['./checkin.component.scss']
 })
 export class checkinComponent implements OnInit, OnDestroy {
-  Pjlist: any[] = []; // 包含 PLM 與 Internal 專案
+  Pjlist: any[] = []; // 原始清單
   displayedHistory: any[] = [];
 
   isProcessing = false;
   checkinMode: 'normal' | 'backfill' = 'normal';
   currentTime = new Date();
 
-  // 選單綁定關鍵：使用 uniqueKey (例如 'PLM_10' 或 'Internal_5')
-  selectedProjectKeys: string[] = [];
+  // 分成兩個選單的綁定值
+  selectedPlmKeys: string[] = [];
+  selectedSvcKeys: string[] = [];
+  selectedInternalKeys: string[] = [];
   projectAssignments: ProjectAssign[] = [];
-  
+
   totalPercentage = 0;
   checkedInDates = new Set<string>();
   approvedLeaves = new Set<string>();
-  pendingLeaves = new Set<string>();  
-  
+  pendingLeaves = new Set<string>();
+
   autoStatus: '上班' | '下班' = '上班';
-  checkinStatus: string = '上班'; 
+  checkinStatus: string = '上班';
 
   backfillDate = new Date();
   backfillTime = "08:30";
@@ -55,11 +57,17 @@ export class checkinComponent implements OnInit, OnDestroy {
 
   get isBackfill() { return this.checkinMode === 'backfill'; }
 
-  // 1. 同時載入兩張表的專案清單 (都用 getdata)
+  // 輔助方法：供 HTML 過濾不同類型的專案
+  getProjectsByType(type: 'PLM' | 'Internal'| 'Svc') {
+    return this.Pjlist.filter(p => p.type === type);
+  }
+
+  // 1. 載入所有專案
   loadAllProjects() {
     forkJoin({
       plm: this.apiSvc.getdatabyrole('projectplm'),
-      internal: this.apiSvc.getdata('projectinternal') // 改回 getdata
+      internal: this.apiSvc.getdata('projectinternal'),
+      svc: this.apiSvc.getdata('projectsvc')
     }).subscribe({
       next: (res) => {
         const plmList = (res.plm || []).map(p => ({
@@ -75,124 +83,27 @@ export class checkinComponent implements OnInit, OnDestroy {
           displayName: `(內部 ${p.id}) ${p.name || '未命名項目'}`,
           uniqueKey: `Internal_${p.id}`
         }));
-
-        this.Pjlist = [...internalList, ...plmList];
-        
-        // 確保清單載入後再抓歷史紀錄，以便名稱對照
+        const svcList = (res.svc || []).map(p => ({
+          ...p,
+          type: 'Svc',
+          displayName: `(SVC ${p.id}) ${p.project_name || '未命名項目'}`,
+          uniqueKey: `Svc_${p.id}`
+        }));
+        this.Pjlist = [...internalList, ...plmList, ...svcList];
         this.getHistory();
       },
       error: () => this.toastr.error('專案清單載入失敗')
     });
   }
 
-  // 2. 獲取紀錄
-  getHistory() {
-    forkJoin({
-      checkin: this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id),
-      leave: this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id)
-    }).subscribe({
-      next: ({ checkin, leave }) => {
-        this.displayedHistory = this.groupHistory(checkin);
-        this.checkedInDates.clear();
-        checkin.forEach(item => {
-          this.checkedInDates.add(new Date(item.checkin_time).toDateString());
-        });
-        this.determineAutoStatus();
-        this.processLeaveDates(leave);
-      }
-    });
-  }
-
-  // 根據 ID 與 Type 找出顯示名稱
-  getProjectDisplayName(id: number, type: string): string {
-    const pj = this.Pjlist.find(x => x.id === id && x.type === type);
-    return pj ? pj.displayName : `未知項目(${id})`;
-  }
-
-  // 3. 歷史紀錄分群與顯示處理
-  groupHistory(data: any[]) {
-    const groups = data.reduce((acc, obj) => {
-      const timeKey = new Date(obj.checkin_time).getTime();
-      if (!acc[timeKey]) {
-        acc[timeKey] = {
-          checkin_time: obj.checkin_time,
-          fake_time: obj.fake_time,
-          mode: obj.mode,
-          status: obj.status,
-          project_names: [],
-          raw_projects: [] 
-        };
-      }
-      
-      if (obj.project_id) {
-        const displayName = this.getProjectDisplayName(obj.project_id, obj.type);
-        acc[timeKey].project_names.push(`${displayName} (${obj.work_percentage}%)`);
-        acc[timeKey].raw_projects.push(obj);
-      } else {
-        acc[timeKey].project_names.push(`一般打卡 (100%)`);
-      }
-      
-      return acc;
-    }, {});
-
-    return (Object as any).values(groups).sort((a: any, b: any) =>
-      new Date(b.checkin_time).getTime() - new Date(a.checkin_time).getTime());
-  }
-
-  // 4. 請假與打卡狀態判定邏輯
-  processLeaveDates(history: any[]) {
-    this.approvedLeaves.clear();
-    this.pendingLeaves.clear();
-    history.forEach(item => {
-      let start = new Date(item.start_time);
-      let end = new Date(item.end_time);
-      let current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-      let endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-      while (current <= endDate) {
-        const dateStr = current.toDateString();
-        if (item.status === 'Approved') this.approvedLeaves.add(dateStr);
-        else if (item.status === 'Pending') this.pendingLeaves.add(dateStr);
-        current.setDate(current.getDate() + 1);
-      }
-    });
-  }
-
-  determineAutoStatus() {
-    const todayStr = new Date().toDateString();
-    const hasRecordToday = this.displayedHistory.some(log => 
-      new Date(log.checkin_time).toDateString() === todayStr
-    );
-
-    if (hasRecordToday) {
-      this.autoStatus = '下班';
-      const todayLogs = this.displayedHistory.filter(log =>
-        new Date(log.checkin_time).toDateString() === todayStr
-      );
-      const firstLogOfToday = todayLogs[todayLogs.length - 1]; // 取得當天最早一筆
-      if (!this.isBackfill && firstLogOfToday) {
-        this.loadLastCheckinProjects(firstLogOfToday);
-      }
-    } else {
-      this.autoStatus = '上班';
-    }
-  }
-
-  loadLastCheckinProjects(lastInEvent: any) {
-    this.projectAssignments = lastInEvent.raw_projects.map((p: any) => ({
-      id: p.project_id,
-      type: p.type,
-      name: this.getProjectDisplayName(p.project_id, p.type),
-      percentage: p.work_percentage
-    }));
-    this.selectedProjectKeys = this.projectAssignments.map(a => `${a.type}_${a.id}`);
-    this.calculateTotal();
-  }
-
-  // 5. 專案選擇與比例計算
+  // 2. 處理選單選擇變更 (核心邏輯)
   onProjectSelectChange() {
+    // 合併兩個選單的 Key 值
+    const allSelectedKeys = [...this.selectedPlmKeys, ...this.selectedInternalKeys, ...this.selectedSvcKeys];
     const currentKeys = this.projectAssignments.map(a => `${a.type}_${a.id}`);
 
-    this.selectedProjectKeys.forEach(key => {
+    // A. 處理新增：如果選單中有，但 Assignments 中沒有
+    allSelectedKeys.forEach(key => {
       if (!currentKeys.includes(key)) {
         const p = this.Pjlist.find(x => x.uniqueKey === key);
         if (p) {
@@ -206,10 +117,12 @@ export class checkinComponent implements OnInit, OnDestroy {
       }
     });
 
+    // B. 處理刪除：如果 Assignments 中有，但選單中已取消勾選
     this.projectAssignments = this.projectAssignments.filter(a =>
-      this.selectedProjectKeys.includes(`${a.type}_${a.id}`)
+      allSelectedKeys.includes(`${a.type}_${a.id}`)
     );
 
+    // C. 自動重新分配比例
     if (this.projectAssignments.length > 0) {
       const avg = Math.floor(100 / this.projectAssignments.length);
       this.projectAssignments.forEach((p, index) => {
@@ -221,15 +134,44 @@ export class checkinComponent implements OnInit, OnDestroy {
     this.calculateTotal();
   }
 
+  // 3. 載入上次打卡的專案資料 (分類至兩個選單)
+  loadLastCheckinProjects(lastInEvent: any) {
+    this.projectAssignments = lastInEvent.raw_projects.map((p: any) => ({
+      id: p.project_id,
+      type: p.type,
+      name: this.getProjectDisplayName(p.project_id, p.type),
+      percentage: p.work_percentage
+    }));
+
+    // 將資料分回對應的選單綁定變數
+    this.selectedPlmKeys = this.projectAssignments
+      .filter(a => a.type === 'PLM')
+      .map(a => `PLM_${a.id}`);
+      
+    this.selectedInternalKeys = this.projectAssignments
+      .filter(a => a.type === 'Internal')
+      .map(a => `Internal_${a.id}`);
+
+      this.selectedSvcKeys = this.projectAssignments
+      .filter(a => a.type === 'Svc')
+      .map(a => `Svc_${a.id}`);
+    this.calculateTotal();
+  }
+
+  // --- 其餘共用邏輯 ---
+
+  getProjectDisplayName(id: number, type: string): string {
+    const pj = this.Pjlist.find(x => x.id === id && x.type === type);
+    return pj ? pj.displayName : `未知項目(${id})`;
+  }
+
   onSliderInput(event: any, item: any) {
     const newValue = Number(event.value ?? 0);
     item.percentage = newValue;
     const others = this.projectAssignments.filter(p => p !== item);
-
     if (others.length > 0) {
       const remaining = 100 - newValue;
       const currentOthersSum = others.reduce((sum, p) => sum + Number(p.percentage || 0), 0);
-
       if (currentOthersSum > 0) {
         let distributedSum = 0;
         others.forEach((p, index) => {
@@ -256,7 +198,83 @@ export class checkinComponent implements OnInit, OnDestroy {
     this.totalPercentage = this.projectAssignments.reduce((sum, p) => sum + Number(p.percentage || 0), 0);
   }
 
-  // 6. 提交打卡
+  getHistory() {
+    forkJoin({
+      checkin: this.apiSvc.getdatabyid('CheckinLogs', this.authSvc.state.user_id),
+      leave: this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id)
+    }).subscribe({
+      next: ({ checkin, leave }) => {
+        this.displayedHistory = this.groupHistory(checkin);
+        this.checkedInDates.clear();
+        checkin.forEach(item => this.checkedInDates.add(new Date(item.checkin_time).toDateString()));
+        this.determineAutoStatus();
+        this.processLeaveDates(leave);
+      }
+    });
+  }
+
+  groupHistory(data: any[]) {
+    const groups = data.reduce((acc, obj) => {
+      const timeKey = new Date(obj.checkin_time).getTime();
+      if (!acc[timeKey]) {
+        acc[timeKey] = {
+          checkin_time: obj.checkin_time,
+          fake_time: obj.fake_time,
+          mode: obj.mode,
+          status: obj.status,
+          project_names: [],
+          raw_projects: [] 
+        };
+      }
+      if (obj.project_id) {
+        const displayName = this.getProjectDisplayName(obj.project_id, obj.type);
+        acc[timeKey].project_names.push(`${displayName} (${obj.work_percentage}%)`);
+        acc[timeKey].raw_projects.push(obj);
+      } else {
+        acc[timeKey].project_names.push(`一般打卡 (100%)`);
+      }
+      return acc;
+    }, {});
+    return (Object as any).values(groups).sort((a: any, b: any) =>
+      new Date(b.checkin_time).getTime() - new Date(a.checkin_time).getTime());
+  }
+
+  processLeaveDates(history: any[]) {
+    this.approvedLeaves.clear();
+    this.pendingLeaves.clear();
+    history.forEach(item => {
+      let start = new Date(item.start_time);
+      let end = new Date(item.end_time);
+      let current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      let endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      while (current <= endDate) {
+        const dateStr = current.toDateString();
+        if (item.status === 'Approved') this.approvedLeaves.add(dateStr);
+        else if (item.status === 'Pending') this.pendingLeaves.add(dateStr);
+        current.setDate(current.getDate() + 1);
+      }
+    });
+  }
+
+  determineAutoStatus() {
+    const todayStr = new Date().toDateString();
+    const hasRecordToday = this.displayedHistory.some(log => 
+      new Date(log.checkin_time).toDateString() === todayStr
+    );
+    if (hasRecordToday) {
+      this.autoStatus = '下班';
+      const todayLogs = this.displayedHistory.filter(log =>
+        new Date(log.checkin_time).toDateString() === todayStr
+      );
+      const firstLogOfToday = todayLogs[todayLogs.length - 1]; 
+      if (!this.isBackfill && firstLogOfToday) {
+        this.loadLastCheckinProjects(firstLogOfToday);
+      }
+    } else {
+      this.autoStatus = '上班';
+    }
+  }
+
   submitCheckin() {
     let finalTime: Date = new Date();
     if (this.isBackfill) {
@@ -264,7 +282,6 @@ export class checkinComponent implements OnInit, OnDestroy {
       finalTime = new Date(this.backfillDate);
       finalTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
     }
-
     const status = this.isBackfill ? this.checkinStatus : this.autoStatus;
     const fakeDate = new Date(finalTime.getTime()); 
     const randomMin = Math.floor(Math.random() * 15);
@@ -319,7 +336,9 @@ export class checkinComponent implements OnInit, OnDestroy {
   }
 
   resetForm() {
-    this.selectedProjectKeys = [];
+    this.selectedPlmKeys = [];
+    this.selectedSvcKeys =[];
+    this.selectedInternalKeys = [];
     this.projectAssignments = [];
     this.totalPercentage = 0;
   }

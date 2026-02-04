@@ -26,7 +26,7 @@ dayjs.extend(weekOfYear);
 
 
 export class projectplmComponent implements OnInit {
-  year = new Date().getFullYear();
+year = new Date().getFullYear();
   week = dayjs().week();
   search: string;
   data: any;
@@ -38,7 +38,10 @@ export class projectplmComponent implements OnInit {
   };
   stype_filter: string = "";
   projectplm: any;
-  infolist: any;
+  
+  // 重要：用來強制重新渲染 Table 的 Flag
+  tableReady = false;
+  
   table_config: any = {
     checkable: true,
     serverSide: true,
@@ -48,44 +51,29 @@ export class projectplmComponent implements OnInit {
       disableClear: true
     },
     columns: [
-      // 1. 重點結單預估日期 (時間維度)
-      {name:'id', displayName: '專案ID'},
+      { name: 'id', displayName: '專案ID' },
       { name: 'year', displayName: '年度', width: 80 },
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },
-      { name: 'close_date', displayName: '預計結案日', width: 120 , templateRef: 'date' },
-
-      // 2. 客戶資訊
+      { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
       { name: 'customer_name', displayName: '客戶名稱', width: 200 },
-      // 2. 聯絡資訊 (顯示主要聯絡人)
+      { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
       { name: 'contact', displayName: '聯絡人', width: 120 },
       { name: 'telephone', displayName: '電話', width: 150 },
-
-      // 3. 技術現況
+      { name: 'email', displayName: 'Email', width: 200 },
       { name: 'existing_plm', displayName: '現有 PLM', width: 150 },
       { name: 'existing_cad', displayName: '現有 CAD', width: 150 },
-
-      // 3. License (金額資訊)
       { name: 'rfq_to_client_amount', displayName: 'RFQ to Client', width: 120 },
       { name: 'net_to_ds_amount', displayName: 'Net to DS', width: 120 },
-
-      // 4. DS系統
       { name: 'sys', displayName: '系統查詢', width: 120 },
       { name: 'is_system_checked', displayName: '是否查詢系統', width: 120, templateRef: 'boolean' },
       { name: 'is_ags_booking', displayName: 'AGS是否Booking', width: 130, templateRef: 'boolean' },
-
-      // 5. AGS管制點
       { name: 'ags', displayName: 'AGS 狀態', width: 150, templateRef: 'ags_status' },
       { name: 'under_control_longshot_year_q', displayName: '掌控狀況 Year/Q', width: 150 },
       { name: 'solution_mapping', displayName: '解決方案對應', width: 200 },
+      { name: 'this_week', displayName: '本週週報', width: 300, templateRef: 'this_week_content' },
       { name: 'sales', displayName: '業務負責人', width: 120 },
       { name: 'service', displayName: '服務負責人', width: 120 },
-
-      // 6. 操作
-      { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
-      { name: 'this_week', displayName: '本週週報', width: 300, templateRef: 'this_week_content' },
-      { name: 'week', displayName: '週報紀錄', width: 300, templateRef: 'week_content' },
-
     ]
   };
   dataSource!: MatTableDataSource<any>;
@@ -105,6 +93,7 @@ export class projectplmComponent implements OnInit {
   agslist: any;
   userlist: any;
   weeklist: any;
+  base_columns: any;
   constructor(
     private apiSvc: ApiService,
     private modalSvc: NgbModal,
@@ -121,6 +110,7 @@ export class projectplmComponent implements OnInit {
 
 
   async ngOnInit() {
+    this.base_columns = this.table_config.columns.filter(c => c.name !== 'week');
     try {
       // 即使多個 Component 都寫這行，Service 內部也會擋掉重複的連線請求
       await this.signalRSvc.StartConnection();
@@ -207,10 +197,11 @@ export class projectplmComponent implements OnInit {
     this.selected = null;
     this.loadData()
   }
-  loadData() {
+loadData() {
+    this.tableReady = false; // 重置狀態
+    
     forkJoin({
       cuslist: this.apiSvc.getdata('customerplm'),
-
       syslist: this.apiSvc.getCodeLookup('sys'),
       agslist: this.apiSvc.getCodeLookup('ags'),
       userlist: this.apiSvc.getdata('logininfo'),
@@ -221,50 +212,68 @@ export class projectplmComponent implements OnInit {
       this.syslist = syslist;
       this.agslist = agslist;
       this.userlist = userlist;
-      this.crmlist = crmlist
-      this.weeklist = weeklist
-      this.cuslist.map(e => {
-        e['crm'] = this.crmlist.find(x => x.code == e.industry_crm)?.description
-      })
-      this.apiSvc.getdata('projectplm')
-        .pipe(
-          tap((data: any[]) => {
-            data.map(e => {
-              var customer = this.cuslist.find(x => x.id == e.customer_id);
-              var ags = this.agslist.find(x => x.code == e.ags_status);
-              
-              e['customer'] = customer
-              e['contact'] = customer.contact
-              e['telephone'] = customer.telephone
-              e['existing_plm'] = customer.existing_plm
-              e['existing_cad'] = customer.existing_cad
-              e['sys'] = this.syslist.find(x => x.code == e.system_inquiry_channel)?.description;
-              e['ags'] = ags
-              e['ags_description'] = ags?.description;
-              e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
-              e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
-              e['button'] = [{ name: '編輯週報', type: 'weekly_report' }]
-              
-              var week = this.weeklist.filter(x => x.project_id == e.id);
-              e['week'] = week.sort((a, b) => {
-                if (a.year !== b.year) {
-                  return a.year - b.year; // 先比年份 (由小到大)
-                }
-                return a.week - b.week;   // 年份相同再比週數 (由小到大)
-              });
-              const found = week?.find(e => e.year == this.year && e.week == this.week);
-              e['this_week'] = found ? [found] : []; // 強制轉成陣列格式，方便 HTML 統一處理
-            });
-            this.projectplm = data;
-            console.log(data)
-            this.dataSource = new MatTableDataSource<any>(data);
-            this.loaded = true;
+      this.crmlist = crmlist;
+      this.weeklist = weeklist;
 
-          })
-        )
-        .subscribe();
+      // 1. 找出所有週別標籤
+      const weekSet = new Set<string>();
+      this.weeklist.forEach(w => weekSet.add(`${w.year}/W${w.week}`));
+      const sortedWeeks = Array.from(weekSet).sort();
+
+      // 2. 建立動態欄位
+      const dynamicWeekColumns = sortedWeeks.map(weekKey => ({
+        name: `dyn_week_${weekKey}`, 
+        displayName: weekKey,
+        width: 200,
+        templateRef: 'dynamic_week_content'
+      }));
+      const cleanBase = (this.base_columns && this.base_columns.length > 0) 
+                  ? this.base_columns 
+                  : this.table_config.columns.filter(c => !c.name.startsWith('dyn_week_') && c.name !== 'week');
+
+// 2. 重新賦值 (重新宣告一個新的物件，確保引用改變)
+const updatedConfig = {
+  ...this.table_config,
+  columns: [...cleanBase, ...dynamicWeekColumns] // 永遠用乾淨的底來加動態欄位
+};
+
+this.table_config = updatedConfig;
+// ...
+
+      // 4. 抓取主資料
+      this.apiSvc.getdata('projectplm').subscribe((data: any[]) => {
+        data.forEach(e => {
+          const customer = this.cuslist.find(x => x.id == e.customer_id);
+          const ags = this.agslist.find(x => x.code == e.ags_status);
+          
+          e['customer'] = customer;
+          e['contact'] = customer?.contact;
+          e['telephone'] = customer?.telephone;
+          e['email'] = customer?.email;
+          e['existing_plm'] = customer?.existing_plm;
+          e['existing_cad'] = customer?.existing_cad;
+          e['sys'] = this.syslist.find(x => x.code == e.system_inquiry_channel)?.description;
+          e['ags'] = ags;
+          e['ags_description'] = ags?.description;
+          e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
+          e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
+          e['button'] = [{ name: '編輯週報', type: 'weekly_report' }];
+          
+          // 關鍵：將週報資料過濾出來，供 getProjectWeekContent 比對
+          e['week_data'] = this.weeklist.filter(x => x.project_id == e.id);
+          const foundThisWeek = e['week_data'].find(w => w.year == this.year && w.week == this.week);
+          e['this_week'] = foundThisWeek ? [foundThisWeek] : [];
+        });
+
+        this.projectplm = data;
+        this.dataSource = new MatTableDataSource<any>(data);
+        this.loaded = true;
+        this.tableReady = true; // 資料與欄位都準備好了，再顯示 Table
+      });
     });
   }
+
+
   handleTableAction(event: { btn: any, row: any }) {
     if (event.btn.type === 'weekly_report') {
       // 開啟週報 Modal，沿用您的 windowClass 與 backdrop 設定

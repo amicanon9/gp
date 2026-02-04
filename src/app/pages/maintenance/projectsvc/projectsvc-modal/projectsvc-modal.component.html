@@ -1,0 +1,124 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    
+    <div style="padding-left: 1%"> <h2>專案基本資訊</h2> </div>
+    <div class="row">
+       <div class="col-md-6 form-group" *ngIf="formGroup.get('id')?.value">
+        <div class="form-name">
+          <label>專案ID</label>
+        </div>
+        <div class="form-input">
+          <span class="form-control-plaintext">
+            {{ formGroup.get('id')?.value }}
+          </span>
+          
+          <input type="hidden" formControlName="id">
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="project_name">專案名稱</label></div>
+        <div class="form-input">
+          <input type="text" id="project_name" formControlName="project_name" [class.invalid]="isError('project_name')" />
+          <small class="text-danger" *ngIf="errorType('project_name', 'required')">*必填</small>
+        </div>
+      </div>
+     
+       <div class="col-md-6 form-group">
+        <div class="form-name"><label for="project_manager_id">專案經理</label></div>
+        <div class="form-input">
+          <ng-select id="project_manager_id" [items]="userlist" bindValue="id" bindLabel="username" 
+            [clearable]="true" formControlName="project_manager_id" [class.invalid]="isError('project_manager_id')">
+          </ng-select>
+          <small class="text-danger" *ngIf="errorType('project_manager_id', 'required')">*必選</small>
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="contract_amount">合約價格</label></div>
+        <div class="form-input">
+          <input type="number" id="contract_amount" formControlName="contract_amount" placeholder="0.00" />
+        </div>
+      </div>
+     
+      <div class="col-md-12 form-group">
+         <div >
+            <label style="padding-left: 10px;"  for="description">專案團隊</label>
+            <lib-multi-select [pureValue]="false" [dataSource]="userlist" [valueProperty]="'id'" [textProperty]="'username'"
+              formControlName="team_members">
+            </lib-multi-select>
+          </div>
+
+      </div>
+    </div>
+
+    <div style="padding-left: 1%"> <h2>專案執行數據</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="planned_days">計畫人天</label></div>
+        <div class="form-input">
+          <input type="number" id="planned_days" formControlName="planned_days" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="actual_days">實際人天</label></div>
+        <div class="form-input">
+          <input type="number" id="actual_days" formControlName="actual_days" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="margin_percentage">專案利潤(%)</label></div>
+        <div class="form-input">
+          <input type="number" id="margin_percentage" formControlName="margin_percentage" placeholder="例如: 35" />
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-left: 1%"> <h2>專案里程碑(完成日期  )</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="sow_signed_date">SOW 簽約日</label></div>
+        <div class="form-input"><input type="date" id="sow_signed_date" formControlName="sow_signed_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="kickoff_date">Kick off</label></div>
+        <div class="form-input"><input type="date" id="kickoff_date" formControlName="kickoff_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="access_date">Access</label></div>
+        <div class="form-input"><input type="date" id="access_date" formControlName="access_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="define_date">Define</label></div>
+        <div class="form-input"><input type="date" id="define_date" formControlName="define_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="design_date">Design</label></div>
+        <div class="form-input"><input type="date" id="design_date" formControlName="design_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="uat_date">UAT</label></div>
+        <div class="form-input"><input type="date" id="uat_date" formControlName="uat_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="go_live_date">系統上線日</label></div>
+        <div class="form-input"><input type="date" id="go_live_date" formControlName="go_live_date" /></div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="rollout_date">Rollout</label></div>
+        <div class="form-input"><input type="date" id="rollout_date" formControlName="rollout_date" /></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid">確認</button>
+</div>

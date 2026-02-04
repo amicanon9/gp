@@ -59,6 +59,11 @@ import { departmentsComponent } from 'app/pages/manage/departments/departments.c
 import { departmentsModalComponent } from 'app/pages/manage/departments/departments-modal/departments-modal.component';
 import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
 import { ProjectInternalModalComponent } from 'app/pages/maintenance/projectinternal/projectinternal-modal/projectinternal-modal.component';
+import { projectsvcModalComponent } from 'app/pages/maintenance/projectsvc/projectsvc-modal/projectsvc-modal.component';
+import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc.component';
+import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
+import { taskmasterModalComponent } from 'app/pages/maintenance/taskmaster/taskmaster-modal/taskmaster-modal.component';
+import { ImageDialogComponent } from 'app/_components/image-dialog/image-dialog.component';
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -114,6 +119,8 @@ export const TW_FORMATS = {
     PspowernoinfoModalComponent,
     projectplmComponent,
     projectplmModalComponent,
+    projectsvcComponent,
+    projectsvcModalComponent,
     customerplmComponent,
     customerplmModalComponent,
     weeklyreportplmModalComponent,
@@ -133,7 +140,10 @@ export const TW_FORMATS = {
     ChangePasswordModalComponent,
     MultiSelectComponent,
     FileUploadComponent,
-    FeemaskComponent
+    ImageDialogComponent,
+    FeemaskComponent,
+    taskmasterComponent,
+    taskmasterModalComponent
   ],
   exports:[
     MultiSelectComponent,

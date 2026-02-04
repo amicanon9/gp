@@ -69,24 +69,24 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     if (this.timer) clearInterval(this.timer);
   }
   onLeaveTypeChange() {
-  // 檢查選中的值是否為 '其他'
-  if (this.applyData.leave_type === '其他') {
-    this.isOtherSelected = true;
-    // 先清空 leave_type，讓使用者接下來輸入的東西成為最終值
-    this.applyData.leave_type = ''; 
-  } else {
-    this.isOtherSelected = false;
-    this.customLeaveName = '';
-  }
-  
-  if (this.onTimeChange) {
-    this.onTimeChange();
-  }
-}
+    // 檢查選中的值是否為 '其他'
+    if (this.applyData.leave_type === '其他') {
+      this.isOtherSelected = true;
+      // 先清空 leave_type，讓使用者接下來輸入的東西成為最終值
+      this.applyData.leave_type = '';
+    } else {
+      this.isOtherSelected = false;
+      this.customLeaveName = '';
+    }
 
-updateOtherValue() {
-  this.applyData.leave_type = this.customLeaveName;
-}
+    if (this.onTimeChange) {
+      this.onTimeChange();
+    }
+  }
+
+  updateOtherValue() {
+    this.applyData.leave_type = this.customLeaveName;
+  }
   calculateLaborLawQuota(joinedDate: Date): number {
     const today = new Date();
 
@@ -157,41 +157,33 @@ updateOtherValue() {
       }
     });
   }
-  // 抽取成獨立方法，方便重新載入時呼叫
+  // 4. 請假與打卡狀態判定邏輯
   processLeaveDates(history: any[]) {
     this.approvedLeaves.clear();
     this.pendingLeaves.clear();
     history.forEach(item => {
-      const dateStr = new Date(item.start_time).toDateString(); // 以開始日期為準
-      if (item.status === 'Approved') {
-        this.approvedLeaves.add(dateStr);
-      } else if (item.status === 'Pending') {
-        this.pendingLeaves.add(dateStr);
+      let start = new Date(item.start_time);
+      let end = new Date(item.end_time);
+      let current = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      let endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      while (current <= endDate) {
+        const dateStr = current.toDateString();
+        if (item.status === 'Approved') this.approvedLeaves.add(dateStr);
+        else if (item.status === 'Pending') this.pendingLeaves.add(dateStr);
+        current.setDate(current.getDate() + 1);
       }
     });
   }
-
-  // 修正後的 dateClass
   dateClass = (d: any): string => {
     if (!d) return '';
     const date = (d instanceof Date) ? d : new Date(d);
     if (isNaN(date.getTime())) return '';
-
     const dateStr = date.toDateString();
-
-    // 優先權判斷：已核准(紫色) > 待審核(黃色) > 已打卡(圓點/綠色)
-    if (this.approvedLeaves.has(dateStr)) {
-      return 'leave-approved-date'; // 紫色
-    }
-    if (this.pendingLeaves.has(dateStr)) {
-      return 'leave-pending-date'; // 黃色
-    }
-    if (this.checkedInDates.has(dateStr)) {
-      return 'has-checkin-date';
-    }
+    if (this.approvedLeaves.has(dateStr)) return 'leave-approved-date';
+    if (this.pendingLeaves.has(dateStr)) return 'leave-pending-date';
+    if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
     return '';
   };
-
   // getHistory 也要記得更新 Set
   getHistory() {
     this.apiSvc.getdatabyid('LeaveApplications', this.authSvc.state.user_id).subscribe(res => {
@@ -202,6 +194,7 @@ updateOtherValue() {
   }
   // 計算年資
   calculateSeniority(joinedDate: Date) {
+    console.log(joinedDate)
     const today = new Date();
     let years = today.getFullYear() - joinedDate.getFullYear();
     let months = today.getMonth() - joinedDate.getMonth();

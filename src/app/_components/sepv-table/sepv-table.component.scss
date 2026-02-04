@@ -68,7 +68,19 @@
   }
 
 }
+.names-container {
+  display: flex;       /* 讓子元素橫向排列 */
+  flex-wrap: wrap;    /* 如果名字太多，自動折行 */
+  gap: 5px;           /* 每個名字之間的間距 */
+}
 
+.item-tag {
+  background-color: #e9ecef;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap; /* 確保名字本身不會因為空格被切斷 */
+  font-size: 12px;
+}
 
 .hidden {
   display: none;

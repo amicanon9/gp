@@ -1,20 +1,27 @@
 <div class="modal-header">
   <h1 class="modal-title">{{ title }}</h1>
-  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+  <button type="button" class="close" aria-label="Close" (click)='modal.dismiss("Cross Click")'>
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
 
 <div class="modal-body">
   <div class="form" [formGroup]="formGroup">
-    
+
     <div style="padding-left: 1%"><h2>基本資訊</h2></div>
     <div class="row">
+      <div class="col-md-12 form-group" *ngIf="formGroup.get('id')?.value > 0">
+        <div class="form-name"><label>客戶 ID</label></div>
+        <div class="form-input">
+          <span class="form-control-plaintext fw-bold text-primary">{{ formGroup.get('id')?.value }}</span>
+        </div>
+      </div>
+
       <div class="col-md-6 form-group">
         <div class="form-name"><label for="name">客戶名稱</label></div>
         <div class="form-input">
           <input type="text" id="name" formControlName="name" [class.invalid]="isError('name')" />
-          <small class="text-danger" *ngIf="errorType('name', 'required')">*必填</small>
+          <small class="text-danger" *ngIf='errorType("name", "required")'>*必填</small>
         </div>
       </div>
       <div class="col-md-6 form-group">
@@ -27,7 +34,7 @@
         <div class="form-name"><label for="industry_crm">產業別 CRM</label></div>
         <div class="form-input">
           <ng-select id="industry_crm" [items]="crmlist" bindValue="code" bindLabel="description" [clearable]="true"
-            formControlName="industry_crm" [class.invalid]="isError('industry_crm')" [notFoundText]="'查無資料'"  >
+            formControlName="industry_crm" [class.invalid]="isError('industry_crm')" [notFoundText]="'查無資料'">
           </ng-select>
         </div>
       </div>
@@ -56,58 +63,33 @@
     </div>
 
     <div style="padding-left: 1%"><h2>聯絡資訊</h2></div>
-    <div class="row">
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="contact">主要聯絡人</label></div>
-        <div class="form-input"><input type="text" id="contact" formControlName="contact" /></div>
+    <div class="row mb-2" style="border-bottom: 1px solid #eee; padding-bottom: 10px;" *ngFor="let i of [1,2,3,4,5]">
+      <div class="col-md-4 form-group">
+        <div class="form-name"><label>{{ i === 1 ? '主要聯絡人' : '聯絡人 ' + i }}</label></div>
+        <div class="form-input">
+          <input type="text" [formControlName]="i === 1 ? 'contact' : 'contact' + i" placeholder="姓名" />
+        </div>
       </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="telephone">聯絡資訊</label></div>
-        <div class="form-input"><input type="text" id="telephone" formControlName="telephone" /></div>
+      <div class="col-md-4 form-group">
+        <div class="form-name"><label>聯絡電話</label></div>
+        <div class="form-input">
+          <input type="text" [formControlName]="i === 1 ? 'telephone' : 'telephone' + i" placeholder="電話/分機" />
+        </div>
       </div>
-      
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="contact2">聯絡人 2</label></div>
-        <div class="form-input"><input type="text" id="contact2" formControlName="contact2" /></div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="telephone2">聯絡資訊 2</label></div>
-        <div class="form-input"><input type="text" id="telephone2" formControlName="telephone2" /></div>
-      </div>
-
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="contact3">聯絡人 3</label></div>
-        <div class="form-input"><input type="text" id="contact3" formControlName="contact3" /></div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="telephone3">聯絡資訊 3</label></div>
-        <div class="form-input"><input type="text" id="telephone3" formControlName="telephone3" /></div>
-      </div>
-
-       <div class="col-md-6 form-group">
-        <div class="form-name"><label for="contact4">聯絡人 4</label></div>
-        <div class="form-input"><input type="text" id="contact4" formControlName="contact4" /></div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="telephone4">聯絡資訊 4</label></div>
-        <div class="form-input"><input type="text" id="telephone4" formControlName="telephone4" /></div>
-      </div>
-
-       <div class="col-md-6 form-group">
-        <div class="form-name"><label for="contact5">聯絡人 5</label></div>
-        <div class="form-input"><input type="text" id="contact5" formControlName="contact5" /></div>
-      </div>
-      <div class="col-md-6 form-group">
-        <div class="form-name"><label for="telephone5">聯絡資訊 5</label></div>
-        <div class="form-input"><input type="text" id="telephone5" formControlName="telephone5" /></div>
+      <div class="col-md-4 form-group">
+        <div class="form-name"><label>Email</label></div>
+        <div class="form-input">
+          <input type="email" [formControlName]="i === 1 ? 'email' : 'email' + i" placeholder="example@mail.com" />
+          <small class="text-danger" *ngIf='errorType(i === 1 ? "email" : "email" + i, "email")'>格式錯誤</small>
+        </div>
       </div>
     </div>
 
     <div style="padding-left: 1%"><h2>其他說明</h2></div>
     <div class="row">
       <div class="col-md-12 form-group">
-        <div  >
-          <textarea style="width: 100%;" id="description"  formControlName="description" rows="3"></textarea>
+        <div>
+          <textarea style="width: 100%;" id="description" formControlName="description" rows="3"></textarea>
         </div>
       </div>
     </div>
@@ -116,6 +98,6 @@
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+  <button type="button" class="btn btn-cancel" (click)='modal.dismiss("cancel click")'>取消</button>
   <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
 </div>

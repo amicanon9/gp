@@ -1,78 +1,82 @@
-<div >
-  <mat-card style="width: 100%;">
-    <mat-card-content>
+<mat-card class="file-upload-card shadow-none border">
+  <mat-card-content>
+    <div class="header-info mb-3">
+      <mat-chip-listbox>
+        <mat-chip color="primary" selected>{{category | uppercase}} 附件清單</mat-chip>
+      </mat-chip-listbox>
+    </div>
 
-      <div class="col-md-12">
-        <div class="card card-plain">
-          <div class="form-group">
-            <div class="form-name" style="width: 25%;font-weight: bold;">
-              目前版本 :
-            </div>
-            <div class="form-input" style="width: 20%;padding-left: 0%;">
-              <ng-select [clearable]="false" [searchable]="false" *ngIf="true" [(ngModel)]="version" (change)="onchange()">
-                <ng-option *ngFor="let data of versions" value={{data}}>{{data}}</ng-option>
-              </ng-select>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive" style="overflow-x: auto;height:200px">
-              <table class="table" *ngIf="this.cloudfiles">
-                <thead class=" text-primary">
-                  <th class="col-md-5" >檔案名稱</th>
-                  <th class="col-md-2" >上傳日期</th>
-                  <th class="col-md-2 text-center">下載/刪除</th>
-                  <th class="col-md-3 text-right">檔案大小</th>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let data of cloudfiles;let index=index">
-                    <td>
-                      <span matTooltip={{data.name}}>{{(data.name.length>28)? (data.name | slice:0:28)+'..':(data.name)}}</span>
-                    </td>
-                    <td>
-                      <span>{{data.createTime | date:'yyyy-MM-dd'}}</span>
-                    </td>
-                    <td class="text-center">
-                      <mat-icon style="cursor: pointer;color:#37abf8" (click)="download(data.name)">cloud_download</mat-icon>
-                      /
-                      <mat-icon style="cursor: pointer;color:#ef8157" (click)="delete(data.name)">delete</mat-icon>
-                    </td>
-                    <td class="text-right">{{data.size/1024|number:'0.1-1'}}KB</td>
-                  </tr>
-                  <ng-container *ngFor="let data of files;let index=index">
-                  <tr *ngIf="data.progress!=100">
-                    <td>
-                      <mat-icon color="accent" (click)="cancel(index)" style="cursor: pointer" *ngIf="data.progress!=100">clear</mat-icon>
-                      {{(data.files.name.length>28)? (data.files.name | slice:0:28)+'..':(data.files.name)}}
-                    </td>
-                    <td class="text-center">
-                      <!-- <mat-icon style="color:#35d826" *ngIf="data.progress==100">cloud_done</mat-icon> -->
-                      <mat-progress-bar [value]="data.progress" *ngIf="data.progress!=100"></mat-progress-bar>
-                    </td>
-                    <td class="text-right">{{data.files.size/1024|number:'0.1-1'}}KB</td>
-                  </tr>
-                  </ng-container>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+      <table class="table align-middle">
+        <thead class="bg-light sticky-top">
+          <tr>
+            <th style="width: 80px;">預覽</th>
+            <th>檔案名稱</th>
+            <th class="text-center">操作</th>
+            <th class="text-right">大小</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of cloudfiles">
+            <td>
+              <div class="preview-box">
+                <img *ngIf="isImage(data.name)" [src]="getCloudPreview(data.name)" 
+                     class="img-thumbnail preview-img" (click)="download(data.name)">
+                <mat-icon *ngIf="!isImage(data.name)" color="disabled" class="file-icon">insert_drive_file</mat-icon>
+              </div>
+            </td>
+            <td>
+              <div class="file-name-text" [matTooltip]="data.name">{{data.name}}</div>
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="primary" (click)="download(data.name)" matTooltip="下載">
+                <mat-icon>cloud_download</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="delete(data.name)" matTooltip="刪除">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+            <td class="text-right text-muted small">{{data.size/1024 | number:'0.1-1'}} KB</td>
+          </tr>
+
+          <tr *ngFor="let item of files; let i = index" class="table-warning">
+            <td>
+              <div class="preview-box">
+                <img *ngIf="item.preview" [src]="item.preview" class="img-thumbnail preview-img">
+                <mat-icon *ngIf="!item.preview" color="accent" class="file-icon">attach_file</mat-icon>
+              </div>
+            </td>
+            <td>
+              <div class="file-name-text text-truncate">{{item.file.name}}</div>
+              <mat-progress-bar mode="determinate" [value]="item.progress" *ngIf="item.inProgress"></mat-progress-bar>
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="accent" (click)="cancelSelection(i)" *ngIf="!item.inProgress">
+                <mat-icon>cancel</mat-icon>
+              </button>
+              <span *ngIf="item.inProgress" class="small text-primary">{{item.progress}}%</span>
+            </td>
+            <td class="text-right text-muted small">{{item.file.size/1024 | number:'0.1-1'}} KB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card-content>
+
+  <mat-card-actions class="p-3 border-top bg-light">
+    <div class="row g-2 w-100 m-0">
+      <div class="col-6">
+        <button mat-stroked-button color="primary" class="w-100 py-1" (click)="onClick()">
+          <mat-icon>add_photo_alternate</mat-icon> 選擇檔案
+        </button>
       </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <div class="row" >
-        <div class="col-md-6">
-          <button mat-button color="primary" (click)="onClick()" style="width: 100%;">
-            <mat-icon>tab_unselected</mat-icon>
-            選擇檔案
-          </button>
-        </div>
-        <div class="col-md-6">
-          <button mat-button color="warn" (click)="uploadFiles()" style="width: 100%;">
-            <mat-icon>file_upload</mat-icon>
-            上傳檔案
-          </button>
-        </div>
+      <div class="col-6">
+        <button mat-raised-button color="warn" class="w-100 py-1" (click)="uploadFiles()" [disabled]="files.length === 0">
+          <mat-icon>cloud_upload</mat-icon> 開始上傳
+        </button>
       </div>
-    </mat-card-actions>
-  </mat-card><input type="file" #fileUpload id="fileUpload" name="fileUpload" multiple="multiple" accept="image/png,image/jpg,.doc, .docx,.pdf,.xlsx" style="display:none;" />
-</div>
+    </div>
+  </mat-card-actions>
+</mat-card>
+
+<input type="file" #fileUpload multiple style="display:none;" accept="image/*,.pdf,.doc,.docx,.xlsx" />

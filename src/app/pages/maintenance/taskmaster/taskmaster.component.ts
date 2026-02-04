@@ -11,17 +11,17 @@ import { DroplistService } from 'app/_services/droplist.service';
 import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { SignalrService } from 'app/_services/signalr.service';
-import { customerplmModalComponent } from './customerplm-modal/customerplm-modal.component';
+import { taskmasterModalComponent } from './taskmaster-modal/taskmaster-modal.component';
 import { ActivatedRoute, Router } from '@angular/router';
 @Component({
-  selector: 'sepvdb-customerplm',
-  templateUrl: './customerplm.component.html',
-  styleUrls: ['./customerplm.component.scss']
+  selector: 'sepvdb-taskmaster',
+  templateUrl: './taskmaster.component.html',
+  styleUrls: ['./taskmaster.component.scss']
 })
 
 
 
-export class customerplmComponent implements OnInit {
+export class taskmasterComponent implements OnInit {
   search: string;
   data: any;
   stype: any={
@@ -31,7 +31,7 @@ export class customerplmComponent implements OnInit {
     display_name:'ps_name'
   };
   stype_filter: string="";
-  customerplm: any;
+  taskmaster: any;
   infolist:any;
  table_config: any = {
     checkable: true,
@@ -42,26 +42,13 @@ export class customerplmComponent implements OnInit {
       disableClear: true
     },
   columns: [
-    // 1. 基本資訊
-    { name: 'name', displayName: '客戶名稱', width: 200 },
-    { name: 'tax_id_no', displayName: '統一編號', width: 120 },
-    { name: 'crm', displayName: '產業別 CRM', width: 150 },
-    
-    // 2. 聯絡資訊 (顯示主要聯絡人)
-    { name: 'contact', displayName: '聯絡人', width: 120 },
-    { name: 'telephone', displayName: '電話', width: 150 },
-    { name: 'email', displayName: 'Email', width: 200 },
-    // 3. 技術現況
-    { name: 'existing_plm', displayName: '現有 PLM', width: 150 },
-    { name: 'existing_cad', displayName: '現有 CAD', width: 150 },
-    
-    // 4. 其他敘述
-    { name: 'decision_level', displayName: '決策層級', width: 120 },
-    { name: 'description', displayName: '備註說明', width: 250 },
-
-    // 5. 操作
-    { name: 'detail', displayName: '資料維護', templateRef: 'detail', width: 100 },
-  ]
+      { name: 'task_name', displayName: '任務名稱', width: 250 },
+      { name: 'category', displayName: '類別', width: 120 }, // 程式、美工
+      { name: 'priority', displayName: '優先度', width: 100 }, // 一般、緊急
+      { name: 'status', displayName: '狀態', width: 120 },   // 待辦、測試、審核、完成
+      { name: 'close_date', displayName: '預計完成', width: 150, type: 'date' },
+      { name: 'description', displayName: '描述', width: 300 },
+    ]
   };
   dataSource!: MatTableDataSource<any>;
   subs: any;
@@ -73,8 +60,6 @@ export class customerplmComponent implements OnInit {
   loaded = false;
   @ViewChild("xlsx", { static: false })
   xlsx: ElementRef;
-  cuslist: any;
-  crmlist: any;
   select_id:any;
 
   constructor(
@@ -98,7 +83,7 @@ export class customerplmComponent implements OnInit {
     await this.signalRSvc.StartConnection();
 
     // 使用具名函式，方便之後取消監聽
-    this.signalRSvc.Hub.on('customerplm', this.refreshData);
+    this.signalRSvc.Hub.on('taskmaster', this.refreshData);
 
     this.loadData();
   } catch (err) {
@@ -121,12 +106,11 @@ ngOnDestroy() {
     this.selected = $event;
   }
  onAdd() {
-    const modalRef = this.modalSvc.open(customerplmModalComponent, { windowClass: "modal-mySize", backdrop: 'static' });
+    const modalRef = this.modalSvc.open(taskmasterModalComponent, { windowClass: "modal-mySize", backdrop: 'static' });
     modalRef.componentInstance.title = "新增";
     // 傳送必要清單到 Modal
-    modalRef.componentInstance.crmlist = JSON.parse(JSON.stringify(this.crmlist));
     modalRef.result.then((res: any) => {
-      this.apiSvc.createdata('customerplm',res).pipe(
+      this.apiSvc.createdata('taskmaster',res).pipe(
         catchError(err => {
           this.showErrorToast('新增失敗');
           return throwError(err);
@@ -137,13 +121,12 @@ ngOnDestroy() {
 
   onEdit() {
     if (!this.selected) return;
-    const modalRef = this.modalSvc.open(customerplmModalComponent, { windowClass: 'modal-mySize', backdrop: 'static' });
+    const modalRef = this.modalSvc.open(taskmasterModalComponent, { windowClass: 'modal-mySize', backdrop: 'static' });
     modalRef.componentInstance.title = "編輯";
     modalRef.componentInstance.formData = JSON.parse(JSON.stringify(this.selected));
-    modalRef.componentInstance.crmlist = JSON.parse(JSON.stringify(this.crmlist));
 
     modalRef.result.then((res: any) => {
-      this.apiSvc.updatedata('customerplm',this.selected.id, res).pipe(
+      this.apiSvc.updatedata('taskmaster',this.selected.id, res).pipe(
         catchError(err => {
           this.showErrorToast('編輯失敗');
           return throwError(err);
@@ -160,7 +143,7 @@ ngOnDestroy() {
       horizontalPosition: 'center',
     });
     ref.onAction().subscribe(() => {
-      this.apiSvc.deletedata('customerplm',this.selected.id).pipe(
+      this.apiSvc.deletedata('taskmaster',this.selected.id).pipe(
         catchError(err => {
           this.showErrorToast('刪除失敗，請檢查關聯資料');
           return throwError(err);
@@ -174,25 +157,19 @@ ngOnDestroy() {
     this.loadData()
   }
 loadData() {
-  forkJoin({
-    crmlist : this.apiSvc.getCodeLookup('crm')
-  }).subscribe(({ crmlist}) => {
-    this.crmlist = crmlist
-    this.apiSvc.getdata('customerplm')
+  this.apiSvc.getdata('taskmaster')
       .pipe(
         tap((data: any[]) => {
    
            data.map(e => {
-            e['crm']=this.crmlist.find(x=>x.code==e.industry_crm)?.description;
           });
-          this.customerplm = data;
+          this.taskmaster = data;
           this.dataSource = new MatTableDataSource<any>(data);
           this.loaded = true;
           
         })
       )
       .subscribe();
-  });
 }
 private showSuccessToast(msg: string) {
     this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {

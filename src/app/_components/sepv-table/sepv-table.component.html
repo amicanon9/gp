@@ -52,6 +52,12 @@
               <i class="nc-icon nc-check-2" *ngIf="element[column.name]==true"></i>
             </div>
           </ng-container>
+            <ng-container *ngSwitchCase="'users'">
+              <div [style.width.px]="column.width">
+                <span class="item" *ngFor="let data of element[column.name]">{{data.username}}</span>
+              </div>
+              
+            </ng-container>
           <ng-container *ngSwitchCase="'roles'">
             <span class="item" *ngFor="let role of element[column.name]">{{role.role_name}}</span>
           </ng-container>
@@ -134,6 +140,27 @@
               <ng-template #noWeek><span class="text-muted">-</span></ng-template>
             </div>
           </ng-container>
+          <ng-container [ngSwitch]="column.templateRef!=undefined ? column.templateRef : 'base'">
+  
+          <ng-container *ngSwitchCase="'dynamic_week_content'">
+            <div class="week-cell-wrapper" [style.width.px]="column.width" >
+              <ng-container *ngIf="getProjectWeekContent(element.week_data, column.displayName) as w; else noWeek">
+                <div [ngStyle]="{
+                 'background-color': 
+                    w.ags_status === 'A6' ? '#6c757d' : 
+                    w.ags_status === 'A5' ? '#adb5bd' : 
+                    w.ags_status === 'A4' ? '#90ee90' : '#e9ecef',
+                 'color': (w.ags_status === 'A5' || w.ags_status === 'A6') ? '#fff' : '#000'
+               }" class="week-text-item text-left" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline" style="border-radius: 5px;">
+                
+                  <span class="week-content-text" style="margin-left: -5px;">{{ w.content }}</span>
+                </div>
+              </ng-container>
+              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
+            </div>
+          </ng-container>
+
+  </ng-container>
         </ng-container>
       </td>
     </ng-container>

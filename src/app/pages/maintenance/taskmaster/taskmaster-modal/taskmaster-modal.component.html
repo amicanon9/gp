@@ -1,0 +1,83 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" (click)='modal.dismiss()'>
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    
+    <div style="padding-left: 1%"><h2>任務資訊</h2></div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="task_name">任務名稱</label></div>
+        <div class="form-input">
+          <input type="text" id="task_name" formControlName="task_name" [class.invalid]="isError('task_name')" />
+          <small class="text-danger" *ngIf='errorType("task_name", "required")'>*必填</small>
+        </div>
+      </div>
+
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>類別</label></div>
+        <div class="form-input">
+          <ng-select [items]="categories" formControlName="category" [clearable]="false"></ng-select>
+        </div>
+      </div>
+
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>優先度</label></div>
+        <div class="form-input">
+          <ng-select [items]="priorities" formControlName="priority" [clearable]="false"></ng-select>
+        </div>
+      </div>
+
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>狀態</label></div>
+        <div class="form-input">
+          <ng-select [items]="statuses" formControlName="status" [clearable]="false"></ng-select>
+        </div>
+      </div>
+
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label>預計完成日</label></div>
+        <div class="form-input">
+          <input type="date" formControlName="close_date" />
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-left: 1%"><h2>任務描述</h2></div>
+    <div class="row">
+      <div class="col-md-12 form-group">
+        <textarea style="width: 100%;border-radius: 5px;margin-left: 5px;margin-right: 5px;" formControlName="description" rows="3" placeholder="請輸入任務詳細說明..."></textarea>
+      </div>
+    </div>
+
+   <div *ngIf="formGroup.get('id')?.value > 0">
+  <hr class="my-4">
+  <div style="padding-left: 1%; display: flex; align-items: center;">
+    <mat-icon color="primary" style="margin-right: 8px;">collections</mat-icon>
+    <h2 style="margin: 0;">任務附件與圖片管理</h2>
+  </div>
+  
+  <div class="row mt-3">
+    <div class="col-md-12">
+      <app-image-dialog 
+        [id]="formGroup.get('id')?.value" 
+        controllerName="TaskMaster" 
+        category="task">
+      </app-image-dialog>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)='modal.dismiss()'>取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">
+    儲存變更
+  </button>
+</div>

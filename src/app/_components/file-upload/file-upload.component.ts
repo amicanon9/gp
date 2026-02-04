@@ -1,11 +1,12 @@
 import { ApiService } from 'app/_services/api.service';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { catchError, finalize, map } from 'rxjs/operators';
-import { HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
+import { catchError, map } from 'rxjs/operators';
+import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of, pipe } from 'rxjs';
-import { isRegularExpressionLiteral } from 'typescript';
+import { of } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { environment } from 'environments/environment';
 
 @Component({
   selector: 'file-upload',
@@ -13,162 +14,125 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./file-upload.component.scss']
 })
 export class FileUploadComponent implements OnInit {
-  @ViewChild("fileUpload", { static: false })
-  fileUpload: ElementRef;
-  files = [];
-  @Input() pi_number: number;
-  data: any;
-  version: string;
-  versions = Array.from(Array(26)).map((e, i) => i + 65).map(x => String.fromCharCode(x));
-  cloudfiles: string[];
+  @ViewChild("fileUpload", { static: false }) fileUpload: ElementRef;
+
+  @Input() id: number;              // 關聯 ID
+  @Input() controllerName: string;  // 如 'TaskMaster'
+  @Input() category: string;        // 如 'task'
+
+  files: any[] = [];       // 待上傳列表
+  cloudfiles: any[] = [];  // 已在雲端的檔案清單
+
   constructor(
     private apiSvc: ApiService,
     private snackbar: MatSnackBar,
     private toastr: ToastrService,
-  ) {
-    this.version = 'A'
-  }
+    private sanitizer: DomSanitizer
+  ) { }
 
   ngOnInit(): void {
     this.onLoad();
   }
-  onLoad() {
-    this.files = [];
-    this.data = {
-      pi_number: this.pi_number,
-      version: this.version
-    }
-    this.apiSvc.getProformaInvoicesFileList(this.data).subscribe(x => {
-      if (x) {
-        this.cloudfiles = x.result
-      }
-    })
-  }
-  onClick() {
-    const fileUpload = this.fileUpload.nativeElement; fileUpload.onchange = () => {
-      for (let index = 0; index < fileUpload.files.length; index++) {
-        const files = fileUpload.files[index];
-        var reader = new FileReader();
 
-        reader.readAsDataURL(files);
-        reader.onload = (event) => {
-          this.files.push({
-            files: files,
-            pi_number: this.pi_number,
-            version: this.version,
-            category: 'pi',
-            inProgress: false,
-            progress: 0,
-          })
-        }
+  onLoad() {
+    if (!this.id || this.id <= 0) return;
+    this.files = [];
+    this.apiSvc.getTaskList(this.controllerName, this.category, this.id).subscribe(x => {
+      this.cloudfiles = x || [];
+    });
+  }
+
+  // 判斷是否為圖片，用來決定要不要顯示縮圖
+  isImage(fileName: string): boolean {
+    if (!fileName) return false;
+    const extensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return extensions.includes(ext!);
+  }
+
+  // 獲取已上傳圖片的預覽 URL (透過 API 下載端點)
+  getCloudPreview(fileName: string): string {
+    return `${environment.apiUrl}/${this.controllerName}/${this.id}/images/${this.category}/${fileName}`;
+  }
+
+  onClick() {
+    const fileUpload = this.fileUpload.nativeElement;
+    fileUpload.onchange = () => {
+      for (let index = 0; index < fileUpload.files.length; index++) {
+        const file = fileUpload.files[index];
+        const previewUrl = file.type.startsWith('image/') 
+          ? this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file)) 
+          : null;
+
+        this.files.push({
+          file: file,
+          preview: previewUrl,
+          progress: 0,
+          inProgress: false
+        });
       }
+      fileUpload.value = '';
     };
     fileUpload.click();
   }
+
   uploadFiles() {
-    this.fileUpload.nativeElement.value = '';
-    this.files.forEach(file => {
-      this.upload(file);
+    this.files.forEach(fileItem => {
+      if (!fileItem.inProgress && fileItem.progress === 0) {
+        this.upload(fileItem);
+      }
     });
   }
-  upload(file) {
-    const formData = new FormData();
-    formData.append('files', file.files);
-    formData.append('pi_number', file.pi_number);
-    formData.append('version', file.version);
-    formData.append('category', 'pi');
-    file.inProgress = true;
-    this.apiSvc.uploadProformaInvoicesFile(formData).pipe(
-      map(event => {
-        switch (event.type) {
-          case HttpEventType.UploadProgress:
-            file.progress = Math.round(event.loaded * 100 / event.total);
 
-            break;
-          case HttpEventType.Response:
-            return event;
+  upload(fileItem: any) {
+    const formData = new FormData();
+    formData.append('files', fileItem.file);
+    fileItem.inProgress = true;
+
+    this.apiSvc.uploadFiles(this.controllerName, this.id, this.category, formData).pipe(
+      map(event => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          fileItem.progress = Math.round(event.loaded * 100 / event.total);
         }
+        return event;
       }),
       catchError((error: HttpErrorResponse) => {
-        if (error.status >= 200 && error.status <= 226) {
-          if (this.files.find(a => a.status == 0) == undefined) {
-            this.snackbar.open('上傳成功。', '確定', { duration: 3000 })
-          }
+        this.snackbar.open('上傳失敗', '確定', { duration: 3000 });
+        fileItem.inProgress = false;
+        fileItem.progress = 0;
+        return of(null);
+      })
+    ).subscribe(result => {
+      if (result && result.type === HttpEventType.Response) {
+        this.toastr.success("檔案上傳成功");
+        this.onLoad();
+      }
+    });
+  }
 
-        } else {
-          this.snackbar.open('上傳失敗，請確認場所地點是否已選擇及網路連線狀態。', '確定', { duration: 3000 })
-          file.progress = 0
-        }
-        return of(`${file.data.name} 上傳失敗`);
-      })).subscribe(x => x ? this.onLoad() : null);
-  }
-  onchange() {
-    this.files = []
-    this.onLoad()
-  }
-  download(name) {
-    this.apiSvc.downloadProformaInvoicesFile({
-      file_name: name,
-      pi_number: this.pi_number,
-      version: this.version
-    }).subscribe(res => {
-      console.log(res.body);
-      const blob = new Blob([res.body], { type: '*' });
+  download(fileName: string) {
+    this.apiSvc.downloadFile(this.controllerName, this.id, this.category, fileName).subscribe(res => {
+      const blob = new Blob([res.body], { type: res.headers.get('Content-Type') });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      document.body.appendChild(a);
-      a.setAttribute('style', 'display: none');
       a.href = url;
-      a.download = name;
+      a.download = fileName;
       a.click();
       window.URL.revokeObjectURL(url);
-      a.remove(); // remove the element
-    })
+    });
   }
-  delete(name) {
-    const ref = this.snackbar.open(`你確定要刪除${name}嗎?`, '確定', { duration: 3000, panelClass: ['alert-danger', 'alert'], });
-    ref.onAction().subscribe(() => {
-      this.apiSvc.deleteProformaInvoicesFile({
-        file_name: name,
-        pi_number: this.pi_number,
-        version: this.version
-      }).pipe(
-        catchError((error: HttpErrorResponse) => {
-          if (error.status == 200) {
 
-          } else {
-            this.snackbar.open('刪除失敗，請確認場所地點是否已選擇及網路連線狀態。', '確定', { duration: 3000 })
-          }
-          return of(`${name} 刪除失敗`);
-        }),
-        finalize(() => {
-          this.onLoad();
-        })
-      ).subscribe((e: any) => {
-        if (e.result == "刪除成功") {
-          this.toastr.success(
-            '<span data-notify="icon" class="nc-icon nc-bell-55"></span><span data-notify="message">' +
-            '刪除成功'
-            + '</span>',
-            "",
-            {
-              timeOut: 3000,
-              closeButton: true,
-              enableHtml: true,
-              toastClass: "alert alert-success alert-with-icon",
-              positionClass: "toast-top-center"
-            }
-          );
-        }
+  delete(fileName: string) {
+    const ref = this.snackbar.open(`確定要刪除 ${fileName} 嗎?`, '確定', { duration: 3000 });
+    ref.onAction().subscribe(() => {
+      this.apiSvc.deleteFile(this.controllerName, this.id, this.category, fileName).subscribe(() => {
+        this.toastr.info("已刪除檔案");
+        this.onLoad();
       });
     });
   }
-  cancel(index) {
+
+  cancelSelection(index: number) {
     this.files.splice(index, 1);
-    const fileUpload = this.fileUpload.nativeElement;
-    fileUpload.value = '';
-    fileUpload.onchange = () => {
-      console.log("HELLO");
-    }
   }
 }

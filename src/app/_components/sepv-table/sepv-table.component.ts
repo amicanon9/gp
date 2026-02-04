@@ -273,4 +273,9 @@ applyFilter(value: string) {
   reverseMap(origin: Map<any, any>){
     return new Map(Array.from(this.translate_table, entry => [entry[1], entry[0]]));
   }
+  // 輔助函式：讓 HTML 根據欄位標題找到對應的週報紀錄
+  getProjectWeekContent(projectWeeks: any[], weekKey: string) {
+    if (!projectWeeks) return null;
+    return projectWeeks.find(w => `${w.year}/W${w.week}` === weekKey);
+  }
 }

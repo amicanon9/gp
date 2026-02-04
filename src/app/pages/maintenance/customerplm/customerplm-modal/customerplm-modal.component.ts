@@ -11,16 +11,32 @@ export class customerplmModalComponent implements OnInit {
   @Input() crmlist: any[] = []; // 改為接收客戶清單
   selected: any = {};
   // 完整的 customerplm 表單定義
-  formGroup = this.fb.group({
+ formGroup = this.fb.group({
   id: [-1],
   name: [null, [Validators.required]],
   tax_id_no: [null],
-  // 聯絡人與電話 1-5
-  contact: [null], telephone: [null],
-  contact2: [null], telephone2: [null],
-  contact3: [null], telephone3: [null],
-  contact4: [null], telephone4: [null],
-  contact5: [null], telephone5: [null],
+  
+  // 聯絡人、電話與新增的 Email 1-5
+  contact: [null], 
+  telephone: [null],
+  email: [null, [Validators.email]], // 第一組 Email 並加上格式驗證
+
+  contact2: [null], 
+  telephone2: [null],
+  email2: [null, [Validators.email]], // 第二組
+
+  contact3: [null], 
+  telephone3: [null],
+  email3: [null, [Validators.email]], // 第三組
+
+  contact4: [null], 
+  telephone4: [null],
+  email4: [null, [Validators.email]], // 第四組
+
+  contact5: [null], 
+  telephone5: [null],
+  email5: [null, [Validators.email]], // 第五組
+
   // 其他資訊
   decision_level: [null],
   industry_crm: [null],

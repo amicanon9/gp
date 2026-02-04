@@ -1,6 +1,6 @@
 import { map } from 'rxjs/operators';
 import { LoginMenus } from './../_models/loginmenus';
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpEvent, HttpParams, HttpRequest } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Currency } from "app/_models/currency";
 import { Invoices } from "app/_models/invoices";
@@ -833,47 +833,32 @@ public deleteContracts(id: string) {
    * @param formData
    * @returns
    */
-  public uploadProformaInvoicesFile(formData: FormData) {
-    return this.http.post(apiUrl + "/proformaInvoices/uploadfile", formData,
-    {
+/// 1. 取得檔案清單
+  getTaskList(controller: string, category: string, id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${apiUrl}/${controller}/${id}/images/${category}`);
+  }
+
+  // 2. 上傳檔案 (支援進度條)
+  uploadFiles(controller: string, id: number, category: string, formData: FormData): Observable<HttpEvent<any>> {
+    const req = new HttpRequest('POST', `${apiUrl}/${controller}/${id}/images/${category}`, formData, {
       reportProgress: true,
-      observe: 'events'
+      responseType: 'json'
+    });
+    return this.http.request(req);
+  }
+
+  // 3. 刪除檔案
+  deleteFile(controller: string, id: number, category: string, fileName: string): Observable<any> {
+    return this.http.delete(`${apiUrl}/${controller}/${id}/images/${category}/${fileName}`);
+  }
+
+  // 4. 下載檔案
+  downloadFile(controller: string, id: number, category: string, fileName: string): Observable<any> {
+    return this.http.get(`${apiUrl}/${controller}/${id}/images/${category}/${fileName}`, {
+      responseType: 'blob',
+      observe: 'response'
     });
   }
-
-  /**
-   * @description
-   * Download specific files
-   *
-   * @param data
-   * @returns
-   */
-  public downloadProformaInvoicesFile(data: {file_name: string, pi_number: number, version: string}) {
-    return this.http.post(apiUrl + "/proformaInvoices/downloadfile", data, { responseType: 'blob', observe: 'response' })
-  }
-
-  /**
-   * @description
-   * Delete specific files
-   *
-   * @param data
-   * @returns
-   */
-  public deleteProformaInvoicesFile(data: {file_name: string, pi_number: number, version: string}) {
-    return this.http.post(apiUrl + "/proformaInvoices/deletefile", data);
-  }
-
-  /**
-   * @description
-   * Get files'name in specific directory
-   *
-   * @param data
-   * @returns
-   */
-  public getProformaInvoicesFileList (data: {pi_number:number, version: string}) {
-    return this.http.post<{result: string[]}>(apiUrl + "/proformaInvoices/getfilelist", data);
-  }
-
   /**
    * @description
    * Get token with correct username and password

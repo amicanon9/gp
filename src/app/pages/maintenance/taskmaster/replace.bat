@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set OLD=customerplm
-set NEW=projectinternal
+set NEW=taskmaster
 
 REM 先改檔案名稱
 for /r %%F in (*%OLD%*) do (

@@ -1,0 +1,53 @@
+<div style="text-align:center; ">
+  <mat-card style=" width: 100%;">
+    <mat-card-content>
+
+<div class="form-group">
+  <div class="row">
+    <div class="col-xl-4" *ngFor="let img of imgURL; let index = index"(click)="showLightbox(index)">
+      <img *ngIf="img" [src]="sanitize(img)" height="200" width="300" style="margin: 3px;"><br>
+      <label id="file-label">
+        {{dataname[index].imgName}}
+      </label>
+      </div>
+    <!-- <img *ngIf="url" [src]="sanitize(url)" height="150" width="200px" style="margin: 3px;"> -->
+    <div class="col-xl-4" *ngFor="let file of files; let index = index"(click)="showLightbox(index+imgURL.length)">
+      <img *ngIf="file.url" [src]="file.url" height="200" width="300" style="margin: 3px;">
+
+      <div style="padding-top: 5px;"><mat-progress-bar *ngIf="file.url" [value]="file.progress"></mat-progress-bar></div>
+      <label id="file-label">
+        {{file.namedate+file.data.name}}
+      </label>
+      <mat-icon color="accent" (click)="cancel(index)"style="cursor: pointer"*ngIf="file.progress!=100">clear</mat-icon>
+      <!-- <div><mat-icon color="accent" (click)="cancel(index)">clear</mat-icon></div> -->
+
+
+
+
+    </div>
+  </div>
+</div>
+
+
+    </mat-card-content>
+    <mat-card-actions>
+      <div class="row" *ngIf="(view!='dispatchConfirm'&&view!='dispatchQuery')">
+        <div class="col-md-6">
+      <button  mat-button color="primary" (click)="onClick()"style="width: 100%;">
+        <mat-icon>tab_unselected</mat-icon>
+        選擇圖片
+      </button>
+      </div>
+      <div class="col-md-6">
+      <button mat-button color="warn" (click)="uploadFiles()" style="width: 100%;">
+        <mat-icon>file_upload</mat-icon>
+        上傳圖片
+      </button>
+      </div>
+      </div>
+    </mat-card-actions>
+  </mat-card><input type="file" #fileUpload id="fileUpload" name="fileUpload" multiple="multiple" accept="image/png,image/jpeg"
+    style="display:none;" />
+</div>
+<ng-image-fullscreen-view [images]="imageObject" [imageIndex]="selectedImageIndex" [show]="showFlag"
+  (close)="closeEventHandler()"[paginationShow]="true"></ng-image-fullscreen-view>

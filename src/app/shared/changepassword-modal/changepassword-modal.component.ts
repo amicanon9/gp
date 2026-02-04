@@ -15,8 +15,8 @@ export class ChangePasswordModalComponent implements OnInit {
   @Input() title: String = '{"ERROR}';
 
   formGroup = this.fb.group({
-    old_password: [null, [Validators.maxLength(30), Validators.pattern('(?=.*[A-Za-z])(?=.*[0-9!@#$%^&]).{8,}')]],
-    new_password: [null, [Validators.maxLength(30), Validators.pattern('(?=.*[A-Za-z])(?=.*[0-9!@#$%^&]).{8,}')]],
+    old_password: [null],
+    new_password: [null],
   });
 
   constructor(

@@ -126,6 +126,7 @@ export class MultiSelectComponent implements OnChanges, ControlValueAccessor {
   }
 
   setItems() {
+    console.log(this.dataSource,this._value)
     if (this.dataSource && this._value) {
       if (this._value) {
         this.items = this.dataSource.filter(a => this._value.indexOf(this.getValue(a)) === -1);
