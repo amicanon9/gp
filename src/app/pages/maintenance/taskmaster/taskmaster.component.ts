@@ -42,14 +42,31 @@ export class taskmasterComponent implements OnInit {
       disableClear: true
     },
   columns: [
-      { name: 'task_name', displayName: '任務名稱', width: 250 },
-      { name: 'category', displayName: '類別', width: 120 }, // 程式、美工
-      { name: 'priority', displayName: '優先度', width: 100 }, // 一般、緊急
-      { name: 'status', displayName: '狀態', width: 120 },   // 待辦、測試、審核、完成
-      { name: 'close_date', displayName: '預計完成', width: 150, type: 'date' },
+      { name: 'id', displayName: '任務ID' },
+      { name: 'task_name', displayName: '任務名稱' },
+      { name: 'category', displayName: '類別', templateRef: 'status_json' }, 
+      { name: 'priority', displayName: '優先度', templateRef: 'status_json' }, 
+      { name: 'status', displayName: '狀態', templateRef: 'status_json' },
+      { name: 'create_at', displayName: '建立日期', width: 150, templateRef: 'date' },
+      { name: 'close_date', displayName: '預計完成', width: 150, templateRef: 'date' },
       { name: 'description', displayName: '描述', width: 300 },
     ]
   };
+  statusConfig = {
+  category: {
+    '美工': { color: '#ffffff', bg: '#d297f4', type: 'flat' },
+    '程式': { color: '#ffffff', bg: '#5e9ac3', type: 'flat' }
+  },
+  priority: {
+    '緊急': { color: '#ff8f00', bg: '#fff8e1', icon: 'flag', type: 'icon-pill' },
+    '一般': { color: '#26a69a', bg: '#e0f2f1', icon: 'flag', type: 'icon-pill' },
+  },
+  status: {
+    '待辦': { color: '#ffffff', bg: '#d87a06', icon: 'circle', type: 'status-dot' },
+    '進行中': { color: '#ffffff', bg: '#1976d2', icon: 'circle', type: 'status-dot' },
+    '完成': { color: '#ffffff', bg: '#43a047', icon: 'circle', type: 'status-dot' }
+  }
+};
   dataSource!: MatTableDataSource<any>;
   subs: any;
   ticket: any;

@@ -50,7 +50,7 @@ export class TableComponent implements OnInit, OnChanges {
     3: '新增與編輯',
     4: '完整功能'
   };
-
+  @Input() statusConfig: any = {};
   @Input() translate_table: Map<string, string> | null = null;
   @Input() maxTableHeight!: string;
   @Input() minTableHeight!: string;

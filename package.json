@@ -40,6 +40,7 @@
     "express": "4.17.1",
     "jquery": "3.5.1",
     "moment": "^2.29.1",
+    "ng-image-fullscreen-view": "^3.0.3",
     "ngx-countdown": "^10.0.1",
     "ngx-toastr": "13.1.0",
     "pdf-lib": "^1.17.1",

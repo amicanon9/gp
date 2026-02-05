@@ -64,6 +64,10 @@ import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc
 import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
 import { taskmasterModalComponent } from 'app/pages/maintenance/taskmaster/taskmaster-modal/taskmaster-modal.component';
 import { ImageDialogComponent } from 'app/_components/image-dialog/image-dialog.component';
+import { NgImageFullscreenViewModule } from 'ng-image-fullscreen-view'; // 1. 匯入套件
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+
+
 export const TW_FORMATS = {
   parse: {
     dateInput: 'YYYY/MM/DD'
@@ -88,7 +92,7 @@ export const TW_FORMATS = {
     ReactiveFormsModule,
     NgbModule,
     NgSelectModule,
-    // Material
+    NgImageFullscreenViewModule,
     MatRadioModule,
     MatSelectModule,
     MatTableModule,
@@ -107,7 +111,8 @@ export const TW_FORMATS = {
     MatButtonToggleModule,
     MatProgressBarModule,
     MatSliderModule,
-    MatDividerModule
+    MatDividerModule,
+    MatProgressSpinnerModule
   ],
   declarations: [
     HasPermissionDirective,
@@ -143,7 +148,7 @@ export const TW_FORMATS = {
     ImageDialogComponent,
     FeemaskComponent,
     taskmasterComponent,
-    taskmasterModalComponent
+    taskmasterModalComponent,
   ],
   exports:[
     MultiSelectComponent,

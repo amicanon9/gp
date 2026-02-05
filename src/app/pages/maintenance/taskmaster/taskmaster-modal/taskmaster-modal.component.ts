@@ -22,7 +22,7 @@ export class taskmasterModalComponent implements OnInit {
   });
 
   // 選項清單
-  categories = ['程式', '美工', '企劃', '測試'];
+  categories = ['程式', '美工'];
   priorities = ['一般', '緊急'];
   statuses = ['待辦', '進行中', '測試', '審核', '完成'];
 

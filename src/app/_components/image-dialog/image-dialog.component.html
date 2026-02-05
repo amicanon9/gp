@@ -1,53 +1,66 @@
-<div style="text-align:center; ">
-  <mat-card style=" width: 100%;">
+<div class="image-gallery-container">
+  <mat-card class="shadow-none border">
     <mat-card-content>
+      <div class="row g-3">
+        <div class="col-xl-3 col-lg-4 col-md-6" *ngFor="let img of imgURL; let i = index">
+          <div class="image-item-card">
+            <div class="img-box" (click)="showLightbox(i)">
+              <img [src]="sanitize(img)" class="main-img">
+              <button mat-mini-fab color="warn" class="btn-delete-overlay" 
+                      (click)="deleteCloudFile(dataname[i].name); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="img-info">
+              <span class="file-name" [matTooltip]="dataname[i]?.name">{{ dataname[i]?.name }}</span>
+            </div>
+          </div>
+        </div>
 
-<div class="form-group">
-  <div class="row">
-    <div class="col-xl-4" *ngFor="let img of imgURL; let index = index"(click)="showLightbox(index)">
-      <img *ngIf="img" [src]="sanitize(img)" height="200" width="300" style="margin: 3px;"><br>
-      <label id="file-label">
-        {{dataname[index].imgName}}
-      </label>
+        <div class="col-xl-3 col-lg-4 col-md-6" *ngFor="let file of files; let j = index">
+          <div class="image-item-card pending">
+            <div class="img-box" (click)="showLightbox(j + imgURL.length)">
+              <img [src]="file.url" class="main-img">
+              <button mat-icon-button class="btn-cancel-overlay" 
+                      (click)="cancel(j); $event.stopPropagation()" *ngIf="file.progress != 100">
+                <mat-icon>close</mat-icon>
+              </button>
+              <div class="upload-overlay" *ngIf="file.inProgress">
+                <mat-progress-spinner mode="determinate" [value]="file.progress" diameter="40"></mat-progress-spinner>
+                <span class="progress-text">{{file.progress}}%</span>
+              </div>
+            </div>
+            <div class="img-info">
+              <span class="file-name text-truncate">{{ file.namedate + file.data.name }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-    <!-- <img *ngIf="url" [src]="sanitize(url)" height="150" width="200px" style="margin: 3px;"> -->
-    <div class="col-xl-4" *ngFor="let file of files; let index = index"(click)="showLightbox(index+imgURL.length)">
-      <img *ngIf="file.url" [src]="file.url" height="200" width="300" style="margin: 3px;">
-
-      <div style="padding-top: 5px;"><mat-progress-bar *ngIf="file.url" [value]="file.progress"></mat-progress-bar></div>
-      <label id="file-label">
-        {{file.namedate+file.data.name}}
-      </label>
-      <mat-icon color="accent" (click)="cancel(index)"style="cursor: pointer"*ngIf="file.progress!=100">clear</mat-icon>
-      <!-- <div><mat-icon color="accent" (click)="cancel(index)">clear</mat-icon></div> -->
-
-
-
-
-    </div>
-  </div>
-</div>
-
-
     </mat-card-content>
-    <mat-card-actions>
-      <div class="row" *ngIf="(view!='dispatchConfirm'&&view!='dispatchQuery')">
-        <div class="col-md-6">
-      <button  mat-button color="primary" (click)="onClick()"style="width: 100%;">
-        <mat-icon>tab_unselected</mat-icon>
-        選擇圖片
-      </button>
-      </div>
-      <div class="col-md-6">
-      <button mat-button color="warn" (click)="uploadFiles()" style="width: 100%;">
-        <mat-icon>file_upload</mat-icon>
-        上傳圖片
-      </button>
-      </div>
+
+    <mat-card-actions class="border-top">
+      <div class="row w-100 m-0">
+        <div class="col-6 p-1">
+          <button mat-stroked-button color="primary" class="w-100" (click)="onClick()">
+            <mat-icon>add_photo_alternate</mat-icon> 選擇圖片
+          </button>
+        </div>
+        <div class="col-6 p-1">
+          <button mat-raised-button color="warn" class="w-100" (click)="uploadFiles()" [disabled]="files.length === 0">
+            <mat-icon>cloud_upload</mat-icon> 開始上傳
+          </button>
+        </div>
       </div>
     </mat-card-actions>
-  </mat-card><input type="file" #fileUpload id="fileUpload" name="fileUpload" multiple="multiple" accept="image/png,image/jpeg"
+  </mat-card>
+  <input type="file" #fileUpload id="fileUpload" name="fileUpload" multiple="multiple" accept="image/png,image/jpeg"
     style="display:none;" />
 </div>
-<ng-image-fullscreen-view [images]="imageObject" [imageIndex]="selectedImageIndex" [show]="showFlag"
-  (close)="closeEventHandler()"[paginationShow]="true"></ng-image-fullscreen-view>
+
+<ng-image-fullscreen-view 
+  [images]="imageObject" 
+  [imageIndex]="selectedImageIndex" 
+  [show]="showFlag"
+  (close)="closeEventHandler()" 
+  [paginationShow]="true">
+</ng-image-fullscreen-view>

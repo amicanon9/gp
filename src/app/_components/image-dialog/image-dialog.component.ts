@@ -1,13 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { HttpEventType, HttpErrorResponse } from '@angular/common/http';
+import { of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { formatDate } from '@angular/common';
 import { ApiService } from 'app/_services/api.service';
 import { ToastrService } from 'ngx-toastr';
-import { environment } from 'environments/environment';
-import { of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-image-dialog',
@@ -16,21 +15,23 @@ import { catchError, map } from 'rxjs/operators';
 })
 export class ImageDialogComponent implements OnInit {
   @ViewChild("fileUpload", { static: false }) fileUpload: ElementRef;
-  
-  // 動態參數
-  @Input() id: number;
-  @Input() controllerName: string;
-  @Input() category: string;
 
-  files = [];          // 準備上傳的檔案
-  cloudfiles = [];     // 雲端已有的檔案
-  imageObject = [];    // 給 ng-image-fullscreen-view 用的清單
+  @Input() id: number;              // 關聯 ID
+  @Input() controllerName: string;  // 如 'TaskMaster'
+  @Input() category: string;        // 如 'task'
+
+  files = [];              // 待上傳
+  imgURL: any[] = [];      // 雲端圖檔 Blob URL
+  dataname: any[] = [];    // 雲端檔名清單
+  imageObject: any[] = []; // 給燈箱用的最終清單
   
   showFlag: boolean = false;
   selectedImageIndex: number = -1;
+  namedate: string;
+  repeat: any[] = [];
 
   constructor(
-    private apiSvc: ApiService,
+    private apiSvc: ApiService, 
     private sanitizer: DomSanitizer,
     private snackbar: MatSnackBar,
     private toastr: ToastrService
@@ -40,44 +41,46 @@ export class ImageDialogComponent implements OnInit {
     this.onLoad();
   }
 
-  // 1. 取得檔案清單並初始化全螢幕物件
+  // 1. 初始化讀取
   onLoad() {
     if (!this.id) return;
-    this.apiSvc.getTaskList(this.controllerName, this.category, this.id).subscribe(res => {
-      this.cloudfiles = res || [];
-      this.files = [];
-      this.refreshImageObject();
-    });
-  }
-
-  // 刷新 Lightbox 用的圖片物件
-  refreshImageObject() {
+    this.imgURL = [];
     this.imageObject = [];
-    const apiUrl = environment.apiUrl;
-
-    // 先放雲端的圖
-    this.cloudfiles.forEach(f => {
-      const url = `${apiUrl}/${this.controllerName}/${this.id}/images/${this.category}/${f.name}`;
-      this.imageObject.push({
-        image: url,
-        thumbImage: url,
-        title: f.name,
-        alt: f.name
-      });
-    });
-
-    // 再放還沒上傳但已選取的圖 (Base64)
-    this.files.forEach(f => {
-      this.imageObject.push({
-        image: f.url,
-        thumbImage: f.url,
-        title: f.data.name,
-        alt: f.data.name
+    
+    // 取得檔案清單
+    this.apiSvc.getTaskList(this.controllerName, this.category, this.id).subscribe(res => {
+      this.dataname = res || [];
+      
+      // 逐一抓取圖片 Blob (確保授權過得去)
+      this.dataname.forEach((fileInfo, i) => {
+        this.apiSvc.downloadFile(this.controllerName, this.id, this.category, fileInfo.name).subscribe(data => {
+          const blobUrl = URL.createObjectURL(data.body);
+          this.imgURL[i] = blobUrl;
+          this.syncImageObject(); // 每次抓完圖就更新一次燈箱清單
+        });
       });
     });
   }
 
-  // 顯示全螢幕
+  // 2. 同步燈箱顯示物件 (合併已上傳與待上傳)
+  syncImageObject() {
+    const cloudPart = this.imgURL.map((url, i) => ({
+      image: url,
+      thumbImage: url,
+      title: this.dataname[i]?.name,
+      alt: 'cloud_img'
+    }));
+    
+    const localPart = this.files.map(f => ({
+      image: f.url,
+      thumbImage: f.url,
+      title: f.namedate + f.data.name,
+      alt: 'local_img'
+    }));
+
+    this.imageObject = [...cloudPart, ...localPart];
+  }
+
   showLightbox(index: number) {
     this.selectedImageIndex = index;
     this.showFlag = true;
@@ -85,30 +88,28 @@ export class ImageDialogComponent implements OnInit {
 
   closeEventHandler() {
     this.showFlag = false;
-    this.selectedImageIndex = -1;
   }
 
-  // 2. 選擇檔案 (含預覽)
+  // 3. 點擊選擇圖片
   onClick() {
     const el = this.fileUpload.nativeElement;
     el.onchange = () => {
-      const dateStr = formatDate(new Date(), 'yyyyMMddHHmm', 'en') + '_';
-      
       for (let i = 0; i < el.files.length; i++) {
         const file = el.files[i];
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (event: any) => {
-          const url = event.target.result;
+          this.namedate = formatDate(new Date(), 'yyyyMMddHHmm', 'en') + '_';
           if (!this.files.find(a => a.data.name === file.name)) {
-            this.files.push({
-              data: file,
-              url: url,
-              namedate: dateStr,
-              progress: 0,
-              inProgress: false
+            this.files.push({ 
+              data: file, 
+              inProgress: false, 
+              progress: 0, 
+              url: event.target.result, 
+              namedate: this.namedate, 
+              status: 0 
             });
-            this.refreshImageObject();
+            this.syncImageObject();
           }
         };
       }
@@ -117,15 +118,14 @@ export class ImageDialogComponent implements OnInit {
     el.click();
   }
 
-  // 3. 執行上傳
+  // 4. 上傳邏輯
   uploadFiles() {
     this.files.forEach(fileItem => {
-      if (fileItem.progress === 100) return;
+      if (fileItem.status === 1) return;
 
       const formData = new FormData();
-      // 依照你的要求，檔名加上時間戳
-      const newName = fileItem.namedate + fileItem.data.name;
-      formData.append('files', fileItem.data, newName);
+      const finalName = fileItem.namedate + fileItem.data.name;
+      formData.append('files', fileItem.data, finalName);
 
       fileItem.inProgress = true;
       this.apiSvc.uploadFiles(this.controllerName, this.id, this.category, formData).pipe(
@@ -135,26 +135,40 @@ export class ImageDialogComponent implements OnInit {
           }
           return event;
         }),
-        catchError(err => {
+        catchError(() => {
           this.snackbar.open('上傳失敗', '確定', { duration: 2000 });
           fileItem.inProgress = false;
           return of(null);
         })
       ).subscribe(res => {
         if (res?.type === HttpEventType.Response) {
+          fileItem.status = 1;
           this.toastr.success(`${fileItem.data.name} 上傳成功`);
-          // 全部傳完後重刷
-          if (this.files.every(f => f.progress === 100)) {
-            this.onLoad();
+          if (this.files.every(f => f.status === 1)) {
+            this.onLoad(); // 全部傳完刷新列表
+            this.files = [];
           }
         }
       });
     });
   }
-
+  deleteCloudFile(fileName: string) {
+    const ref = this.snackbar.open(`確定要從雲端刪除 ${fileName} 嗎?`, '確定', {
+      duration: 5000,
+      panelClass: ['alert-danger', 'alert'],
+      verticalPosition: 'top',
+      horizontalPosition: 'center',
+    });
+  ref.onAction().subscribe(() => {
+    this.apiSvc.deleteFile(this.controllerName, this.id, this.category, fileName).subscribe(() => {
+      this.toastr.success("檔案已刪除");
+      this.onLoad(); // 重新載入列表與 imgURL
+    });
+  });
+}
   cancel(index: number) {
     this.files.splice(index, 1);
-    this.refreshImageObject();
+    this.syncImageObject();
   }
 
   sanitize(url: string) {
