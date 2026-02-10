@@ -54,22 +54,22 @@
       </div>
     </div>
 
-   <div *ngIf="formGroup.get('id')?.value > 0">
-  <div style="padding-left: 1%; display: flex; align-items: center;">
-    <mat-icon color="primary" style="margin-right: 8px;">collections</mat-icon>
-    <h2 style="margin: 0;">圖片管理</h2>
-  </div>
-  
-  <div class="row mt-3">
-    <div class="col-md-12">
-      <app-image-dialog 
+ <div class="mt-4">
+    <div style="padding-left: 1%; display: flex; align-items: center;">
+      <mat-icon color="primary" style="margin-right: 8px;">collections</mat-icon>
+      <h2 style="margin: 0;">圖片管理</h2>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-12">
+        <app-image-dialog 
+        #imgComponent
         [id]="formGroup.get('id')?.value" 
-        controllerName="TaskMaster" 
         category="task">
       </app-image-dialog>
+      </div>
     </div>
   </div>
-</div>
 
   </div>
 </div>

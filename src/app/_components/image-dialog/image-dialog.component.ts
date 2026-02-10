@@ -17,9 +17,8 @@ export class ImageDialogComponent implements OnInit {
   @ViewChild("fileUpload", { static: false }) fileUpload: ElementRef;
 
   @Input() id: number;              // 關聯 ID
-  @Input() controllerName: string;  // 如 'TaskMaster'
+  @Input() controllerName: string = 'FileProcessor';  // 如 'TaskMaster'
   @Input() category: string;        // 如 'task'
-
   files = [];              // 待上傳
   imgURL: any[] = [];      // 雲端圖檔 Blob URL
   dataname: any[] = [];    // 雲端檔名清單
@@ -29,7 +28,7 @@ export class ImageDialogComponent implements OnInit {
   selectedImageIndex: number = -1;
   namedate: string;
   repeat: any[] = [];
-
+  
   constructor(
     private apiSvc: ApiService, 
     private sanitizer: DomSanitizer,
@@ -48,7 +47,7 @@ export class ImageDialogComponent implements OnInit {
     this.imageObject = [];
     
     // 取得檔案清單
-    this.apiSvc.getTaskList(this.controllerName, this.category, this.id).subscribe(res => {
+    this.apiSvc.getimagelist(this.controllerName, this.category, this.id).subscribe(res => {
       this.dataname = res || [];
       
       // 逐一抓取圖片 Blob (確保授權過得去)
@@ -61,7 +60,29 @@ export class ImageDialogComponent implements OnInit {
       });
     });
   }
+  public async manualUpload(newId: number): Promise<boolean> {
+  this.id = newId; // 更新 ID，確保上傳路徑正確
+  
+  if (this.files.length === 0) return true;
 
+  // 使用 Promise 確保所有檔案上傳完成才回傳
+  const uploadTasks = this.files.map(fileItem => {
+    const formData = new FormData();
+    const finalName = fileItem.namedate + fileItem.data.name;
+    formData.append('files', fileItem.data, finalName);
+    
+    return this.apiSvc.uploadFiles(this.controllerName, this.id, this.category, formData).toPromise();
+  });
+
+  try {
+    await Promise.all(uploadTasks);
+    this.files = []; // 清空待上傳列表
+    return true;
+  } catch (err) {
+    this.toastr.error("部分圖片上傳失敗");
+    return false;
+  }
+}
   // 2. 同步燈箱顯示物件 (合併已上傳與待上傳)
   syncImageObject() {
     const cloudPart = this.imgURL.map((url, i) => ({

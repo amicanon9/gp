@@ -215,7 +215,7 @@ export class checkinComponent implements OnInit, OnDestroy {
 
   groupHistory(data: any[]) {
     const groups = data.reduce((acc, obj) => {
-      const timeKey = new Date(obj.checkin_time).getTime();
+      const timeKey = new Date(obj.fake_time).getTime();
       if (!acc[timeKey]) {
         acc[timeKey] = {
           checkin_time: obj.checkin_time,

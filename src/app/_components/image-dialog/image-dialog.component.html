@@ -40,16 +40,12 @@
 
     <mat-card-actions class="border-top">
       <div class="row w-100 m-0">
-        <div class="col-6 p-1">
+        <div class="col-12 p-1">
           <button mat-stroked-button color="primary" class="w-100" (click)="onClick()">
             <mat-icon>add_photo_alternate</mat-icon> 選擇圖片
           </button>
         </div>
-        <div class="col-6 p-1">
-          <button mat-raised-button color="warn" class="w-100" (click)="uploadFiles()" [disabled]="files.length === 0">
-            <mat-icon>cloud_upload</mat-icon> 開始上傳
-          </button>
-        </div>
+       
       </div>
     </mat-card-actions>
   </mat-card>

@@ -1,10 +1,6 @@
 <mat-card class="file-upload-card shadow-none border">
   <mat-card-content>
-    <div class="header-info mb-3">
-      <mat-chip-listbox>
-        <mat-chip color="primary" selected>{{category | uppercase}} 附件清單</mat-chip>
-      </mat-chip-listbox>
-    </div>
+
 
     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
       <table class="table align-middle">
@@ -65,16 +61,12 @@
 
   <mat-card-actions class="p-3 border-top bg-light">
     <div class="row g-2 w-100 m-0">
-      <div class="col-6">
+      <div class="col-12">
         <button mat-stroked-button color="primary" class="w-100 py-1" (click)="onClick()">
           <mat-icon>add_photo_alternate</mat-icon> 選擇檔案
         </button>
       </div>
-      <div class="col-6">
-        <button mat-raised-button color="warn" class="w-100 py-1" (click)="uploadFiles()" [disabled]="files.length === 0">
-          <mat-icon>cloud_upload</mat-icon> 開始上傳
-        </button>
-      </div>
+      
     </div>
   </mat-card-actions>
 </mat-card>

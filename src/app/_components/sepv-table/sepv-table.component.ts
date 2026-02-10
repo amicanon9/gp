@@ -215,6 +215,7 @@ applyFilter(value: string) {
 
     if (changes.dataSource) {
       if (this.dataSource) {
+        console.log(this.dataSource)
         if (this.config.serverSide) {
           this.dataSource.sort = this.sort;
           this.dataSource.paginator = this.paginator;

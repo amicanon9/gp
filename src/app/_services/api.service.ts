@@ -834,7 +834,7 @@ public deleteContracts(id: string) {
    * @returns
    */
 /// 1. 取得檔案清單
-  getTaskList(controller: string, category: string, id: number): Observable<any[]> {
+  getimagelist(controller: string, category: string, id: number): Observable<any[]> {
     return this.http.get<any[]>(`${apiUrl}/${controller}/${id}/images/${category}`);
   }
 

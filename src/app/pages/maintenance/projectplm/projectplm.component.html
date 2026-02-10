@@ -1,3 +1,69 @@
+<div fxLayout="row" fxLayoutAlign="start center" class="mb-4">
+  <div style="background-color: #ffffff; 
+              border-radius: 8px; 
+              padding: 0 12px; 
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+              display: flex; 
+              align-items: center;
+              border: 1px solid #e0e0e0;">
+    
+    <mat-icon style="margin-right: 8px; color: #51cbce;">calendar_today</mat-icon>
+    
+    <mat-form-field appearance="standard" style="width: 120px; margin-bottom: -1.25em;">
+      <mat-label>達成狀況統計年度</mat-label>
+      <mat-select [(ngModel)]="year" 
+                  (selectionChange)="calculateQuarterlyStats()" 
+                  style="font-weight: 500;">
+        <mat-option *ngFor="let y of availableYears" [value]="y">
+          {{ y }} 年
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </div>
+
+</div>
+
+<div fxLayout="row wrap" 
+     fxLayoutAlign="start stretch" 
+     class="stats-container mb-3">
+  
+  <mat-card *ngFor="let q of quarterStats" 
+            fxFlex="23.5" 
+            fxFlex.md="48"
+            fxFlex.sm="48" 
+            fxFlex.xs="100" 
+            class="quarter-card">
+    <mat-card-content>
+      <div class="text-center mb-3">
+        <h4 class="m-0 font-weight-bold text-nowrap">{{ q.label }} 達成狀況</h4>
+      </div>
+      
+      <div fxLayout="column" fxLayoutGap="10px">
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span class="stat-label">Longshot</span>
+          <span class="stat-value text-danger" [class.text-success]="q.longshot >= q.targets.ls">
+            ({{ q.longshot }}/{{ q.targets.ls }})
+          </span>
+        </div>
+        
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span class="stat-label">BCD</span>
+          <span class="stat-value text-success">
+            ({{ q.bcd }}/{{ q.targets.bcd }})
+          </span>
+        </div>
+        
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span class="stat-label">Commit</span>
+          <span class="stat-value text-warning">
+            ({{ q.commit }}/{{ q.targets.cm }})
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
 <div class="table_field">
   <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="3px" class="float-left">
     <button class="btn btn-primary" (click)="onAdd()" *hasPermission="2">新增</button>

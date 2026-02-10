@@ -1,0 +1,136 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" (click)='modal.dismiss()'>
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body" [formGroup]="formGroup">
+  <div style="padding-left: 1%">
+    <h2>基本資訊</h2>
+  </div>
+  <div class="form-group">
+    <div class="form-name">
+      <label>日期</label>
+    </div>
+    <div class="form-input">
+      <input type="date" formControlName="expense_date" [class.invalid]="isError('expense_date')" />
+      <small class="text-danger" *ngIf="errorType('expense_date', 'required')">*必填欄位</small>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-name">
+      <label>報銷類別</label>
+    </div>
+    <div class="form-input">
+      <ng-select [items]="categoryItems" formControlName="category_item" [clearable]="false"></ng-select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-name">
+      <label>項目/行程</label>
+    </div>
+    <div class="form-input">
+      <input type="text" formControlName="item_name" placeholder="例：拜訪客戶" autocomplete="off" />
+    </div>
+  </div>
+  <div style="padding-left: 1%">
+    <h2>專案</h2>
+  </div>
+  <div class="form-group">
+    <div class="form-name">
+      <label>專案類型</label>
+    </div>
+    <div class="form-input">
+      <ng-select [items]="typelist" bindLabel="label" bindValue="type" formControlName="project_type" [clearable]="false"></ng-select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-name">
+      <label>選擇專案</label>
+    </div>
+    <div class="form-input">
+      <ng-select [items]="projectOptions" bindLabel="name" bindValue="id" formControlName="project_id"
+        placeholder="請選擇專案"></ng-select>
+    </div>
+  </div>
+
+  <ng-container *ngIf="formGroup.get('category_item').value === '交通費'">
+    <div style="padding-left: 1%">
+      <h2>交通費明細 (自動計算)</h2>
+    </div>
+    <div class="row bg-light py-2 mx-1 border-radius-5">
+      <div class="col-md-12 form-group">
+        <label>目的地(單程)</label>
+        <input type="text" class="form-control" formControlName="location_from_to" placeholder="例：台中辦公室 <-> 台北客戶端" />
+      </div>
+      <div class="col-md-3 form-group">
+        <label>里程 (KM)</label>
+        <input type="number" class="form-control" formControlName="mileage" />
+      </div>
+      <div class="col-md-3 form-group">
+        <label>補助單價</label>
+        <input type="number" class="form-control" formControlName="subsidy_unit_price" readonly />
+      </div>
+      <div class="col-md-3 form-group">
+        <label>過路費</label>
+        <input type="number" class="form-control" formControlName="toll_fee" />
+      </div>
+      <div class="col-md-3 form-group">
+        <label>停車費</label>
+        <input type="number" class="form-control" formControlName="parking_fee" />
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="formGroup.get('category_item').value !== '交通費'">
+    <div class="row mt-2">
+      <div class="col-md-12 form-group">
+        <label>報銷金額</label>
+        <input type="number" class="form-control" formControlName="manual_amount" />
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="total-amount-banner mb-4">
+    <div class="row align-items-center py-3 mx-0 border-radius-5 shadow-sm">
+      <div class="col-6 pl-4">
+        <h4 class="m-0" style="opacity: 0.8; font-weight: 400;">核銷總金額合計</h4>
+      </div>
+      <div class="col-6 text-right pr-4">
+        <h2 class="m-0 font-weight-bold">{{ formGroup.get('total_amount').value | currency:'TWD':'symbol':'1.0-0' }}
+        </h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12 form-group">
+    <label>備註/敘述</label>
+  </div>
+  <mat-form-field appearance="outline" class="w-100">
+    <textarea matInput formControlName="description" rows="2" placeholder="請輸入備註"></textarea>
+  </mat-form-field>
+   <div class="mt-4">
+    <div style="padding-left: 1%; display: flex; align-items: center;">
+      <mat-icon color="primary" style="margin-right: 8px;">collections</mat-icon>
+      <h2 style="margin: 0;">附件單據管理</h2>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-12">
+        <app-image-dialog 
+        #imgComponent
+        [id]="formGroup.get('id')?.value" 
+        category="expenseclaims">
+      </app-image-dialog>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)='modal.dismiss()'>取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid">確認送出</button>
+</div>

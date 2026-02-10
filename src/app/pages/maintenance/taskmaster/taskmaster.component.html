@@ -4,20 +4,53 @@
     <button class="btn btn-warning" (click)="onEdit()" [disabled]="selected == null" *hasPermission="3">編輯/檢視</button>
     <button class="btn btn-danger" (click)="onDelete()" [disabled]="selected == null" *hasPermission="4">刪除</button>
   </div>
-  <input type="file" #xlsx id="xlsx" name="xlsx" multiple="multiple"
-    accept="image/png,image/jpg,.doc, .docx,.pdf,.xlsx" style="display:none;" />
+
+  <input type="file" #xlsx id="xlsx" name="xlsx" multiple="multiple" accept="image/png,image/jpg,.doc, .docx,.pdf,.xlsx"
+    style="display:none;" />
   <div class="text-right fieldinput">
     <mat-form-field>
       <input matInput placeholder="快速搜尋" [(ngModel)]="search">
     </mat-form-field>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="start stretch" fxLayoutGap="15px" class="stats-container mb-3">
+
+    <mat-card fxFlex="25">
+      <mat-card-content class="text-center">
+        <div class="stat-label">待辦</div>
+        <div class="stat-value text-warning">{{ stats.todo }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex="25">
+      <mat-card-content class="text-center">
+        <div class="stat-label">審核</div>
+        <div class="stat-value text-primary">{{ stats.doing }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex="25">
+      <mat-card-content class="text-center">
+        <div class="stat-label">完成</div>
+        <div class="stat-value text-success">{{ stats.done }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex="25" class="border-left-danger">
+      <mat-card-content class="text-center">
+        <div class="stat-label text-danger">🔥緊急</div>
+        <div class="stat-value text-danger">{{ stats.urgent }}</div>
+      </mat-card-content>
+    </mat-card>
   </div>
   <mat-card>
     <mat-card-content>
       <ng-container *ngIf="!loaded">
         讀取中...
       </ng-container>
-      <sepv-table #namiTable [search]="search" [config]="table_config" [maxTableHeight]="maxTableHeight" [statusConfig]="statusConfig"
-        [minTableHeight]="minTableHeight" [dataSource]="dataSource" (select)="onSelect($event)" [hidden]="!loaded" [status]="infolist"  [stype]="stype" [stype_filter]="stype_filter">
+      <sepv-table #namiTable [search]="search" [config]="table_config" [maxTableHeight]="maxTableHeight"
+        [statusConfig]="statusConfig" [minTableHeight]="minTableHeight" [dataSource]="dataSource"
+        (select)="onSelect($event)" [hidden]="!loaded" [status]="infolist" [stype]="stype"
+        [stype_filter]="stype_filter">
       </sepv-table>
     </mat-card-content>
   </mat-card>

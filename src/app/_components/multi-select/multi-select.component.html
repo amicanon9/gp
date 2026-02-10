@@ -1,17 +1,17 @@
 <div class="form-control multi-select-container" [class.disabled]="disabled">
-  <div fxLayout="row" fxLayout.xs="column" *ngIf="!disabled">
-    <div class="actions" fxFlex="250px" fxFlex.xs fxLayout="row">
-       <button class="btn btn-info" type="button"  fxFlex (click)="selectAll()"
+  <div  *ngIf="!disabled">
+    <div class="actions" >
+       <button class="btn btn-info" type="button"   (click)="selectAll()"
         [disabled]="!items || items.length === 1">
         全選
       </button>
-      <button type="button" class="btn btn-cancel" fxFlex (click)="unselectAll()"
+      <button type="button" class="btn btn-cancel"  (click)="unselectAll()"
         [disabled]="!selected || selected.length === 0">
         清空
       </button>
      
     </div>
-    <select class="form-control select multi" fxFlex [formControl]="select" (change)="onChange()">
+    <select class="form-control select multi"  [formControl]="select" (change)="onChange()">
       <option *ngFor="let item of items" [ngValue]="getValue(item)">
         {{ getText(item)}}
       </option>

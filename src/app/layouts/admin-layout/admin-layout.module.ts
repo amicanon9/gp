@@ -66,6 +66,9 @@ import { taskmasterModalComponent } from 'app/pages/maintenance/taskmaster/taskm
 import { ImageDialogComponent } from 'app/_components/image-dialog/image-dialog.component';
 import { NgImageFullscreenViewModule } from 'ng-image-fullscreen-view'; // 1. 匯入套件
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { expenseclaimsComponent } from 'app/pages/tools/expenseclaims/expenseclaims.component';
+import { expenseclaimsModalComponent } from 'app/pages/tools/expenseclaims/expenseclaims-modal/expenseclaims-modal.component';
 
 
 export const TW_FORMATS = {
@@ -112,7 +115,8 @@ export const TW_FORMATS = {
     MatProgressBarModule,
     MatSliderModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    FlexLayoutModule
   ],
   declarations: [
     HasPermissionDirective,
@@ -149,6 +153,8 @@ export const TW_FORMATS = {
     FeemaskComponent,
     taskmasterComponent,
     taskmasterModalComponent,
+    expenseclaimsComponent,
+    expenseclaimsModalComponent
   ],
   exports:[
     MultiSelectComponent,

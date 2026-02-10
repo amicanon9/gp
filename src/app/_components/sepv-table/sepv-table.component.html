@@ -8,9 +8,13 @@
     </select>
   </ng-container>
 
-  <mat-table [dataSource]="innerDataSource" matSort [matSortActive]="config.sort && config.sort.active"
-    [matSortDisabled]="!config.serverSide" [matSortDirection]="config.sort && config.sort.direction"
-    [matSortDisableClear]="config.sort && config.sort.disableClear" [class.disabled]="disabled">
+  <mat-table [dataSource]="innerDataSource" matSort 
+    [matSortActive]="config.sort && config.sort.active"
+    [matSortDisabled]="!config.serverSide" 
+    [matSortDirection]="config.sort && config.sort.direction"
+    [matSortDisableClear]="config.sort && config.sort.disableClear" 
+    [class.disabled]="disabled"
+    style="width: max-content; min-width: 100%;">
 
     <ng-container matColumnDef="checkbox">
       <th mat-header-cell *matHeaderCellDef class="hidden"></th>
@@ -19,12 +23,21 @@
       </td>
     </ng-container>
 
-    <ng-container [matColumnDef]="column.name" *ngFor="let column of config.columns" [sticky]="column.sticky"
+    <ng-container [matColumnDef]="column.name" *ngFor="let column of config.columns" 
+      [sticky]="column.sticky"
       [stickyEnd]="column.stickyEnd">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{column.displayName}}</th>
-      <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)">
+      
+      <th mat-header-cell *matHeaderCellDef mat-sort-header 
+          [style.width.px]="column.width" 
+          [style.flex]="'0 0 ' + column.width + 'px'">
+        {{column.displayName}}
+      </th>
+
+      <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)"
+          [style.width.px]="column.width"
+          [style.flex]="'0 0 ' + column.width + 'px'">
         
-        <ng-container [ngSwitch]="column.templateRef!=undefined ? column.templateRef : 'base'">
+        <ng-container [ngSwitch]="column.templateRef != undefined ? column.templateRef : 'base'">
           
           <ng-container *ngSwitchCase="'status_json'">
             <ng-container *ngTemplateOutlet="statusTemplate; context: { 
@@ -35,74 +48,78 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'base'">
-            <div [style.width.px]="column.width" [matTooltip]="getValue(element, column.name)">
+            <div class="text-truncate" [matTooltip]="getValue(element, column.name)">
               {{ getValue(element, column.name) }}
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'date'">
-            <div [style.width.px]="column.width">{{ element[column.name] | date:'yyyy-MM-dd'}}</div>
+            <div>{{ element[column.name] | date:'yyyy-MM-dd'}}</div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'date_long'">
-            <div [style.width.px]="column.width">{{ element[column.name] | date:'yyyy-MM-dd HH:mm'}}</div>
+            <div>{{ element[column.name] | date:'yyyy-MM-dd HH:mm'}}</div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'disabled'">
-            <div style="width:80%" class="text-left">
+            <div class="text-left">
               <span class="badge badge-danger" *ngIf="element[column.name]==true">已停用</span>
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'boolean'">
-            <div style="width:80%" class="text-center">
+            <div class="text-center w-100">
               <i class="nc-icon nc-check-2" *ngIf="element[column.name]==true"></i>
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'users'">
-            <div [style.width.px]="column.width">
+            <div class="text-truncate">
               <span class="item" *ngFor="let data of element[column.name]">{{data.username}}</span>
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'roles'">
-            <span class="item" *ngFor="let role of element[column.name]">{{role.role_name}}</span>
+            <div class="text-truncate">
+              <span class="item" *ngFor="let role of element[column.name]">{{role.role_name}}</span>
+            </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'menus'">
-            <span class="item" *ngFor="let data of element[column.name]">{{data.menuName}}</span>
+            <div class="text-truncate">
+              <span class="item" *ngFor="let data of element[column.name]">{{data.menuName}}</span>
+            </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'number'">
-            <span style="display: block;">
+            <span class="w-100 text-right" style="display: block; padding-right: 10px;">
               {{ element[column.name] | number:'1.0-2'}}
             </span>
           </ng-container>
 
           <ng-container *ngSwitchCase="'permissions'">
-            <span class="item" style="margin-left: 15px;">
+            <span class="item">
               {{ permissionMap[element[column.name]] || '未知' }}
             </span>
           </ng-container>
 
           <ng-container *ngSwitchCase="'detail'">
-            <div>
-              <button class="btn btn-success" style="padding: 5px;font-size: 12px;"
+            <div class="d-flex flex-wrap">
+              <button class="btn btn-success btn-sm m-1"
                 *ngFor="let detail of element[column.name]" (click)="goToDetail(detail)">{{detail.name}}</button>
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'button'">
-            <div>
-              <button class="btn btn-success" style="padding: 5px; font-size: 12px;"
+            <div class="d-flex flex-wrap">
+              <button class="btn btn-success btn-sm m-1"
                 *ngFor="let btn of element[column.name]" (click)="ToDetail(btn, element)"> {{btn.name}}
               </button>
             </div>
           </ng-container>
 
           <ng-container *ngSwitchCase="'ags_status'">
-            <div [style.width.px]="column.width" class="text-left">
+            <div class="text-left">
               <ng-container *ngIf="element[column.name] as ags">
                 <span class="badge ags-badge-main" [ngStyle]="{
                     'background-color': ags.code === 'A6' ? '#6c757d' : ags.code === 'A5' ? '#adb5bd' : ags.code === 'A4' ? '#90ee90' : '#e9ecef',
@@ -115,30 +132,16 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'week_content'">
-            <div class="week-multi-wrapper week-flex-container">
+            <div class="week-multi-wrapper">
               <ng-container *ngIf="element.week && element.week.length > 0; else noWeek">
-                <span *ngFor="let w of element.week" class="week-row-item week-item" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline">
+                <div *ngFor="let w of element.week" class="mb-1" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline">
                   <span class="badge" [ngStyle]="{
                     'background-color': w.ags_status === 'A6' ? '#6c757d' : w.ags_status === 'A5' ? '#adb5bd' : w.ags_status === 'A4' ? '#90ee90' : '#6c757d',
                     'color': w.ags_status === 'A4' ? '#000' : '#fff'
                   }">
                     {{w.year}}/W{{w.week}}
                   </span>
-                  <span class="week-content-text">{{ w.content }}</span>
-                </span>
-              </ng-container>
-              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
-            </div>
-          </ng-container>
-
-          <ng-container *ngSwitchCase="'this_week_content'">
-            <div class="week-cell-wrapper">
-              <ng-container *ngIf="element && element.this_week.length > 0; else noWeek">
-                <div class="text-truncate week-text" [matTooltip]="element.this_week[0].content_detail" matTooltipClass="nami-tooltip-multiline">
-                  <span class="badge badge-secondary">
-                    {{element.this_week[0].year}}/W{{element.this_week[0].week}}
-                  </span>
-                  {{ element.this_week[0].content }}
+                  <span class="ml-1 small">{{ w.content }}</span>
                 </div>
               </ng-container>
               <ng-template #noWeek><span class="text-muted">-</span></ng-template>
@@ -146,13 +149,13 @@
           </ng-container>
 
           <ng-container *ngSwitchCase="'dynamic_week_content'">
-            <div class="week-cell-wrapper" [style.width.px]="column.width">
+            <div class="w-100">
               <ng-container *ngIf="getProjectWeekContent(element.week_data, column.displayName) as w; else noWeek">
                 <div [ngStyle]="{
                   'background-color': w.ags_status === 'A6' ? '#6c757d' : w.ags_status === 'A5' ? '#adb5bd' : w.ags_status === 'A4' ? '#90ee90' : '#e9ecef',
                   'color': (w.ags_status === 'A5' || w.ags_status === 'A6') ? '#fff' : '#000'
-                }" class="week-text-item text-left" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline" style="border-radius: 5px; padding: 2px 5px;">
-                  <span class="week-content-text">{{ w.content }}</span>
+                }" class="week-text-item text-truncate p-1" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline" style="border-radius: 4px;">
+                  {{ w.content }}
                 </div>
               </ng-container>
               <ng-template #noWeek><span class="text-muted">-</span></ng-template>
@@ -194,13 +197,11 @@
         }">
           {{ cfg[val].icon }}
         </mat-icon>
-        
         {{ val }}
       </div>
     </ng-container>
-
     <ng-template #fallback>
-      <span class="text-muted" style="font-size: 13px;">{{ val || '-' }}</span>
+      <span class="text-muted">{{ val || '-' }}</span>
     </ng-template>
   </div>
 </ng-template>

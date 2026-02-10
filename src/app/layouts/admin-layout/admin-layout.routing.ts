@@ -23,6 +23,7 @@ import { departmentsComponent } from 'app/pages/manage/departments/departments.c
 import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
 import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc.component';
 import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
+import { expenseclaimsComponent } from 'app/pages/tools/expenseclaims/expenseclaims.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
@@ -35,6 +36,7 @@ export const AdminLayoutRoutes: Routes = [
   { path: 'tools/checkin',          component: checkinComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leaveapplications',          component: leaveapplicationsComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leavemanagement',          component: leavemanagementComponent, canActivate: [AuthGuard, MenuGuard]},
+  { path: 'tools/expenseclaims',          component: expenseclaimsComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'ps/pspowernoinfo',      component: PspowernoinfoComponent, canActivate: [AuthGuard, MenuGuard] },
   
   { path: 'manage/setofbooks',     component: SetOfBooksComponent, canActivate: [AuthGuard, MenuGuard] },

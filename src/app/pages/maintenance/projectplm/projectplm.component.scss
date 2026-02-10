@@ -10,3 +10,70 @@ button{
 ::ng-deep .mat-simple-snackbar-action {
   color: white
 }
+.stats-container {
+  display: flex !important;
+  // 控制卡片之間的水平與垂直間距
+  gap: 20px; 
+  
+  // 為了確保 wrap 正常運作，不要讓寬度計算加上 margin
+  .quarter-card {
+    border-radius: 10px;
+    border-top: 5px solid #51cbce; /* Q1 顏色 */
+    transition: transform 0.2s;
+    
+    &:hover { transform: translateY(-5px); }
+    
+    // 讓每一季度的顏色稍有區隔 (選填)
+    // &:nth-child(2) { border-top-color: #6bd098; }
+    // &:nth-child(3) { border-top-color: #fbc658; }
+    // &:nth-child(4) { border-top-color: #ef8157; }
+
+    @media (max-width: 959px) {
+      // 在平板模式下，因為是 2x2 排列，gap 會影響寬度，稍微縮小 flex-basis
+      flex: 1 1 calc(50% - 20px) !important;
+    }
+
+    @media (max-width: 599px) {
+      // 在手機模式下，100% 寬度
+      flex: 1 1 100% !important;
+    }
+     .stat-label { font-weight: 500; color: #555; }
+  .stat-value { font-weight: 500; font-size: 1.1rem; }
+
+  }
+}
+
+.nami-table-container {
+  width: 100%;
+  overflow: auto; // 讓容器可以橫向捲動
+  
+  mat-table {
+    display: block; // 確保表格作為塊級元素
+    width: max-content; // 非常重要：讓表格寬度隨內容撐開，而不是縮進 100%
+    min-width: 100%;
+
+    mat-header-row, mat-row {
+      display: flex; // 保持 Flex 佈局
+      width: 100%;
+    }
+
+    mat-header-cell, mat-cell {
+      flex: 0 0 auto; // 防止欄位被壓縮 (縮放比例為 0)
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      box-sizing: border-box;
+      background-color: white; // 預設背景，避免透明重疊
+    }
+  }
+
+  // 凍結欄位的視覺優化
+  .mat-table-sticky {
+    z-index: 10 !important;
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.2); // 加上淡淡的右側陰影
+    
+    &.mat-column-stickyEnd {
+      box-shadow: -2px 0 5px -2px rgba(0,0,0,0.2); // 如果是右側凍結則陰影在左
+    }
+  }
+}

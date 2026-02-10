@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { ImageDialogComponent } from "app/_components/image-dialog/image-dialog.component";
+import { ApiService } from "app/_services/api.service";
 
 @Component({
   selector: 'app-taskmaster-modal',
@@ -9,7 +11,7 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class taskmasterModalComponent implements OnInit {
   @Input() formData: any = {};
   @Input() title: string = "{ERROR}";
-  
+  @ViewChild('imgComponent') imgComponent: ImageDialogComponent;
   // 定義 taskmaster 的表單結構
   formGroup = this.fb.group({
     id: [-1],
@@ -28,7 +30,8 @@ export class taskmasterModalComponent implements OnInit {
 
   constructor(
     public modal: NgbActiveModal,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private apiSvc:ApiService,
   ) { }
 
   ngOnInit() {
@@ -50,9 +53,26 @@ export class taskmasterModalComponent implements OnInit {
     return this.isError(item) && this.formGroup.get(item)?.hasError(type);
   }
 
-  submit() {
-    if (this.formGroup.valid) {
-      this.modal.close(this.formGroup.getRawValue());
-    }
+ submit() {
+  if (this.formGroup.invalid) return;
+  const data = this.formGroup.value;
+
+  if (data.id > 0) {
+    // 【編輯模式】
+    this.apiSvc.updatedata('taskmaster', data.id, data).subscribe(async (res: any) => {
+      // 就算資料沒變，也要檢查有沒有新選的圖片要傳
+      await this.imgComponent.manualUpload(data.id);
+      this.modal.close(true); // 關閉彈窗並傳回 true
+    });
+  } else {
+    // 【新增模式】
+    this.apiSvc.createdata('taskmaster', data).subscribe(async (res: any) => {
+      const newId = Array.isArray(res) ? res[0].id : res.id;
+      if (newId) {
+        await this.imgComponent.manualUpload(newId);
+        this.modal.close(true);
+      }
+    });
   }
+}
 }

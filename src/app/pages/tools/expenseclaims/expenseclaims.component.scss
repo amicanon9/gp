@@ -44,3 +44,12 @@ button{
     font-size: 1.2rem;
   }
 }
+
+::ng-deep {
+  .mat-form-field-appearance-outline {
+    // 1. 預設狀態的外框顏色
+    .mat-form-field-outline {
+      color: rgba(0, 0, 0, 1); // 或者你想要的淡灰色
+    }
+}
+}

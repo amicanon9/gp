@@ -38,7 +38,14 @@ year = new Date().getFullYear();
   };
   stype_filter: string = "";
   projectplm: any;
-  
+  // 1. 定義結構
+quarterStats: any[] = [
+  { label: 'Q1', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
+  { label: 'Q2', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
+  { label: 'Q3', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
+  { label: 'Q4', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } }
+];
+availableYears: number[] = [];
   // 重要：用來強制重新渲染 Table 的 Flag
   tableReady = false;
   
@@ -52,11 +59,12 @@ year = new Date().getFullYear();
     },
     columns: [
       { name: 'id', displayName: '專案ID' },
+      { name: 'customer_name', displayName: '客戶名稱', width: 200 , sticky: true},
       { name: 'year', displayName: '年度', width: 80 },
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },
       { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
-      { name: 'customer_name', displayName: '客戶名稱', width: 200 },
+      
       { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
       { name: 'contact', displayName: '聯絡人', width: 120 },
       { name: 'telephone', displayName: '電話', width: 150 },
@@ -106,7 +114,6 @@ year = new Date().getFullYear();
       if (params.id) this.stype_filter = params.id
     });
   }
-
 
 
   async ngOnInit() {
@@ -198,82 +205,109 @@ year = new Date().getFullYear();
     this.loadData()
   }
 loadData() {
-    this.tableReady = false; // 重置狀態
+  this.tableReady = false;
+
+  // 將 projectplm 加入合併請求中
+  forkJoin({
+    projectData: this.apiSvc.getdata('projectplm'),
+    cuslist: this.apiSvc.getdata('customerplm'),
+    syslist: this.apiSvc.getCodeLookup('sys'),
+    agslist: this.apiSvc.getCodeLookup('ags'),
+    userlist: this.apiSvc.getdata('logininfo'),
+    crmlist: this.apiSvc.getCodeLookup('crm'),
+    weeklist: this.apiSvc.getdata('weeklyreportplm'),
+  }).pipe(
+    finalize(() => {
+      this.loaded = true;
+      this.tableReady = true;
+    })
+  ).subscribe(({ projectData, cuslist, syslist, agslist, userlist, crmlist, weeklist }) => {
+    // A. 基礎清單賦值
+    this.cuslist = cuslist;
+    this.syslist = syslist;
+    this.agslist = agslist;
+    this.userlist = userlist;
+    this.crmlist = crmlist;
+    this.weeklist = weeklist;
+
+    // B. 自動提取所有不重複年份 (用於年度選擇器)
+    const rawYears = projectData.map(item => Number(item.year));
+    rawYears.push(new Date().getFullYear()); // 確保包含今年
+    this.availableYears = Array.from(new Set(rawYears)).sort((a, b) => b - a);
+
+    // C. 建立動態週別欄位 (這部分維持原邏輯)
+    const weekSet = new Set<string>();
+    this.weeklist.forEach(w => weekSet.add(`${w.year}/W${w.week}`));
+    // const sortedWeeks = Array.from(weekSet).sort();
+    const sortedWeeks = Array.from(weekSet)
+    const dynamicWeekColumns = sortedWeeks.map(weekKey => ({
+      name: `dyn_week_${weekKey}`, 
+      displayName: weekKey,
+      width: 200,
+      templateRef: 'dynamic_week_content'
+    }));
     
-    forkJoin({
-      cuslist: this.apiSvc.getdata('customerplm'),
-      syslist: this.apiSvc.getCodeLookup('sys'),
-      agslist: this.apiSvc.getCodeLookup('ags'),
-      userlist: this.apiSvc.getdata('logininfo'),
-      crmlist: this.apiSvc.getCodeLookup('crm'),
-      weeklist: this.apiSvc.getdata('weeklyreportplm'),
-    }).subscribe(({ cuslist, syslist, agslist, userlist, crmlist, weeklist }) => {
-      this.cuslist = cuslist;
-      this.syslist = syslist;
-      this.agslist = agslist;
-      this.userlist = userlist;
-      this.crmlist = crmlist;
-      this.weeklist = weeklist;
+    const cleanBase = (this.base_columns && this.base_columns.length > 0) 
+                      ? this.base_columns 
+                      : this.table_config.columns.filter(c => !c.name.startsWith('dyn_week_') && c.name !== 'week');
 
-      // 1. 找出所有週別標籤
-      const weekSet = new Set<string>();
-      this.weeklist.forEach(w => weekSet.add(`${w.year}/W${w.week}`));
-      const sortedWeeks = Array.from(weekSet).sort();
+    this.table_config = {
+      ...this.table_config,
+      columns: [...cleanBase, ...dynamicWeekColumns]
+    };
 
-      // 2. 建立動態欄位
-      const dynamicWeekColumns = sortedWeeks.map(weekKey => ({
-        name: `dyn_week_${weekKey}`, 
-        displayName: weekKey,
-        width: 200,
-        templateRef: 'dynamic_week_content'
-      }));
-      const cleanBase = (this.base_columns && this.base_columns.length > 0) 
-                  ? this.base_columns 
-                  : this.table_config.columns.filter(c => !c.name.startsWith('dyn_week_') && c.name !== 'week');
-
-// 2. 重新賦值 (重新宣告一個新的物件，確保引用改變)
-const updatedConfig = {
-  ...this.table_config,
-  columns: [...cleanBase, ...dynamicWeekColumns] // 永遠用乾淨的底來加動態欄位
-};
-
-this.table_config = updatedConfig;
-// ...
-
-      // 4. 抓取主資料
-      this.apiSvc.getdata('projectplm').subscribe((data: any[]) => {
-        data.forEach(e => {
-          const customer = this.cuslist.find(x => x.id == e.customer_id);
-          const ags = this.agslist.find(x => x.code == e.ags_status);
-          
-          e['customer'] = customer;
-          e['contact'] = customer?.contact;
-          e['telephone'] = customer?.telephone;
-          e['email'] = customer?.email;
-          e['existing_plm'] = customer?.existing_plm;
-          e['existing_cad'] = customer?.existing_cad;
-          e['sys'] = this.syslist.find(x => x.code == e.system_inquiry_channel)?.description;
-          e['ags'] = ags;
-          e['ags_description'] = ags?.description;
-          e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
-          e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
-          e['button'] = [{ name: '編輯週報', type: 'weekly_report' }];
-          
-          // 關鍵：將週報資料過濾出來，供 getProjectWeekContent 比對
-          e['week_data'] = this.weeklist.filter(x => x.project_id == e.id);
-          const foundThisWeek = e['week_data'].find(w => w.year == this.year && w.week == this.week);
-          e['this_week'] = foundThisWeek ? [foundThisWeek] : [];
-        });
-
-        this.projectplm = data;
-        this.dataSource = new MatTableDataSource<any>(data);
-        this.loaded = true;
-        this.tableReady = true; // 資料與欄位都準備好了，再顯示 Table
-      });
+    // D. 處理 projectplm 資料欄位 Mapping
+    projectData.forEach(e => {
+      const customer = this.cuslist.find(x => x.id == e.customer_id);
+      const ags = this.agslist.find(x => x.code == e.ags_status);
+      
+      e['customer'] = customer;
+      e['contact'] = customer?.contact;
+      e['telephone'] = customer?.telephone;
+      e['email'] = customer?.email;
+      e['existing_plm'] = customer?.existing_plm;
+      e['existing_cad'] = customer?.existing_cad;
+      e['sys'] = this.syslist.find(x => x.code == e.system_inquiry_channel)?.description;
+      e['ags'] = ags;
+      e['ags_description'] = ags?.description;
+      e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
+      e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
+      e['button'] = [{ name: '編輯週報', type: 'weekly_report' }];
+      
+      // 週報比對邏輯
+      e['week_data'] = this.weeklist.filter(x => x.project_id == e.id);
+      const foundThisWeek = e['week_data'].find(w => w.year == this.year && w.week == this.week);
+      e['this_week'] = foundThisWeek ? [foundThisWeek] : [];
     });
-  }
 
+    this.projectplm = projectData;
 
+    // E. 執行統計計算 (僅計算當前選擇年度)
+    this.calculateQuarterlyStats();
+
+    // F. 渲染表格
+    this.dataSource = new MatTableDataSource<any>(this.projectplm);
+  });
+}
+
+  calculateQuarterlyStats() {
+  // 重置
+  this.quarterStats.forEach(q => { q.longshot = 0; q.bcd = 0; q.commit = 0; });
+  if (!this.projectplm) return;
+
+  // 僅針對目前選中的 this.year 進行統計
+  const yearFiltered = this.projectplm.filter(item => Number(item.year) === Number(this.year));
+
+  yearFiltered.forEach(item => {
+    const qStat = this.quarterStats.find(q => q.label === item.quarter);
+    if (!qStat) return;
+
+    const desc = (item.ags_description || '').toUpperCase().trim();
+    if (desc.includes('LONGSHOT')) qStat.longshot++;
+    else if (desc.includes('BCD')) qStat.bcd++;
+    else if (desc.includes('COMMIT')) qStat.commit++;
+  });
+}
   handleTableAction(event: { btn: any, row: any }) {
     if (event.btn.type === 'weekly_report') {
       // 開啟週報 Modal，沿用您的 windowClass 與 backdrop 設定
