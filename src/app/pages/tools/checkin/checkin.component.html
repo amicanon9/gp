@@ -48,45 +48,45 @@
           </div>
 
           <div class="project-section">
-  <label class="form-label fw-bold mb-3">
-    <mat-icon class="align-middle">assignment</mat-icon> 專案工時分配 (需滿 100%)
-  </label>
+            <label class="form-label fw-bold mb-3">
+              <mat-icon class="align-middle">assignment</mat-icon> 專案工時分配 (需滿 100%)
+            </label>
 
-  <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
-    <mat-label>選擇 PLM 專案</mat-label>
-    <mat-select [(ngModel)]="selectedPlmKeys" multiple (selectionChange)="onProjectSelectChange()">
-      <mat-option *ngFor="let p of getProjectsByType('PLM')" [value]="p.uniqueKey">
-        {{ p.displayName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
-    <mat-label>選擇服務專案</mat-label>
-    <mat-select [(ngModel)]="selectedSvcKeys" multiple (selectionChange)="onProjectSelectChange()">
-      <mat-option *ngFor="let p of getProjectsByType('Svc')" [value]="p.uniqueKey">
-        {{ p.displayName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
-    <mat-label>選擇內部專案</mat-label>
-    <mat-select [(ngModel)]="selectedInternalKeys" multiple (selectionChange)="onProjectSelectChange()">
-      <mat-option *ngFor="let p of getProjectsByType('Internal')" [value]="p.uniqueKey">
-        {{ p.displayName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+              <mat-label>選擇 PLM 專案</mat-label>
+              <mat-select [(ngModel)]="selectedPlmKeys" multiple (selectionChange)="onProjectSelectChange()">
+                <mat-option *ngFor="let p of getProjectsByType('PLM')" [value]="p.uniqueKey">
+                  {{ p.displayName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+              <mat-label>選擇服務專案</mat-label>
+              <mat-select [(ngModel)]="selectedSvcKeys" multiple (selectionChange)="onProjectSelectChange()">
+                <mat-option *ngFor="let p of getProjectsByType('Svc')" [value]="p.uniqueKey">
+                  {{ p.displayName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+              <mat-label>選擇內部專案</mat-label>
+              <mat-select [(ngModel)]="selectedInternalKeys" multiple (selectionChange)="onProjectSelectChange()">
+                <mat-option *ngFor="let p of getProjectsByType('Internal')" [value]="p.uniqueKey">
+                  {{ p.displayName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-  <div *ngFor="let item of projectAssignments" class="slider-item p-2 mb-2 border rounded shadow-sm bg-white">
-    <div class="d-flex justify-content-between align-items-center mb-1">
-      <span class="fw-bold text-truncate" style="max-width: 70%;">{{item.name}}</span>
-      <span class="badge rounded-pill bg-info text-white fs-6">{{item.percentage}}%</span>
-    </div>
-    <mat-slider class="w-100" min="0" max="100" step="1" [value]="item.percentage"
-      (input)="onSliderInput($event, item)">
-    </mat-slider>
-  </div>
-</div>
+            <div *ngFor="let item of projectAssignments" class="slider-item p-2 mb-2 border rounded shadow-sm bg-white">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold text-truncate" style="max-width: 70%;">{{item.name}}</span>
+                <span class="badge rounded-pill bg-info text-white fs-6">{{item.percentage}}%</span>
+              </div>
+              <mat-slider class="w-100" min="0" max="100" step="1" [value]="item.percentage"
+                (input)="onSliderInput($event, item)">
+              </mat-slider>
+            </div>
+          </div>
         </mat-card-content>
         <mat-card-actions class="p-1 bg-light d-flex flex-column align-items-start">
           <div class="mb-3 w-100">
@@ -108,9 +108,8 @@
 
 
             <button mat-raised-button [color]="isBackfill ? 'warn' : 'primary'"
-             [disabled]="isProcessing || totalPercentage !== 100 || projectAssignments.length === 0"
-              class="btn-main-action-full shadow flex-grow-1"
-              (click)="submitCheckin()">
+              [disabled]="isProcessing || totalPercentage !== 100 || projectAssignments.length === 0"
+              class="btn-main-action-full shadow flex-grow-1" (click)="submitCheckin()">
               <mat-icon class="me-2">check_circle</mat-icon>
               <span class="fs-5"> {{ isBackfill ? '補打' + checkinStatus : '打卡' + autoStatus }}</span>
             </button>
@@ -136,12 +135,12 @@
                   <th>模式</th>
                   <th class="text-center">狀態</th>
                   <th>專案</th>
-
+                  <th class="text-center">動作</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngIf="!displayedHistory?.length">
-                  <td colspan="6" class="text-center text-muted py-5">
+                  <td colspan="7" class="text-center text-muted py-5">
                     <mat-icon style="font-size: 48px; width: 48px; height: 48px;"
                       class="mb-2">history_toggle_off</mat-icon>
                     <p>尚無任何打卡紀錄</p>
@@ -174,7 +173,13 @@
                       </span>
                     </div>
                   </td>
-
+                  <td class="text-center">
+                    <button *ngIf="item.mode === 'backfill'" mat-icon-button color="warn" (click)="deleteHistory(item)"
+                      matTooltip="刪除補打">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                    <span *ngIf="item.mode !== 'backfill'" class="text-muted small">-</span>
+                  </td>
                 </tr>
               </tbody>
             </table>

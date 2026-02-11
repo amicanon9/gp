@@ -1,11 +1,17 @@
 <div class="nami-table-container" [style.maxHeight]="maxTableHeight" [style.minHeight]="minTableHeight">
 
   <ng-container *ngIf="status">
-    根據<b>{{stype.name}}</b>查詢
-    <select [(ngModel)]="stype_filter" (change)="filterStatus()" [compareWith]="compareById">
-      <option [ngValue]="''">全選</option>
-      <option *ngFor="let item of status" [ngValue]="item[stype.key]">{{item[stype.display_name]}}</option>
-    </select>
+    <mat-form-field appearance="outline" class="filter-select-field" subscriptSizing="dynamic">
+      <mat-label>{{stype.name}}過濾</mat-label>
+      <mat-select [(ngModel)]="stype_filter" (selectionChange)="filterStatus()" [compareWith]="compareById">
+        <mat-option [value]="''">
+          <span class="text-muted">顯示全部資料</span>
+        </mat-option>
+        <mat-option *ngFor="let item of status" [value]="item[stype.key]">
+          {{item[stype.display_name]}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </ng-container>
 
   <mat-table [dataSource]="innerDataSource" matSort 
@@ -16,7 +22,7 @@
     [class.disabled]="disabled"
     style="width: max-content; min-width: 100%;">
 
-    <ng-container matColumnDef="checkbox">
+      <ng-container matColumnDef="checkbox">
       <th mat-header-cell *matHeaderCellDef class="hidden"></th>
       <td mat-cell *matCellDef="let element; let i = index" class="hidden">
         <mat-checkbox [checked]="selectedId === i" (change)="onSelect(element, i)"></mat-checkbox>
@@ -29,15 +35,14 @@
       
       <th mat-header-cell *matHeaderCellDef mat-sort-header 
           [style.width.px]="column.width" 
-          [style.flex]="'0 0 ' + column.width + 'px'">
-        {{column.displayName}}
+          [style.flex]="'0 0 ' + column.width + 'px'"
+          [style.left.px]="column.left"> {{column.displayName}}
       </th>
 
       <td mat-cell *matCellDef="let element; let i = index" (click)="onSelect(element, i)"
           [style.width.px]="column.width"
-          [style.flex]="'0 0 ' + column.width + 'px'">
-        
-        <ng-container [ngSwitch]="column.templateRef != undefined ? column.templateRef : 'base'">
+          [style.flex]="'0 0 ' + column.width + 'px'"
+          [style.left.px]="column.left"> <ng-container [ngSwitch]="column.templateRef != undefined ? column.templateRef : 'base'">
           
           <ng-container *ngSwitchCase="'status_json'">
             <ng-container *ngTemplateOutlet="statusTemplate; context: { 
@@ -148,6 +153,20 @@
             </div>
           </ng-container>
 
+          <ng-container *ngSwitchCase="'this_week_content'">
+            <div class="week-cell-wrapper">
+              <ng-container *ngIf="element && element.this_week.length > 0; else noWeek">
+                <div class="text-truncate week-text" [matTooltip]="element.this_week[0].content_detail" matTooltipClass="nami-tooltip-multiline">
+                  <span class="badge badge-secondary">
+                    {{element.this_week[0].year}}/W{{element.this_week[0].week}}
+                  </span>
+                  {{ element.this_week[0].content }}
+                </div>
+              </ng-container>
+              <ng-template #noWeek><span class="text-muted">-</span></ng-template>
+            </div>
+          </ng-container>
+
           <ng-container *ngSwitchCase="'dynamic_week_content'">
             <div class="w-100">
               <ng-container *ngIf="getProjectWeekContent(element.week_data, column.displayName) as w; else noWeek">
@@ -172,36 +191,3 @@
 </div>
 
 <mat-paginator [class.disabled]="disabled" [pageSizeOptions]="[10, 5, 50]" *ngIf="config.serverSide"></mat-paginator>
-
-<ng-template #statusTemplate let-val="value" let-cfg="config" let-w="width">
-  <div [style.width.px]="w" class="d-flex align-items-center">
-    <ng-container *ngIf="val && cfg && cfg[val]; else fallback">
-      <div [ngStyle]="{
-        'color': cfg[val].color,
-        'background-color': cfg[val].bg,
-        'padding': '4px 10px',
-        'border-radius': cfg[val].type === 'status-dot' ? '20px' : '6px',
-        'display': 'inline-flex',
-        'align-items': 'center',
-        'font-size': '13px',
-        'font-weight': '600',
-        'letter-spacing': '0.5px'
-      }">
-        <mat-icon *ngIf="cfg[val].icon" [ngStyle]="{
-          'font-size': cfg[val].type === 'status-dot' ? '8px' : '16px',
-          'width': cfg[val].type === 'status-dot' ? '8px' : '16px',
-          'height': cfg[val].type === 'status-dot' ? '8px' : '16px',
-          'margin-right': '6px',
-          'display': 'flex',
-          'align-items': 'center'
-        }">
-          {{ cfg[val].icon }}
-        </mat-icon>
-        {{ val }}
-      </div>
-    </ng-container>
-    <ng-template #fallback>
-      <span class="text-muted">{{ val || '-' }}</span>
-    </ng-template>
-  </div>
-</ng-template>

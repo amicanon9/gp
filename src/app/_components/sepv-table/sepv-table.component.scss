@@ -176,7 +176,6 @@ th{
   font-size: 13px;
   padding: 12px;
 }
-
 ::ng-deep {
   .nami-table-container {
     overflow: auto !important; // 確保有捲軸
@@ -185,18 +184,23 @@ th{
       width: max-content !important; // 強制表格寬度撐開，不要擠壓
       display: block;
 
+
+
       mat-header-cell, mat-cell {
         background-color: white; // 必須給背景色，否則 sticky 捲動時會透視
         white-space: nowrap;     // 禁止文字自動換行擠壓寬度
         box-sizing: border-box;
       }
 
+
+
       // 修正 Material Sticky 的重疊偏位問題
+
       .mat-table-sticky {
-        z-index: 10 !important;
         background-color: white !important;
         border-right: 1px solid #e0e0e0 !important; // 增加邊界線
       }
     }
   }
+
 }

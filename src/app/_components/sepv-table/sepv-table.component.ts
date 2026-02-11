@@ -214,34 +214,42 @@ applyFilter(value: string) {
     }
 
     if (changes.dataSource) {
-      if (this.dataSource) {
-        console.log(this.dataSource)
-        if (this.config.serverSide) {
-          this.dataSource.sort = this.sort;
-          this.dataSource.paginator = this.paginator;
-          this.innerDataSource = this.dataSource;
-        }
-        else {
-          this.innerDataSource = new MatTableDataSource(this.dataSource);
-          console.log("I am bug");
-        }
-        if (this.translate_table !== null) {
-          this.innerDataSource.data.forEach((data: any) => {
-            let keys = Object.keys(data);
-            keys.forEach(key => {
-              if (this.translate_table.has(data[key])) {
-                data[key] = this.translate_table.get(data[key]);
-              }
-            });
-          });
-        }
-        this.temp_data = JSON.parse(JSON.stringify(this.innerDataSource.data));
-        if (this.stype_filter) {
-          this.filterStatus();
-        }
-      }
-      this.selectedId = -1;
+  if (this.dataSource) {
+    // 統一處理 DataSource
+    if (this.config.serverSide) {
+      // 伺服器端模式：直接使用傳入的實體
+      this.innerDataSource = this.dataSource;
+    } else {
+      // 本地模式：包裝成 MatTableDataSource
+      this.innerDataSource = new MatTableDataSource(this.dataSource);
     }
+
+    // 關鍵：延遲綁定 paginator 和 sort，確保 ViewChild 已抓到元件
+    setTimeout(() => {
+      if (this.innerDataSource) {
+        this.innerDataSource.paginator = this.paginator;
+        this.innerDataSource.sort = this.sort;
+      }
+    });
+
+    // 處理翻譯邏輯...
+    if (this.translate_table !== null) {
+      this.innerDataSource.data.forEach((data: any) => {
+        Object.keys(data).forEach(key => {
+          if (this.translate_table.has(data[key])) {
+            data[key] = this.translate_table.get(data[key]);
+          }
+        });
+      });
+    }
+
+    this.temp_data = JSON.parse(JSON.stringify(this.innerDataSource.data));
+    if (this.stype_filter) {
+      this.filterStatus();
+    }
+  }
+  this.selectedId = -1;
+}
   }
   onSelect(row: any, i: number) {
     if (!this.disabled) {

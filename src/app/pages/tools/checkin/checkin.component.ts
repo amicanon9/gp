@@ -3,6 +3,7 @@ import { ApiService } from 'app/_services/api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/_services/auth.service';
 import { forkJoin } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface ProjectAssign {
   id: number;
@@ -45,7 +46,8 @@ export class checkinComponent implements OnInit, OnDestroy {
   constructor(
     private apiSvc: ApiService,
     private toastr: ToastrService,
-    private authSvc: AuthService
+    private authSvc: AuthService,
+    private snackbar: MatSnackBar,
   ) { }
 
   ngOnInit() {
@@ -205,6 +207,7 @@ export class checkinComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: ({ checkin, leave }) => {
         this.displayedHistory = this.groupHistory(checkin);
+        console.log(this.displayedHistory)
         this.checkedInDates.clear();
         checkin.forEach(item => this.checkedInDates.add(new Date(item.checkin_time).toDateString()));
         this.determineAutoStatus();
@@ -334,7 +337,35 @@ export class checkinComponent implements OnInit, OnDestroy {
       complete: () => this.isProcessing = false
     });
   }
+  // 需注入 Swal (SweetAlert2) 或使用 confirm
+async deleteHistory(item: any) {
+  const ref = this.snackbar.open('確定要刪除這筆補打紀錄嗎?', '確定', { 
+    duration: 5000, // 給使用者多一點時間考慮
+    panelClass: ['alert-danger', 'alert'],
+    verticalPosition: 'top'
+  });
+  ref.onAction().subscribe(() => {
+    // 取得該組紀錄中所有的 ID (支持多專案分攤的情況)
+    const idsToDelete = item.raw_projects.map((p: any) => p.id);
+    
+    // 同時送出刪除請求
+    const deleteRequests = idsToDelete.map(id => 
+      this.apiSvc.deletedata('CheckinLogs', id)
+    );
 
+    forkJoin(deleteRequests).subscribe({
+      next: () => {
+        this.showSuccessToast('紀錄已成功刪除');
+        this.getHistory(); // 重新整理清單
+      },
+      error: (err) => {
+        console.error('刪除失敗', err);
+        this.snackbar.open('刪除失敗，請稍後再試', '關閉', { duration: 3000 });
+      }
+    });
+  });
+
+}
   resetForm() {
     this.selectedPlmKeys = [];
     this.selectedSvcKeys =[];
@@ -357,4 +388,10 @@ export class checkinComponent implements OnInit, OnDestroy {
     if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
     return '';
   };
+  private showSuccessToast(msg: string) {
+    this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {
+      timeOut: 3000, closeButton: true, enableHtml: true,
+      toastClass: "alert alert-success alert-with-icon", positionClass: "toast-top-center"
+    });
+  }
 }

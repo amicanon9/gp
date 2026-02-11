@@ -43,37 +43,31 @@ button{
   }
 }
 
-.nami-table-container {
-  width: 100%;
-  overflow: auto; // 讓容器可以橫向捲動
-  
-  mat-table {
-    display: block; // 確保表格作為塊級元素
-    width: max-content; // 非常重要：讓表格寬度隨內容撐開，而不是縮進 100%
-    min-width: 100%;
+::ng-deep {
+  .nami-table-container {
 
-    mat-header-row, mat-row {
-      display: flex; // 保持 Flex 佈局
-      width: 100%;
-    }
+    mat-table {
 
-    mat-header-cell, mat-cell {
-      flex: 0 0 auto; // 防止欄位被壓縮 (縮放比例為 0)
-      display: flex;
-      align-items: center;
-      padding: 0 8px;
-      box-sizing: border-box;
-      background-color: white; // 預設背景，避免透明重疊
-    }
-  }
+      mat-header-cell,
+      mat-cell {
+        background-color: white;
+        white-space: nowrap;
+        box-sizing: border-box;
+      }
 
-  // 凍結欄位的視覺優化
-  .mat-table-sticky {
-    z-index: 10 !important;
-    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.2); // 加上淡淡的右側陰影
-    
-    &.mat-column-stickyEnd {
-      box-shadow: -2px 0 5px -2px rgba(0,0,0,0.2); // 如果是右側凍結則陰影在左
+      // ⭐ 讓 selected 可以覆蓋 sticky
+      .mat-row.selected {
+        mat-cell,
+        .mat-table-sticky {
+          background-color: #D9F2FF !important; // 你想要的選取顏色
+        }
+      }
+
+      // sticky 預設背景
+      .mat-table-sticky {
+        background-color: white;
+        border-right: 1px solid #e0e0e0;
+      }
     }
   }
 }

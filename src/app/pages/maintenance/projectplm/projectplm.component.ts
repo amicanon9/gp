@@ -31,10 +31,10 @@ year = new Date().getFullYear();
   search: string;
   data: any;
   stype: any = {
-    name: '購電業',
-    key: 'id',
-    pk_key: 'info_id',
-    display_name: 'ps_name'
+    name: 'AGS狀態',
+    key: 'code',
+    pk_key: 'ags_status',
+    display_name: 'description'
   };
   stype_filter: string = "";
   projectplm: any;

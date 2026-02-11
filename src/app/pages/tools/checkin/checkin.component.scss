@@ -210,3 +210,6 @@ mat-card-header {
   }
 }
 
+::ng-deep .mat-simple-snackbar-action {
+  color: white
+}
