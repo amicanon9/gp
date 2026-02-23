@@ -191,3 +191,36 @@
 </div>
 
 <mat-paginator [class.disabled]="disabled" [pageSizeOptions]="[10, 5, 50]" *ngIf="config.serverSide"></mat-paginator>
+
+<ng-template #statusTemplate let-val="value" let-cfg="config" let-w="width">
+  <div [style.width.px]="w" class="d-flex align-items-center">
+    <ng-container *ngIf="val && cfg && cfg[val]; else fallback">
+      <div [ngStyle]="{
+        'color': cfg[val].color,
+        'background-color': cfg[val].bg,
+        'padding': '4px 10px',
+        'border-radius': cfg[val].type === 'status-dot' ? '20px' : '6px',
+        'display': 'inline-flex',
+        'align-items': 'center',
+        'font-size': '13px',
+        'font-weight': '600',
+        'letter-spacing': '0.5px'
+      }">
+        <mat-icon *ngIf="cfg[val].icon" [ngStyle]="{
+          'font-size': cfg[val].type === 'status-dot' ? '8px' : '16px',
+          'width': cfg[val].type === 'status-dot' ? '8px' : '16px',
+          'height': cfg[val].type === 'status-dot' ? '8px' : '16px',
+          'margin-right': '6px',
+          'display': 'flex',
+          'align-items': 'center'
+        }">
+          {{ cfg[val].icon }}
+        </mat-icon>
+        {{ val }}
+      </div>
+    </ng-container>
+    <ng-template #fallback>
+      <span class="text-muted">{{ val || '-' }}</span>
+    </ng-template>
+  </div>
+</ng-template>

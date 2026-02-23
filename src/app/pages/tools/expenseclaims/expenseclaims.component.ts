@@ -143,7 +143,7 @@ onAdd() {
   
   modalRef.componentInstance.title = "新增";
   modalRef.componentInstance.projectList = this.projectList;
-
+  modalRef.componentInstance.historyData = this.dataSource.data;
   // 監聽 Modal 關閉後的動作
   modalRef.result.then((res: any) => {
     // 只要 Modal 回傳值（我們設定成功回傳 true），就代表資料與圖片都處理完了

@@ -69,6 +69,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { expenseclaimsComponent } from 'app/pages/tools/expenseclaims/expenseclaims.component';
 import { expenseclaimsModalComponent } from 'app/pages/tools/expenseclaims/expenseclaims-modal/expenseclaims-modal.component';
+import { ReportsComponent } from 'app/pages/tools/reports/reports.component';
 
 
 export const TW_FORMATS = {
@@ -154,7 +155,8 @@ export const TW_FORMATS = {
     taskmasterComponent,
     taskmasterModalComponent,
     expenseclaimsComponent,
-    expenseclaimsModalComponent
+    expenseclaimsModalComponent,
+    ReportsComponent
   ],
   exports:[
     MultiSelectComponent,

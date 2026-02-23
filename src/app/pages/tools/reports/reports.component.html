@@ -1,0 +1,51 @@
+<div class="inner-content">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <i class="fa fa-file-excel-o"></i> 報表下載
+    </div>
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-12 d-flex align-items-center flex-wrap">
+          
+          <div class="d-flex align-items-center mr-4">
+            <mat-form-field appearance="outline" style="width: 180px;">
+              <mat-label>選擇員工</mat-label>
+              <mat-select [(ngModel)]="selectedUser">
+                <mat-option *ngFor="let user of userList" [value]="user.username">
+                  {{ user.username }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <mat-form-field appearance="outline" class="mr-3" style="width: 180px;">
+              <mat-label>選擇月份</mat-label>
+              <input matInput [matDatepicker]="dp" [(ngModel)]="datefm">
+              <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+              <mat-datepicker #dp></mat-datepicker>
+            </mat-form-field>
+            <small class="text-muted d-none d-lg-block">系統將自動產生該月報表</small>
+          </div>
+
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-md-3" *ngFor="let report of reports">
+          <div class="report-box p-3 border rounded text-center mb-3">
+            <div class="mb-2">
+              <i class="fa fa-table fa-3x text-info"></i>
+            </div>
+            <h6>{{ report }}</h6>
+            <button class="btn btn-outline-primary btn-sm btn-block" (click)="openReport(report)">
+              <i class="fa fa-download"></i> 下載報表 (Excel)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
