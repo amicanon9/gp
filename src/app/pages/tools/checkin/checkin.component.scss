@@ -87,7 +87,8 @@ $color-text-dark: #333333;
 
   .mat-calendar-body-selected {
     border-radius: 4px !important;
-    background-color: #f78f66;
+    background-color: transparent;
+    color: black
   }
 }
 
@@ -212,4 +213,29 @@ mat-card-header {
 
 ::ng-deep .mat-simple-snackbar-action {
   color: white
+}
+/* 針對歷史紀錄的大日曆進行寬度優化 */
+.full-width-history-calendar {
+  width: 100% !important;
+  
+  ::ng-deep {
+    .mat-calendar-content {
+      padding: 0 !important;
+    }
+    .mat-calendar-table {
+      width: 100% !important;
+    }
+    /* 讓日曆格子的字體大一點，看起來比較像看板 */
+    .mat-calendar-body-cell-content {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.legend-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 6px;
 }

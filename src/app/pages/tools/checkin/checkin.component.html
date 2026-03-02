@@ -52,7 +52,8 @@
               <mat-icon class="align-middle">assignment</mat-icon> 專案工時分配 (需滿 100%)
             </label>
 
-            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+            <mat-form-field *ngIf="getProjectsByType('PLM').length > 0" appearance="outline"
+              class="w-100 mb-2 custom-form-field">
               <mat-label>選擇 PLM 專案</mat-label>
               <mat-select [(ngModel)]="selectedPlmKeys" multiple (selectionChange)="onProjectSelectChange()">
                 <mat-option *ngFor="let p of getProjectsByType('PLM')" [value]="p.uniqueKey">
@@ -60,7 +61,9 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+
+            <mat-form-field *ngIf="getProjectsByType('Svc').length > 0" appearance="outline"
+              class="w-100 mb-2 custom-form-field">
               <mat-label>選擇服務專案</mat-label>
               <mat-select [(ngModel)]="selectedSvcKeys" multiple (selectionChange)="onProjectSelectChange()">
                 <mat-option *ngFor="let p of getProjectsByType('Svc')" [value]="p.uniqueKey">
@@ -68,7 +71,9 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline" class="w-100 mb-2 custom-form-field">
+
+            <mat-form-field *ngIf="getProjectsByType('Internal').length > 0" appearance="outline"
+              class="w-100 mb-2 custom-form-field">
               <mat-label>選擇內部專案</mat-label>
               <mat-select [(ngModel)]="selectedInternalKeys" multiple (selectionChange)="onProjectSelectChange()">
                 <mat-option *ngFor="let p of getProjectsByType('Internal')" [value]="p.uniqueKey">
@@ -76,7 +81,6 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-
             <div *ngFor="let item of projectAssignments" class="slider-item p-2 mb-2 border rounded shadow-sm bg-white">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-truncate" style="max-width: 70%;">{{item.name}}</span>
@@ -116,76 +120,102 @@
           </div>
         </mat-card-actions>
       </mat-card>
-      <div class="mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="text-muted mb-0"><mat-icon class="align-middle me-1">history</mat-icon> 最近打卡紀錄</h5>
-          <button mat-icon-button color="primary" (click)="getHistory()" matTooltip="重新整理">
-            <mat-icon>refresh</mat-icon>
-          </button>
-        </div>
+    <div class="mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="text-muted mb-0">
+      <mat-icon class="align-middle me-1">{{ isCalendarView ? 'calendar_month' : 'history' }}</mat-icon> 
+      {{ isCalendarView ? '打卡看板 (日曆模式)' : '最近打卡紀錄 (清單模式)' }}
+    </h5>
+    
+    <div class="d-flex align-items-center gap-2">
+      <mat-button-toggle-group [(ngModel)]="isCalendarView" class="mode-toggle">
+        <mat-button-toggle [value]="false">清單</mat-button-toggle>
+        <mat-button-toggle [value]="true">日曆</mat-button-toggle>
+      </mat-button-toggle-group>
 
-        <mat-card class="history-card shadow-sm border-0">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th>日期</th>
-                  <th>打卡時間</th>
-                  <th>實際時間</th>
-                  <th>模式</th>
-                  <th class="text-center">狀態</th>
-                  <th>專案</th>
-                  <th class="text-center">動作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngIf="!displayedHistory?.length">
-                  <td colspan="7" class="text-center text-muted py-5">
-                    <mat-icon style="font-size: 48px; width: 48px; height: 48px;"
-                      class="mb-2">history_toggle_off</mat-icon>
-                    <p>尚無任何打卡紀錄</p>
-                  </td>
-                </tr>
+      <button mat-icon-button color="primary" (click)="getHistory()" matTooltip="重新整理">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
 
-                <tr *ngFor="let item of displayedHistory">
-                  <td class="ps-4">{{ item.checkin_time | date:'yyyy-MM-dd' }}</td>
-                  <td class="fw-bold">{{ item.fake_time | date:'HH:mm' }}</td>
-                  <td class="fw-bold">{{ item.checkin_time | date:'HH:mm' }}</td>
-                  <td>
-                    <span class="badge rounded-pill"
-                      [ngClass]="item.mode === 'backfill' ? 'bg-warning text-dark' : 'bg-info text-white'">
-                      {{ item.mode === 'backfill' ? '補打' : '一般' }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <span [class.text-success]="item.status === '上班'" [class.text-secondary]="item.status === '下班'"
-                      class="fw-bold">
-                      <mat-icon class="align-middle me-1" style="font-size: 18px; width: 18px; height: 18px;">
-                        {{ item.status === '上班' ? 'login' : 'logout' }}
-                      </mat-icon>
-                      {{ item.status }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="d-flex flex-wrap gap-1">
-                      <span *ngFor="let name of item.project_names" class="badge bg-light text-dark border">
-                        {{ name }}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    <button *ngIf="item.mode === 'backfill'" mat-icon-button color="warn" (click)="deleteHistory(item)"
-                      matTooltip="刪除補打">
-                      <mat-icon>delete_outline</mat-icon>
-                    </button>
-                    <span *ngIf="item.mode !== 'backfill'" class="text-muted small">-</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </mat-card>
+  <mat-card *ngIf="!isCalendarView" class="history-card shadow-sm border-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4">日期</th>
+            <th>打卡時間</th>
+            <th>實際時間</th>
+            <th>模式</th>
+            <th class="text-center">狀態</th>
+            <th>專案</th>
+            <th class="text-center">動作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!displayedHistory?.length">
+            <td colspan="7" class="text-center text-muted py-5">
+              <mat-icon style="font-size: 48px; width: 48px; height: 48px;" class="mb-2">history_toggle_off</mat-icon>
+              <p>尚無任何打卡紀錄</p>
+            </td>
+          </tr>
+          <tr *ngFor="let item of displayedHistory">
+            <td class="ps-4">{{ item.checkin_time | date:'yyyy-MM-dd' }}</td>
+            <td class="fw-bold">{{ item.fake_time | date:'HH:mm' }}</td>
+            <td class="fw-bold">{{ item.checkin_time | date:'HH:mm' }}</td>
+            <td>
+              <span class="badge rounded-pill"
+                [ngClass]="item.mode === 'backfill' ? 'bg-warning text-dark' : 'bg-info text-white'">
+                {{ item.mode === 'backfill' ? '補打' : '一般' }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span [class.text-success]="item.status === '上班'" [class.text-secondary]="item.status === '下班'" class="fw-bold">
+                <mat-icon class="align-middle me-1" style="font-size: 18px; width: 18px; height: 18px;">
+                  {{ item.status === '上班' ? 'login' : 'logout' }}
+                </mat-icon>
+                {{ item.status }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex flex-wrap gap-1">
+                <span *ngFor="let name of item.project_names" class="badge bg-light text-dark border">
+                  {{ name }}
+                </span>
+              </div>
+            </td>
+            <td class="text-center">
+              <button *ngIf="item.mode === 'backfill'" mat-icon-button color="warn" (click)="deleteHistory(item)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+              <span *ngIf="item.mode !== 'backfill'" class="text-muted small">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+
+  <mat-card *ngIf="isCalendarView" class="history-card shadow-sm border-0 p-3">
+    <mat-calendar 
+      [dateClass]="dateClass" 
+      class="full-width-history-calendar">
+    </mat-calendar>
+
+    <div class="d-flex gap-4 mt-3 px-3">
+      <div class="d-flex align-items-center small">
+        <div class="legend-box" style="background-color: #55B8DA;"></div>一般打卡
       </div>
+      <div class="d-flex align-items-center small" style="margin-left: 5px;">
+        <div class="legend-box" style="background-color: #6bd098;"></div>請假核准
+      </div>
+      <div class="d-flex align-items-center small" style="margin-left: 5px;">
+        <div class="legend-box" style="background-color: #F9C55C;"></div>請假待審
+      </div>
+    </div>
+  </mat-card>
+</div>
     </div>
   </div>
 </div>

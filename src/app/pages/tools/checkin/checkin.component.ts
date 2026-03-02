@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ApiService } from 'app/_services/api.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'app/_services/auth.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';import { MatCalendar } from '@angular/material/datepicker';
+
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface ProjectAssign {
@@ -20,11 +21,11 @@ interface ProjectAssign {
 export class checkinComponent implements OnInit, OnDestroy {
   Pjlist: any[] = []; // 原始清單
   displayedHistory: any[] = [];
-
+@ViewChild(MatCalendar) calendar!: MatCalendar<Date>;
   isProcessing = false;
   checkinMode: 'normal' | 'backfill' = 'normal';
   currentTime = new Date();
-
+  isCalendarView =true;
   // 分成兩個選單的綁定值
   selectedPlmKeys: string[] = [];
   selectedSvcKeys: string[] = [];
@@ -212,6 +213,9 @@ export class checkinComponent implements OnInit, OnDestroy {
         checkin.forEach(item => this.checkedInDates.add(new Date(item.checkin_time).toDateString()));
         this.determineAutoStatus();
         this.processLeaveDates(leave);
+        if (this.calendar) {
+        this.calendar.updateTodaysDate(); // 這會觸發視圖更新
+      }
       }
     });
   }

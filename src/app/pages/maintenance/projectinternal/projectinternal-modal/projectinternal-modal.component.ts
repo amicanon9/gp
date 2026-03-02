@@ -9,12 +9,13 @@ import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 export class ProjectInternalModalComponent implements OnInit {
   @Input() formData: any = {};
   @Input() title: string = "{ERROR}";
-
+    @Input() booklist:any;
   // 只保留 Internal Project 需要的欄位
   formGroup = this.fb.group({
     id: [0],
     name: [null, [Validators.required]],
-    description: [null]
+    description: [null],
+     book_id:[null, Validators.required],
   });
 
   constructor(

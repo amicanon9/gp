@@ -10,7 +10,7 @@ export class departmentsModalComponent implements OnInit {
   @Input() formData!: any;     // 編輯時傳入的舊資料
   @Input() userlist: any; // 從 parent 傳入的 login_info 清單
   @Input() title: string = '部門資訊';
-
+  @Input() booklist:any;
   formGroup: FormGroup;
 
   constructor(
@@ -22,7 +22,8 @@ export class departmentsModalComponent implements OnInit {
       id: [null],
       dept_name: ["", [Validators.required, Validators.maxLength(50)]],
       manager_id: [null], // 部門主管 ID (int)
-      description: ["", [Validators.maxLength(100)]]
+      description: ["", [Validators.maxLength(100)]],
+      book_id:[null, Validators.required],
     });
   }
 

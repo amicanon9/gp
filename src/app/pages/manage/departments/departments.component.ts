@@ -30,6 +30,7 @@ export class departmentsComponent implements OnInit {
   },
   columns: [
       { name: 'id', displayName: '部門ID' },
+      { name: 'company_name', displayName: '所屬' },
       { name: 'dept_name', displayName: '部門名稱' },
       { name: 'manager_name', displayName: '部門主管' }, // 透過 mapping 產生
       { name: 'description', displayName: '說明' },
@@ -44,6 +45,7 @@ export class departmentsComponent implements OnInit {
   @ViewChild('namiTable') namiTable!: TableComponent;
   loaded = false;
   deplist: any;
+  booklist: any;
 
 
   constructor(
@@ -87,6 +89,7 @@ ngOnDestroy() {
     const modalRef = this.modalSvc.open(departmentsModalComponent, { windowClass: "modal-mySize",backdrop:'static' });
     modalRef.componentInstance.title = "新增";
     modalRef.componentInstance.userlist = JSON.parse(JSON.stringify(this.userlist));
+    modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
     modalRef.result.then((res: any) => {
       let data= res;
       this.apiSvc.createdata('departments',data).pipe(
@@ -134,6 +137,7 @@ ngOnDestroy() {
     modalRef.componentInstance.title = "編輯";
     modalRef.componentInstance.userlist = JSON.parse(JSON.stringify(this.userlist));
     modalRef.componentInstance.formData = JSON.parse(JSON.stringify(this.selected));
+    modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
     modalRef.result.then((res: any) => {
       let data= res;
       console.log(data);
@@ -232,10 +236,12 @@ ngOnDestroy() {
   forkJoin({
     deplist: this.apiSvc.getdata('Departments'),
     userlist: this.apiSvc.getdata('logininfo'),
-  }).subscribe(({ deplist, userlist }) => {
+    booklist: this.apiSvc.getSetOfBooks(),
+  }).subscribe(({ deplist, userlist,booklist }) => {
     // 1. 賦值基礎清單
     this.deplist = deplist;
     this.userlist = userlist;
+    this.booklist = booklist;
     // 3. 設定 Table Data
     this.dataSource = new MatTableDataSource<any>(deplist);
     this.loaded = true;

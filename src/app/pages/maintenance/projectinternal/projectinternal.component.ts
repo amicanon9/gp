@@ -31,6 +31,7 @@ export class projectinternalComponent implements OnInit, OnDestroy {
     },
     columns: [
       { name: 'id', displayName: '專案ID', width: 80 },
+      { name: 'company_name', displayName: '所屬' },
       { name: 'name', displayName: '專案名稱', width: 250 },
       { name: 'description', displayName: '敘述', width: 400 },
       { name: 'created_at', displayName: '建立時間', width: 180, templateRef: 'date' },
@@ -45,6 +46,7 @@ export class projectinternalComponent implements OnInit, OnDestroy {
   selected: any;
   @ViewChild('namiTable') namiTable!: TableComponent;
   loaded = false;
+  booklist: any;
   
 
   constructor(
@@ -84,7 +86,7 @@ export class projectinternalComponent implements OnInit, OnDestroy {
   onAdd() {
     const modalRef = this.modalSvc.open(ProjectInternalModalComponent, { windowClass: "modal-mySize", backdrop: 'static' });
     modalRef.componentInstance.title = "新增內部專案";
-    
+    modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
     modalRef.result.then((res: any) => {
       this.apiSvc.createdata('projectinternal', res).pipe(
         catchError(err => {
@@ -100,7 +102,7 @@ export class projectinternalComponent implements OnInit, OnDestroy {
     const modalRef = this.modalSvc.open(ProjectInternalModalComponent, { windowClass: 'modal-mySize', backdrop: 'static' });
     modalRef.componentInstance.title = "編輯內部專案";
     modalRef.componentInstance.formData = JSON.parse(JSON.stringify(this.selected));
-
+    modalRef.componentInstance.booklist = JSON.parse(JSON.stringify(this.booklist));
     modalRef.result.then((res: any) => {
       this.apiSvc.updatedata('projectinternal', this.selected.id, res).pipe(
         catchError(err => {
@@ -135,22 +137,29 @@ export class projectinternalComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
-  loadData() {
-    this.loaded = false;
-    this.apiSvc.getdata('projectinternal')
-      .pipe(
-        tap((data: any[]) => {
-          this.projectInternalData = data;
-          this.dataSource = new MatTableDataSource<any>(data);
-          this.loaded = true;
-        }),
-        catchError(err => {
-          this.showErrorToast('資料載入失敗');
-          return throwError(err);
-        })
-      ).subscribe();
-  }
+loadData() {
+  this.loaded = false; // 開始載入，顯示轉圈圈
 
+  // 使用 forkJoin 同時發出兩個請求
+  forkJoin({
+    projectData: this.apiSvc.getdata('projectinternal'),
+    booklist: this.apiSvc.getSetOfBooks()
+  }).pipe(
+    catchError(err => {
+      this.showErrorToast('資料載入失敗');
+      this.loaded = true; 
+      return throwError(err);
+    })
+  ).subscribe(({ projectData, booklist }) => {
+    // 1. 處理專案資料 (原本 top 裡的邏輯)
+    this.projectInternalData = projectData;
+    this.dataSource = new MatTableDataSource<any>(projectData);
+    // 2. 處理帳簿資料
+    this.booklist = booklist;
+    // 3. 關閉載入狀態
+    this.loaded = true;
+  });
+}
   // 使用簡化後的 Toast 呼叫方式 (假設 positionClass 已在 Global 設定)
   private showSuccessToast(msg: string) {
     this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {
