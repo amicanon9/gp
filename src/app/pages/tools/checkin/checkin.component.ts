@@ -30,6 +30,7 @@ export class checkinComponent implements OnInit, OnDestroy {
   selectedPlmKeys: string[] = [];
   selectedSvcKeys: string[] = [];
   selectedInternalKeys: string[] = [];
+  selectedFirmKeys: string[] = [];
   projectAssignments: ProjectAssign[] = [];
 
   totalPercentage = 0;
@@ -39,7 +40,7 @@ export class checkinComponent implements OnInit, OnDestroy {
 
   autoStatus: '上班' | '下班' = '上班';
   checkinStatus: string = '上班';
-
+  holidays = new Set<string>();
   backfillDate = new Date();
   backfillTime = "08:30";
   private timer: any;
@@ -54,14 +55,52 @@ export class checkinComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadAllProjects();
     this.timer = setInterval(() => this.currentTime = new Date(), 1000);
+    this.loadHolidays();
   }
 
+loadHolidays() {
+  const currentYearNum = new Date().getFullYear();
+  const lastYear = (currentYearNum - 1).toString();
+  const currentYear = currentYearNum.toString();
+
+  // 同時發起兩個請求
+  forkJoin({
+    lastYearData: this.apiSvc.getHolidaysData(lastYear),
+    currentYearData: this.apiSvc.getHolidaysData(currentYear)
+  }).subscribe({
+    next: (result) => {
+      this.holidays.clear();
+      
+      // 合併兩年的陣列
+      const combinedData = [...result.lastYearData, ...result.currentYearData];
+      
+      combinedData
+        .filter(item => item.isHoliday)
+        .forEach(item => {
+          const y = parseInt(item.date.substring(0, 4));
+          const m = parseInt(item.date.substring(4, 6)) - 1;
+          const d = parseInt(item.date.substring(6, 8));
+          
+          const dateObj = new Date(y, m, d);
+          this.holidays.add(dateObj.toDateString());
+        });
+
+      console.log(`${lastYear}-${currentYear} 假日資料載入完成，共 ${this.holidays.size} 筆`);
+      if (this.calendar) {
+        this.calendar.updateTodaysDate(); // 這會觸發視圖更新
+      }
+    },
+    error: (err) => {
+      console.error('抓取跨年度假日 API 失敗', err);
+    }
+  });
+}
   ngOnDestroy() { if (this.timer) clearInterval(this.timer); }
 
   get isBackfill() { return this.checkinMode === 'backfill'; }
 
   // 輔助方法：供 HTML 過濾不同類型的專案
-  getProjectsByType(type: 'PLM' | 'Internal'| 'Svc') {
+  getProjectsByType(type: 'PLM' | 'Internal'| 'Svc' | 'Firm') {
     return this.Pjlist.filter(p => p.type === type);
   }
 
@@ -70,7 +109,8 @@ export class checkinComponent implements OnInit, OnDestroy {
     forkJoin({
       plm: this.apiSvc.getdatabyrole('projectplm'),
       internal: this.apiSvc.getdata('projectinternal'),
-      svc: this.apiSvc.getdata('projectsvc')
+      svc: this.apiSvc.getdata('projectsvc'),
+      firm: this.apiSvc.getdata('projectfirm'),
     }).subscribe({
       next: (res) => {
         const plmList = (res.plm || []).map(p => ({
@@ -92,7 +132,13 @@ export class checkinComponent implements OnInit, OnDestroy {
           displayName: `(SVC ${p.id}) ${p.project_name || '未命名項目'}`,
           uniqueKey: `Svc_${p.id}`
         }));
-        this.Pjlist = [...internalList, ...plmList, ...svcList];
+        const firmList = (res.firm || []).map(p => ({
+          ...p,
+          type: 'Firm',
+          displayName: `(事務所 ${p.id}) ${p.name || '未命名項目'}`,
+          uniqueKey: `Firm_${p.id}`
+        }));
+        this.Pjlist = [...internalList, ...plmList, ...svcList, ...firmList];
         this.getHistory();
       },
       error: () => this.toastr.error('專案清單載入失敗')
@@ -102,7 +148,7 @@ export class checkinComponent implements OnInit, OnDestroy {
   // 2. 處理選單選擇變更 (核心邏輯)
   onProjectSelectChange() {
     // 合併兩個選單的 Key 值
-    const allSelectedKeys = [...this.selectedPlmKeys, ...this.selectedInternalKeys, ...this.selectedSvcKeys];
+    const allSelectedKeys = [...this.selectedPlmKeys, ...this.selectedInternalKeys, ...this.selectedSvcKeys, ...this.selectedFirmKeys];
     const currentKeys = this.projectAssignments.map(a => `${a.type}_${a.id}`);
 
     // A. 處理新增：如果選單中有，但 Assignments 中沒有
@@ -158,6 +204,9 @@ export class checkinComponent implements OnInit, OnDestroy {
       this.selectedSvcKeys = this.projectAssignments
       .filter(a => a.type === 'Svc')
       .map(a => `Svc_${a.id}`);
+      this.selectedFirmKeys = this.projectAssignments
+      .filter(a => a.type === 'Firm')
+      .map(a => `Firm_${a.id}`);
     this.calculateTotal();
   }
 
@@ -374,6 +423,7 @@ async deleteHistory(item: any) {
     this.selectedPlmKeys = [];
     this.selectedSvcKeys =[];
     this.selectedInternalKeys = [];
+    this.selectedFirmKeys = [];
     this.projectAssignments = [];
     this.totalPercentage = 0;
   }
@@ -383,15 +433,23 @@ async deleteHistory(item: any) {
   }
 
   dateClass = (d: any): string => {
-    if (!d) return '';
-    const date = (d instanceof Date) ? d : new Date(d);
-    if (isNaN(date.getTime())) return '';
-    const dateStr = date.toDateString();
-    if (this.approvedLeaves.has(dateStr)) return 'leave-approved-date';
-    if (this.pendingLeaves.has(dateStr)) return 'leave-pending-date';
-    if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
-    return '';
-  };
+  if (!d) return '';
+  const date = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(date.getTime())) return '';
+  
+  const dateStr = date.toDateString();
+
+  // 優先順序建議：請假 > 假日 > 已打卡
+  if (this.approvedLeaves.has(dateStr)) return 'leave-approved-date';
+  if (this.pendingLeaves.has(dateStr)) return 'leave-pending-date';
+  
+  // 新增：國定假日判斷 (顯示為紅色或橘色)
+  if (this.holidays.has(dateStr)) return 'holiday-date';
+  
+  if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
+  
+  return '';
+};
   private showSuccessToast(msg: string) {
     this.toastr.success(`<span class="nc-icon nc-bell-55"></span> ${msg}`, "", {
       timeOut: 3000, closeButton: true, enableHtml: true,

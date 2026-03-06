@@ -65,7 +65,7 @@ availableYears: number[] = [];
       { name: 'month', displayName: '月', width: 80 },
       { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
       
-      { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
+    
       { name: 'contact', displayName: '聯絡人', width: 120 },
       { name: 'telephone', displayName: '電話', width: 150 },
       { name: 'email', displayName: 'Email', width: 200 },
@@ -79,9 +79,7 @@ availableYears: number[] = [];
       { name: 'ags', displayName: 'AGS 狀態', width: 150, templateRef: 'ags_status' },
       { name: 'under_control_longshot_year_q', displayName: '掌控狀況 Year/Q', width: 150 },
       { name: 'solution_mapping', displayName: '解決方案對應', width: 200 },
-      { name: 'this_week', displayName: '本週週報', width: 300, templateRef: 'this_week_content' },
-      { name: 'sales', displayName: '業務負責人', width: 120 },
-      { name: 'service', displayName: '服務負責人', width: 120 },
+        { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
     ]
   };
   dataSource!: MatTableDataSource<any>;
@@ -204,7 +202,7 @@ availableYears: number[] = [];
     this.selected = null;
     this.loadData()
   }
-loadData() {
+  loadData() {
   this.tableReady = false;
 
   // 將 projectplm 加入合併請求中

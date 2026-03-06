@@ -59,6 +59,8 @@ import { departmentsComponent } from 'app/pages/manage/departments/departments.c
 import { departmentsModalComponent } from 'app/pages/manage/departments/departments-modal/departments-modal.component';
 import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
 import { ProjectInternalModalComponent } from 'app/pages/maintenance/projectinternal/projectinternal-modal/projectinternal-modal.component';
+import { projectfirmComponent } from 'app/pages/maintenance/projectfirm/projectfirm.component';
+import { projectfirmModalComponent } from 'app/pages/maintenance/projectfirm/projectfirm-modal/projectfirm-modal.component';
 import { projectsvcModalComponent } from 'app/pages/maintenance/projectsvc/projectsvc-modal/projectsvc-modal.component';
 import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc.component';
 import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
@@ -140,6 +142,8 @@ export const TW_FORMATS = {
     leavemanagementComponent,
     projectinternalComponent,
     ProjectInternalModalComponent,
+    projectfirmComponent,
+    projectfirmModalComponent,  
     SetOfBooksModalComponent,
     LoginInfoComponent,
     LoginInfoModalComponent,

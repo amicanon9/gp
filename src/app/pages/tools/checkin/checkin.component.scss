@@ -61,6 +61,11 @@ $color-text-dark: #333333;
       border-radius: 4px !important;
     }
   }
+  .holiday-date {
+    @extend %square-date;
+    background-color: #ff7489 !important; // 極淡紅
+    &:hover { background-color: darken(#c4485a, 10%) !important; }
+  }
 
   // 1. 打卡紀錄 (藍色 - 你原本的)
   .has-checkin-date {
@@ -238,4 +243,34 @@ mat-card-header {
   height: 14px;
   border-radius: 3px;
   margin-right: 6px;
+}
+
+// 日曆縮小核心
+.compact-calendar {
+  width: 100%;
+  ::ng-deep .mat-calendar-table {
+    height: 300px !important; // 壓縮高度
+  }
+  ::ng-deep .mat-calendar-body-cell {
+    padding: 2px !important; // 讓格子更緊湊
+  }
+  ::ng-deep .mat-calendar-header {
+    padding-top: 0;
+  }
+}
+
+// 修正表格的 Sticky Header 陰影
+.sticky-top {
+  z-index: 10;
+  background-color: #f8f9fa !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+// 列表滾動條美化
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
 }

@@ -13,24 +13,17 @@
   </div>
   <mat-card>
     <mat-card-content>
-     <ng-container *ngIf="tableReady; else loadingTemplate">
+     <ng-container >
       <sepv-table #namiTable 
         [search]="search" 
         [config]="table_config" 
-        [maxTableHeight]="maxTableHeight" 
-        [minTableHeight]="minTableHeight" 
         [dataSource]="dataSource" 
         (select)="onSelect($event)" 
-        [status]="infolist"  
-        [stype]="stype" 
-        [stype_filter]="stype_filter" 
-        (actionClick)="handleTableAction($event)">
+        >
       </sepv-table>
     </ng-container>
 
-    <ng-template #loadingTemplate>
-      <div class="p-3 text-center">讀取資料中...</div>
-    </ng-template>
+   
     </mat-card-content>
   </mat-card>
 </div>

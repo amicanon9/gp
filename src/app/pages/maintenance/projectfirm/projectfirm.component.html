@@ -13,9 +13,9 @@
   </div>
   <mat-card>
     <mat-card-content>
- 
+    
       <sepv-table #namiTable [search]="search" [config]="table_config" [maxTableHeight]="maxTableHeight" 
-        [minTableHeight]="minTableHeight" [dataSource]="dataSource" (select)="onSelect($event)" [status]="infolist"  [stype]="stype" [stype_filter]="stype_filter">
+        [minTableHeight]="minTableHeight" [dataSource]="dataSource" (select)="onSelect($event)" >
       </sepv-table>
     </mat-card-content>
   </mat-card>

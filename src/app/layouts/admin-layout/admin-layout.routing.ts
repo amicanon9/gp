@@ -25,6 +25,7 @@ import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc
 import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
 import { expenseclaimsComponent } from 'app/pages/tools/expenseclaims/expenseclaims.component';
 import { ReportsComponent } from 'app/pages/tools/reports/reports.component';
+import { projectfirmComponent } from 'app/pages/maintenance/projectfirm/projectfirm.component';
 
 export const AdminLayoutRoutes: Routes = [
   { path: 'login',          component: LoginComponent },
@@ -33,6 +34,7 @@ export const AdminLayoutRoutes: Routes = [
   { path: 'project/projectplm',      component: projectplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectsvc',      component: projectsvcComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectinternal',      component: projectinternalComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'project/projectfirm',      component: projectfirmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'customer/customerplm',      component: customerplmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/checkin',          component: checkinComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leaveapplications',          component: leaveapplicationsComponent, canActivate: [AuthGuard, MenuGuard]},

@@ -23,19 +23,10 @@ export class ApiService {
 
 
 getHolidaysData(year: string): Observable<any[]> {
-  // 將所有敏感資訊與設定寫在方法內部
-  const URL = "https://superiorapis-creator.cteam.com.tw/manager/feature/proxy/99fe9e562fa7/pub_99fe9f51aca7";
-  const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjZXJ0IjoiYzVmYjY3NWY5YzVjMTY1ZDRjNWJhNjZmZDkxYTE4ODU3M2Q2NmEwZSIsImlhdCI6MTc3MjA4Nzc4MX0.QGi2vtyPlAwFWbCUYWrIhbkRidFub842BIMJt6GXZr8";
-
-  const httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'Schema', // 照你原本 Axios 的設定寫 Schema
-      'token': token
-    }),
-    params: new HttpParams().set('year', year)
-  };
-
-  return this.http.get<any[]>(URL, httpOptions);
+  // jsDelivr CDN 支援跨域，且不需要 Token
+  const URL = `https://cdn.jsdelivr.net/gh/ruyut/TaiwanCalendar/data/${year}.json`;
+  
+  return this.http.get<any[]>(URL);
 }
 
  public getReport(data: any) {
