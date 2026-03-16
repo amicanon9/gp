@@ -26,6 +26,7 @@ export class expenseclaimsModalComponent implements OnInit {
     description: [null],
     // 交通費專屬
     location_from_to: [null],
+    transportation: [null],
     mileage: [0],
     subsidy_unit_price: [7],
     toll_fee: [0],
@@ -103,6 +104,7 @@ export class expenseclaimsModalComponent implements OnInit {
           category_item: '交通費',
           item_name: lastClaim.item_name,
           location_from_to: lastClaim.location_from_to,
+          transportation: lastClaim.transportation,
           mileage: lastClaim.mileage,
           subsidy_unit_price: lastClaim.subsidy_unit_price,
           toll_fee: lastClaim.toll_fee || 0,     // 帶入過路費
@@ -115,6 +117,7 @@ export class expenseclaimsModalComponent implements OnInit {
           manual_amount: lastClaim.manual_amount,
           // 非交通費時，清空交通相關欄位
           location_from_to: null,
+          transportation: null,
           mileage: 0,
           toll_fee: 0,
           parking_fee: 0
@@ -133,6 +136,7 @@ export class expenseclaimsModalComponent implements OnInit {
       category_item: '交通費',
       item_name: null,
       location_from_to: null,
+      transportation: null,
       mileage: 0,
       subsidy_unit_price: 7,
       toll_fee: 0,

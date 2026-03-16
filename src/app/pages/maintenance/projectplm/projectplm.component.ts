@@ -288,22 +288,55 @@ availableYears: number[] = [];
   });
 }
 
-  calculateQuarterlyStats() {
-  // 重置
-  this.quarterStats.forEach(q => { q.longshot = 0; q.bcd = 0; q.commit = 0; });
-  if (!this.projectplm) return;
+calculateQuarterlyStats() {
+  // 1. 重置統計數據
+  this.quarterStats.forEach(q => { 
+    q.longshot = 0; 
+    q.bcd = 0; 
+    q.commit = 0; 
+  });
 
-  // 僅針對目前選中的 this.year 進行統計
-  const yearFiltered = this.projectplm.filter(item => Number(item.year) === Number(this.year));
+  if (!this.projectplm || !this.agslist) return;
 
-  yearFiltered.forEach(item => {
-    const qStat = this.quarterStats.find(q => q.label === item.quarter);
-    if (!qStat) return;
+  // 2. 遍歷每一個專案
+  this.projectplm.forEach(project => {
+    const weekData = project['week_data'] || [];
+    
+    // 定義季度與對應的週數範圍
+    const quarterConfigs = [
+      { label: 'Q1', start: 1, end: 13 },
+      { label: 'Q2', start: 14, end: 26 },
+      { label: 'Q3', start: 27, end: 39 },
+      { label: 'Q4', start: 40, end: 53 }
+    ];
 
-    const desc = (item.ags_description || '').toUpperCase().trim();
-    if (desc.includes('LONGSHOT')) qStat.longshot++;
-    else if (desc.includes('BCD')) qStat.bcd++;
-    else if (desc.includes('COMMIT')) qStat.commit++;
+    quarterConfigs.forEach(config => {
+      // 3. 篩選該專案在當前年度 (this.year) 且落在該季度週數範圍內的週報
+      const recordsInQuarter = weekData.filter(w => 
+        Number(w.year) === Number(this.year) && 
+        Number(w.week) >= config.start && 
+        Number(w.week) <= config.end
+      );
+
+      if (recordsInQuarter.length > 0) {
+        // 4. 取得該季度最後一週的紀錄 (週數最大者)
+        const lastRecord = recordsInQuarter.sort((a, b) => b.week - a.week)[0];
+        
+        // 5. 透過 ags_status 找回對應的描述
+        const agsInfo = this.agslist.find(x => x.code == lastRecord.ags_status);
+        
+        if (agsInfo && agsInfo.description) {
+          const desc = agsInfo.description.toUpperCase().trim();
+          const qStat = this.quarterStats.find(q => q.label === config.label);
+          
+          if (qStat) {
+            if (desc.includes('LONGSHOT')) qStat.longshot++;
+            else if (desc.includes('BCD')) qStat.bcd++;
+            else if (desc.includes('COMMIT')) qStat.commit++;
+          }
+        }
+      }
+    });
   });
 }
   handleTableAction(event: { btn: any, row: any }) {

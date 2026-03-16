@@ -39,6 +39,7 @@ export class expenseclaimsComponent implements OnInit, OnDestroy {
       { name: 'category_item', displayName: '類別', templateRef: 'status_json', width: 120 },
       { name: 'item_name', displayName: '項目/行程', width: 200 },
       { name: 'location_from_to', displayName: '目的地(單程)', width: 180 },
+      { name: 'transportation', displayName: '交通方式', width: 180 },
       { name: 'total_amount', displayName: '總金額', width: 120 },
       { name: 'description', displayName: '備註', width: 200 },
     ]

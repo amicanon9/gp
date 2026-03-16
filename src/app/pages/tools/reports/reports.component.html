@@ -11,6 +11,7 @@
             <mat-form-field appearance="outline" style="width: 180px;">
               <mat-label>選擇員工</mat-label>
               <mat-select [(ngModel)]="selectedUser">
+                <mat-option value="All">--- 全部員工 ---</mat-option>
                 <mat-option *ngFor="let user of userList" [value]="user.username">
                   {{ user.username }}
                 </mat-option>

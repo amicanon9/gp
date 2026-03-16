@@ -35,6 +35,7 @@ export class checkinComponent implements OnInit, OnDestroy {
 
   totalPercentage = 0;
   checkedInDates = new Set<string>();
+  checkinOnlyDates = new Set<string>(); // 新增
   approvedLeaves = new Set<string>();
   pendingLeaves = new Set<string>();
 
@@ -259,7 +260,26 @@ loadHolidays() {
         this.displayedHistory = this.groupHistory(checkin);
         console.log(this.displayedHistory)
         this.checkedInDates.clear();
-        checkin.forEach(item => this.checkedInDates.add(new Date(item.checkin_time).toDateString()));
+        this.checkinOnlyDates.clear(); // 新增
+
+        // 先分別收集上班、下班日期
+        const checkinDays = new Set<string>();
+        const checkoutDays = new Set<string>();
+
+        checkin.forEach(item => {
+          const dateStr = new Date(item.checkin_time).toDateString();
+          this.checkedInDates.add(dateStr);
+
+          if (item.status === '上班') checkinDays.add(dateStr);
+          if (item.status === '下班') checkoutDays.add(dateStr);
+        });
+
+        // 有上班卡但沒下班卡的日期
+        checkinDays.forEach(dateStr => {
+          if (!checkoutDays.has(dateStr)) {
+            this.checkinOnlyDates.add(dateStr);
+          }
+        });
         this.determineAutoStatus();
         this.processLeaveDates(leave);
         if (this.calendar) {
@@ -446,6 +466,7 @@ async deleteHistory(item: any) {
   // 新增：國定假日判斷 (顯示為紅色或橘色)
   if (this.holidays.has(dateStr)) return 'holiday-date';
   
+  if (this.checkinOnlyDates.has(dateStr)) return 'checkin-only-date';
   if (this.checkedInDates.has(dateStr)) return 'has-checkin-date';
   
   return '';

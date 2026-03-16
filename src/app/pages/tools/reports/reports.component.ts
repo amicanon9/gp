@@ -19,14 +19,14 @@ export class ReportsComponent implements OnInit {
   reports: any;
   datefm: Date;
   userList: any[] = [];      // 存放所有員工清單
-  selectedUser: string = ''; // 綁定選中的 username
+  selectedUser: string = 'All'; // 綁定選中的 username
 
   constructor(
     public datepipe: DatePipe,
     public authSvc: AuthService,
     public apiSvc: ApiService
   ) {
-    this.reports = ['出勤紀錄表'];
+    this.reports = ['出勤紀錄表','報銷明細表'];
   }
 
   ngOnInit() {
@@ -44,32 +44,49 @@ export class ReportsComponent implements OnInit {
   }
 
   // 2. 執行下載
-  openReport(reportName: string) {
-    if (!this.selectedUser) {
-      alert('請先選擇員工！');
-      return;
-    }
-
-    const targetMonth = this.datepipe.transform(this.datefm, 'yyyy-MM');
-    
-    const payload = {
-      reportName: reportName,
-      Username: this.selectedUser, // 使用下拉選單選中的人
-      Month: targetMonth,
-      format: 'EXCELOPENXML'
-    };
-
-    this.apiSvc.getReport(payload).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.selectedUser}_${reportName}_${targetMonth}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
-      }
-    });
+openReport(reportName: string) {
+  if (!this.selectedUser) {
+    alert('請先選擇員工！');
+    return;
   }
+
+  const targetMonth = this.datepipe.transform(this.datefm, 'yyyy-MM');
+
+  // 如果選的是全部，就跑迴圈
+  if (this.selectedUser === 'All') {
+    this.userList.forEach(user => {
+      this.downloadSingleReport(reportName, user.username, targetMonth);
+    });
+  } else {
+    // 選單個員工
+    this.downloadSingleReport(reportName, this.selectedUser, targetMonth);
+  }
+}
+
+// 封裝原本的下載邏輯，方便重複調用
+downloadSingleReport(reportName: string, username: string, targetMonth: string | null) {
+  const payload = {
+    reportName: reportName,
+    Username: username,
+    Month: targetMonth,
+    format: 'EXCELOPENXML'
+  };
+
+  this.apiSvc.getReport(payload).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      // 檔名會根據傳入的 username 動態改變
+      a.download = `${username}_${reportName}_${targetMonth}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    },
+    error: (err) => {
+      console.error(`下載 ${username} 報表失敗:`, err);
+    }
+  });
+}
 }

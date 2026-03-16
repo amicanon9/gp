@@ -63,9 +63,13 @@
       <h2>交通費明細 (自動計算)</h2>
     </div>
     <div class="row bg-light py-2 mx-1 border-radius-5">
-      <div class="col-md-12 form-group">
+      <div class="col-md-6 form-group">
         <label>目的地(單程)</label>
         <input type="text" class="form-control" formControlName="location_from_to" placeholder="例：台中辦公室 <-> 台北客戶端" />
+      </div>
+      <div class="col-md-6 form-group">
+        <label>交通方式</label>
+        <input type="text" class="form-control" formControlName="transportation" placeholder="例：公車、火車、自駕" />
       </div>
       <div class="col-md-3 form-group">
         <label>里程 (KM)</label>

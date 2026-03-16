@@ -73,7 +73,12 @@ $color-text-dark: #333333;
     background-color: #55B8DA !important;
     &:hover { background-color: darken(#55B8DA, 10%) !important; }
   }
-
+  // 1. 打卡紀錄 (藍色 - 你原本的)
+  .checkin-only-date {
+    @extend %square-date;
+    background-color: #9ce6ff !important;
+    &:hover { background-color: darken(#c6eefb, 10%) !important; }
+  }
   // 2. 請假已核准 (紫色)
   .leave-approved-date {
     @extend %square-date;
