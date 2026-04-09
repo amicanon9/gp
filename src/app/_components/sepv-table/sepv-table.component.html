@@ -173,7 +173,7 @@
                 <div [ngStyle]="{
                   'background-color': w.ags_status === 'A6' ? '#6c757d' : w.ags_status === 'A5' ? '#adb5bd' : w.ags_status === 'A4' ? '#90ee90' : '#e9ecef',
                   'color': (w.ags_status === 'A5' || w.ags_status === 'A6') ? '#fff' : '#000'
-                }" class="week-text-item text-truncate p-1" [matTooltip]="w.content_detail" matTooltipClass="nami-tooltip-multiline" style="border-radius: 4px;">
+                }" class="week-text-item text-truncate p-1" [matTooltip]="stripHtml(w.content_detail)" (click)="ToDetail(weekbtn, element, w)" matTooltipClass="nami-tooltip-multiline" style="border-radius: 4px; cursor: pointer;">
                   {{ w.content }}
                 </div>
               </ng-container>

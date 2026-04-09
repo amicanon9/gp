@@ -100,6 +100,12 @@ availableYears: number[] = [];
   userlist: any;
   weeklist: any;
   base_columns: any;
+  quarterStatDetails: Record<string, Record<string, Array<{project_name: string, week: number, status: string}>>> = {
+  Q1: { LONGSHOT: [], BCD: [], COMMIT: [] },
+  Q2: { LONGSHOT: [], BCD: [], COMMIT: [] },
+  Q3: { LONGSHOT: [], BCD: [], COMMIT: [] },
+  Q4: { LONGSHOT: [], BCD: [], COMMIT: [] },
+};
   constructor(
     private apiSvc: ApiService,
     private modalSvc: NgbModal,
@@ -287,59 +293,89 @@ availableYears: number[] = [];
     this.dataSource = new MatTableDataSource<any>(this.projectplm);
   });
 }
+selectedDetail: { title: string, items: Array<{project_name: string, week: number, status: string}> } | null = null;
 
+openStatDetail(quarterLabel: string, category: string) {
+  const items = this.quarterStatDetails[quarterLabel]?.[category.toUpperCase()] ?? [];
+  this.selectedDetail = {
+    title: `${quarterLabel} - ${category} 進入清單`,
+    items
+  };
+}
 calculateQuarterlyStats() {
-  // 1. 重置統計數據
-  this.quarterStats.forEach(q => { 
-    q.longshot = 0; 
-    q.bcd = 0; 
-    q.commit = 0; 
+  this.quarterStats.forEach(q => { q.longshot = 0; q.bcd = 0; q.commit = 0; });
+
+  ['Q1','Q2','Q3','Q4'].forEach(q => {
+    this.quarterStatDetails[q] = { LONGSHOT: [], BCD: [], COMMIT: [] };
   });
 
   if (!this.projectplm || !this.agslist) return;
 
-  // 2. 遍歷每一個專案
+  const quarterConfigs = [
+    { label: 'Q1', start: 1,  end: 13 },
+    { label: 'Q2', start: 14, end: 26 },
+    { label: 'Q3', start: 27, end: 39 },
+    { label: 'Q4', start: 40, end: 53 }
+  ];
+
   this.projectplm.forEach(project => {
-    const weekData = project['week_data'] || [];
-    
-    // 定義季度與對應的週數範圍
-    const quarterConfigs = [
-      { label: 'Q1', start: 1, end: 13 },
-      { label: 'Q2', start: 14, end: 26 },
-      { label: 'Q3', start: 27, end: 39 },
-      { label: 'Q4', start: 40, end: 53 }
-    ];
+    const weekData: any[] = project['week_data'] || [];
+
+    const currentYearRecords = weekData
+      .filter(w => Number(w.year) === Number(this.year))
+      .sort((a, b) => Number(a.week) - Number(b.week));
+
+    const quarterLastRecord: Record<string, any | null> = {};
+    quarterConfigs.forEach(config => {
+      const recordsInQuarter = currentYearRecords.filter(
+        w => Number(w.week) >= config.start && Number(w.week) <= config.end
+      );
+      quarterLastRecord[config.label] = recordsInQuarter.length > 0
+        ? recordsInQuarter[recordsInQuarter.length - 1]
+        : null;
+    });
+
+    // 上一年最後一筆作為基準，若無則用哨兵值確保第一筆必定計入
+    const prevYearLastRecord = weekData
+      .filter(w => Number(w.year) === Number(this.year) - 1)
+      .sort((a, b) => Number(b.week) - Number(a.week))[0];
+    let prevStatus: string = prevYearLastRecord?.ags_status ?? '__NONE__';
 
     quarterConfigs.forEach(config => {
-      // 3. 篩選該專案在當前年度 (this.year) 且落在該季度週數範圍內的週報
-      const recordsInQuarter = weekData.filter(w => 
-        Number(w.year) === Number(this.year) && 
-        Number(w.week) >= config.start && 
-        Number(w.week) <= config.end
-      );
+      const lastRecord = quarterLastRecord[config.label];
+      const currentStatus: string = lastRecord?.ags_status ?? null;
 
-      if (recordsInQuarter.length > 0) {
-        // 4. 取得該季度最後一週的紀錄 (週數最大者)
-        const lastRecord = recordsInQuarter.sort((a, b) => b.week - a.week)[0];
-        
-        // 5. 透過 ags_status 找回對應的描述
-        const agsInfo = this.agslist.find(x => x.code == lastRecord.ags_status);
-        
-        if (agsInfo && agsInfo.description) {
+      // 該季無資料，跳過，prevStatus 維持不變供下季比較
+      if (currentStatus === null) return;
+
+      // 狀態有變化（含第一筆從 __NONE__ 變成任何狀態）才計入
+      if (currentStatus !== prevStatus) {
+        const agsInfo = this.agslist.find(x => x.code == currentStatus);
+        if (agsInfo?.description) {
           const desc = agsInfo.description.toUpperCase().trim();
           const qStat = this.quarterStats.find(q => q.label === config.label);
-          
-          if (qStat) {
-            if (desc.includes('LONGSHOT')) qStat.longshot++;
-            else if (desc.includes('BCD')) qStat.bcd++;
-            else if (desc.includes('COMMIT')) qStat.commit++;
+          let category: string | null = null;
+
+          if (desc.includes('LONGSHOT'))      { qStat && qStat.longshot++; category = 'LONGSHOT'; }
+          else if (desc.includes('BCD'))      { qStat && qStat.bcd++;      category = 'BCD'; }
+          else if (desc.includes('COMMIT'))   { qStat && qStat.commit++;   category = 'COMMIT'; }
+
+          if (category) {
+            this.quarterStatDetails[config.label][category].push({
+              project_name: project['project_name'] ?? project['name'] ?? `ID:${project['id']}`,
+              week: lastRecord.week,
+              status: agsInfo.description
+            });
           }
         }
       }
+
+      prevStatus = currentStatus;
     });
   });
 }
-  handleTableAction(event: { btn: any, row: any }) {
+
+  handleTableAction(event: { btn: any, row: any, weekitem?: any }) {
     if (event.btn.type === 'weekly_report') {
       // 開啟週報 Modal，沿用您的 windowClass 與 backdrop 設定
       const modalRef = this.modalSvc.open(weeklyreportplmModalComponent, {
@@ -351,6 +387,9 @@ calculateQuarterlyStats() {
       modalRef.componentInstance.title = "週報維護";
       modalRef.componentInstance.projectId = event.row.id;
       modalRef.componentInstance.agslist = JSON.parse(JSON.stringify(this.agslist));
+      if(event.weekitem){
+        modalRef.componentInstance.weekitem = event.weekitem;
+      }
       modalRef.componentInstance.projectName = event.row.customer_name ||
         (event.row.customer ? event.row.customer.name : '');
       modalRef.result.then((res: any) => {

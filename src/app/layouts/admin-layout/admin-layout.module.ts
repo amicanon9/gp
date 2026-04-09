@@ -13,6 +13,7 @@ import { IconsComponent }           from '../../pages/icons/icons.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DatePipe } from '@angular/common'
 import {MatSliderModule} from '@angular/material/slider';
+import { QuillModule } from 'ngx-quill';
 
 
 import { NgbModule }                from '@ng-bootstrap/ng-bootstrap';
@@ -92,6 +93,7 @@ export const TW_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: TW_FORMATS }
   ],
   imports: [
+    QuillModule.forRoot(),
     CommonModule,
     RouterModule.forChild(AdminLayoutRoutes),
     FormsModule,

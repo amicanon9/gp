@@ -18,10 +18,22 @@ export class weeklyreportplmModalComponent implements OnInit {
   @Input() projectName: string = "";
   @Input() title: string = "週報維護";
   @Input() agslist:any;
+  @Input() weekitem:any;
   reportList: any[] = [];
   isEdit: boolean = false;
   apiName: string = 'weeklyreportplm'; // 對應後端 Controller 名稱
-
+  quillModules = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],        // 粗體、斜體、底線、刪除線
+    [{ 'color': [] }, { 'background': [] }],           // 字體顏色、背景色
+    [{ 'size': ['small', false, 'large', 'huge'] }],   // 字體大小
+    [{ 'font': [] }],                                  // 字體
+    [{ 'align': [] }],                                 // 對齊
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],     // 清單
+    ['link', 'image'],                                 // 連結、圖片
+    ['clean']                                          // 清除格式
+  ]
+};
   formGroup = this.fb.group({
     id: [0],
     project_id: [-1, [Validators.required]],
@@ -43,6 +55,9 @@ export class weeklyreportplmModalComponent implements OnInit {
   ngOnInit() {
     if (this.projectId > 0) {
       this.formGroup.patchValue({ project_id: this.projectId });
+      if(this.weekitem){
+        this.editEntry(this.weekitem);
+      }
       this.loadHistory();
     }
   }
