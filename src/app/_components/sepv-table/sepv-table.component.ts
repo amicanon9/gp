@@ -273,6 +273,9 @@ export class TableComponent implements OnInit, AfterViewInit, OnChanges {
         if (this.stype_filter) {
           this.filterStatus();
         }
+        if (this.search) {
+          this.applyFilter(this.search);
+        }
       }
       this.selectedId = -1;
     }
