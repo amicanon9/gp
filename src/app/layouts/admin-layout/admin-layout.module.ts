@@ -45,6 +45,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { PspowernoinfoComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo.component';
 import { PspowernoinfoModalComponent } from 'app/pages/maintenance/pspowernoinfo/pspowernoinfo-modal/pspowernoinfo-modal.component';
 import { MatDividerModule } from '@angular/material/divider'; // 1. 匯入模組
+import { MatMenuModule } from '@angular/material/menu';
 import { HasPermissionDirective } from 'app/permission.directive';
 import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
@@ -120,6 +121,7 @@ export const TW_FORMATS = {
     MatProgressBarModule,
     MatSliderModule,
     MatDividerModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     FlexLayoutModule
   ],

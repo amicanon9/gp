@@ -103,6 +103,33 @@ availableYears: number[] = [];
   userlist: any;
   weeklist: any;
   base_columns: any;
+  
+  toggleableColumns: any[] = [
+    { name: 'year', displayName: '年度' },
+    { name: 'quarter', displayName: '季度' },
+    { name: 'month', displayName: '月' },
+    { name: 'close_date', displayName: '預計結案日' },
+    { name: 'longshot_date', displayName: 'Longshot 日期' },
+    { name: 'bcd_date', displayName: 'BCD 日期' },
+    { name: 'commit_date', displayName: 'Commit 日期' },
+    { name: 'contact', displayName: '聯絡人' },
+    { name: 'telephone', displayName: '電話' },
+    { name: 'email', displayName: 'Email' },
+    { name: 'existing_plm', displayName: '現有 PLM' },
+    { name: 'existing_cad', displayName: '現有 CAD' },
+    { name: 'rfq_to_client_amount', displayName: 'RFQ to Client' },
+    { name: 'net_to_ds_amount', displayName: 'Net to DS' },
+    { name: 'sys', displayName: '系統查詢' },
+    { name: 'is_system_checked', displayName: '是否查詢系統' },
+    { name: 'is_ags_booking', displayName: 'AGS是否Booking' },
+    { name: 'ags', displayName: 'AGS 狀態', width: 150, templateRef: 'ags_status' },
+    { name: 'under_control_longshot_year_q', displayName: '掌控狀況 Year/Q', width: 150 },
+    { name: 'solution_mapping', displayName: '解決方案對應', width: 200 },
+    { name: 'button', displayName: '資料維護', templateRef: 'button', width: 100 },
+  ];
+
+  columnVisibility: { [key: string]: boolean } = {};
+
   quarterStatDetails: Record<string, Record<string, Array<{id: number, project_name: string, date: string, status: string, fieldName: string}>>> = {
   Q1: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q2: { LONGSHOT: [], BCD: [], COMMIT: [] },
@@ -294,7 +321,42 @@ availableYears: number[] = [];
 
     // F. 渲染表格
     this.dataSource = new MatTableDataSource<any>(this.projectplm);
+    
+    // G. 載入並套用欄位隱藏設定
+    this.loadColumnVisibility();
   });
+}
+
+loadColumnVisibility() {
+  const saved = localStorage.getItem('projectplm_column_visibility');
+  if (saved) {
+    this.columnVisibility = JSON.parse(saved);
+  } else {
+    // 預設全部顯示
+    this.toggleableColumns.forEach(col => {
+      this.columnVisibility[col.name] = true;
+    });
+  }
+  this.updateTableConfigVisibility();
+}
+
+toggleColumn(colName: string) {
+  this.columnVisibility[colName] = !this.columnVisibility[colName];
+  localStorage.setItem('projectplm_column_visibility', JSON.stringify(this.columnVisibility));
+  this.updateTableConfigVisibility();
+}
+
+updateTableConfigVisibility() {
+  if (!this.table_config || !this.table_config.columns) return;
+  
+  this.table_config.columns.forEach((col: any) => {
+    if (this.columnVisibility[col.name] !== undefined) {
+      col.inVisible = !this.columnVisibility[col.name];
+    }
+  });
+  
+  // 強制觸發 OnChanges
+  this.table_config = { ...this.table_config };
 }
 selectedDetail: { title: string, items: Array<{id: number, project_name: string, date: string, status: string, fieldName: string}> } | null = null;
 

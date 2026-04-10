@@ -111,6 +111,24 @@
     <button class="btn btn-primary" (click)="onAdd()" *hasPermission="2">新增</button>
     <button class="btn btn-warning" (click)="onEdit()" [disabled]="selected == null" *hasPermission="3">編輯</button>
     <button class="btn btn-danger" (click)="onDelete()" [disabled]="selected == null" *hasPermission="4">刪除</button>
+    
+    <!-- 欄位顯示控制 -->
+    <button class="btn btn-info ml-2" [matMenuTriggerFor]="columnMenu">
+      <i class="nc-icon nc-settings-gear-64"></i> 欄位顯示
+    </button>
+    <mat-menu #columnMenu="matMenu">
+      <div class="px-3 py-2" (click)="$event.stopPropagation()">
+        <h6 class="m-0 mb-2 font-weight-bold">顯示/隱藏欄位</h6>
+        <div fxLayout="column">
+          <mat-checkbox *ngFor="let col of toggleableColumns" 
+                        [checked]="columnVisibility[col.name]"
+                        (change)="toggleColumn(col.name)"
+                        class="mb-1">
+            {{ col.displayName }}
+          </mat-checkbox>
+        </div>
+      </div>
+    </mat-menu>
   </div>
   <input type="file" #xlsx id="xlsx" name="xlsx" multiple="multiple"
     accept="image/png,image/jpg,.doc, .docx,.pdf,.xlsx" style="display:none;" />
