@@ -20,6 +20,9 @@ export class projectplmModalComponent implements OnInit {
     quarter: [null],
     month: [null],
     close_date: [null],
+    longshot_date: [null],
+    bcd_date: [null],
+    commit_date: [null],
     rfq_to_client_amount: [null],
     net_to_ds_amount: [null],
     system_inquiry_channel: [null],
@@ -46,6 +49,15 @@ export class projectplmModalComponent implements OnInit {
      
       if(this.formData.close_date) {
         this.formData.close_date = this.formData.close_date.split('T')[0];
+      }
+      if(this.formData.longshot_date) {
+        this.formData.longshot_date = this.formData.longshot_date.split('T')[0];
+      }
+      if(this.formData.bcd_date) {
+        this.formData.bcd_date = this.formData.bcd_date.split('T')[0];
+      }
+      if(this.formData.commit_date) {
+        this.formData.commit_date = this.formData.commit_date.split('T')[0];
       }
       this.formGroup.patchValue(this.formData);
        this.selected = this.formData.customer

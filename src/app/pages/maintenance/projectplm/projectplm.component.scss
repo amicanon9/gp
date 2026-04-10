@@ -1,7 +1,7 @@
 button{
   margin: 3px;
   margin-bottom: 5px;
-}
+  }
 .table_field {
  //改成固定100%
   width: 100%;
@@ -9,6 +9,16 @@ button{
 }
 ::ng-deep .mat-simple-snackbar-action {
   color: white
+}
+.clickable-stat {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 .stats-container {
   display: flex !important;
@@ -20,7 +30,7 @@ button{
     border-radius: 10px;
     border-top: 5px solid #51cbce; /* Q1 顏色 */
     transition: transform 0.2s;
-    
+
     &:hover { transform: translateY(-5px); }
     
     // 讓每一季度的顏色稍有區隔 (選填)
@@ -31,7 +41,7 @@ button{
     @media (max-width: 959px) {
       // 在平板模式下，因為是 2x2 排列，gap 會影響寬度，稍微縮小 flex-basis
       flex: 1 1 calc(50% - 20px) !important;
-    }
+  }
 
     @media (max-width: 599px) {
       // 在手機模式下，100% 寬度
@@ -61,7 +71,7 @@ button{
         .mat-table-sticky {
           background-color: #D9F2FF !important; // 你想要的選取顏色
         }
-      }
+}
 
       // sticky 預設背景
       .mat-table-sticky {

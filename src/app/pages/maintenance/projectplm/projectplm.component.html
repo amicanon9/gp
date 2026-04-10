@@ -40,26 +40,68 @@
       </div>
       
       <div fxLayout="column" fxLayoutGap="10px">
-        <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="clickable-stat" (click)="openStatDetail(q.label, 'Longshot')">
           <span class="stat-label">Longshot</span>
           <span class="stat-value text-danger" [class.text-success]="q.longshot >= q.targets.ls">
             ({{ q.longshot }}/{{ q.targets.ls }})
           </span>
         </div>
         
-        <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="clickable-stat" (click)="openStatDetail(q.label, 'BCD')">
           <span class="stat-label">BCD</span>
           <span class="stat-value text-success">
             ({{ q.bcd }}/{{ q.targets.bcd }})
           </span>
         </div>
         
-        <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="clickable-stat" (click)="openStatDetail(q.label, 'Commit')">
           <span class="stat-label">Commit</span>
           <span class="stat-value text-warning">
             ({{ q.commit }}/{{ q.targets.cm }})
           </span>
         </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- 統計明細清單 -->
+<div *ngIf="selectedDetail" class="detail-container mb-3 animated fadeIn">
+  <mat-card>
+    <mat-card-header fxLayout="row" fxLayoutAlign="space-between center">
+      <mat-card-title class="m-0">{{ selectedDetail.title }}</mat-card-title>
+      <button mat-icon-button (click)="selectedDetail = null">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>專案 ID</th>
+              <th>專案名稱</th>
+              <th>進入日期</th>
+              <th>目前狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedDetail.items">
+              <td>{{ item.id }}</td>
+              <td>{{ item.project_name }}</td>
+              <td>
+                <input type="date" class="form-control form-control-sm" 
+                       [ngModel]="item.date" 
+                       (ngModelChange)="updateProjectDate(item, $event)"
+                       style="width: 150px; display: inline-block;">
+              </td>
+              <td>{{ item.status }}</td>
+            </tr>
+            <tr *ngIf="selectedDetail.items.length === 0">
+              <td colspan="4" class="text-center text-muted">無資料</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </mat-card-content>
   </mat-card>

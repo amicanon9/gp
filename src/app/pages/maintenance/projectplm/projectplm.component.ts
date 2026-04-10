@@ -64,6 +64,9 @@ availableYears: number[] = [];
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },
       { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
+      { name: 'longshot_date', displayName: 'Longshot 日期', width: 120, templateRef: 'date' },
+      { name: 'bcd_date', displayName: 'BCD 日期', width: 120, templateRef: 'date' },
+      { name: 'commit_date', displayName: 'Commit 日期', width: 120, templateRef: 'date' },
       
     
       { name: 'contact', displayName: '聯絡人', width: 120 },
@@ -100,7 +103,7 @@ availableYears: number[] = [];
   userlist: any;
   weeklist: any;
   base_columns: any;
-  quarterStatDetails: Record<string, Record<string, Array<{project_name: string, week: number, status: string}>>> = {
+  quarterStatDetails: Record<string, Record<string, Array<{id: number, project_name: string, date: string, status: string, fieldName: string}>>> = {
   Q1: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q2: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q3: { LONGSHOT: [], BCD: [], COMMIT: [] },
@@ -293,7 +296,7 @@ availableYears: number[] = [];
     this.dataSource = new MatTableDataSource<any>(this.projectplm);
   });
 }
-selectedDetail: { title: string, items: Array<{project_name: string, week: number, status: string}> } | null = null;
+selectedDetail: { title: string, items: Array<{id: number, project_name: string, date: string, status: string, fieldName: string}> } | null = null;
 
 openStatDetail(quarterLabel: string, category: string) {
   const items = this.quarterStatDetails[quarterLabel]?.[category.toUpperCase()] ?? [];
@@ -302,76 +305,89 @@ openStatDetail(quarterLabel: string, category: string) {
     items
   };
 }
+
+updateProjectDate(item: any, newDate: string) {
+  if (!newDate) return;
+  const updateData = { [item.fieldName]: newDate };
+  this.apiSvc.updatedata('projectplm', item.id, updateData).pipe(
+    catchError(err => {
+      this.showErrorToast('更新日期失敗');
+      return throwError(err);
+    })
+  ).subscribe(() => {
+    this.showSuccessToast('更新成功');
+    // 更新本地資料
+    const proj = this.projectplm.find(p => p.id === item.id);
+    if (proj) proj[item.fieldName] = newDate;
+    item.date = newDate;
+    this.calculateQuarterlyStats();
+  });
+}
+
 calculateQuarterlyStats() {
   this.quarterStats.forEach(q => { q.longshot = 0; q.bcd = 0; q.commit = 0; });
 
-  ['Q1','Q2','Q3','Q4'].forEach(q => {
+  ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => {
     this.quarterStatDetails[q] = { LONGSHOT: [], BCD: [], COMMIT: [] };
   });
 
-  if (!this.projectplm || !this.agslist) return;
+  if (!this.projectplm) return;
 
-  const quarterConfigs = [
-    { label: 'Q1', start: 1,  end: 13 },
-    { label: 'Q2', start: 14, end: 26 },
-    { label: 'Q3', start: 27, end: 39 },
-    { label: 'Q4', start: 40, end: 53 }
-  ];
+  const getQuarter = (dateStr: string) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime()) || date.getFullYear() !== Number(this.year)) return null;
+    const month = date.getMonth() + 1;
+    if (month >= 1 && month <= 3) return 'Q1';
+    if (month >= 4 && month <= 6) return 'Q2';
+    if (month >= 7 && month <= 9) return 'Q3';
+    if (month >= 10 && month <= 12) return 'Q4';
+    return null;
+  };
 
   this.projectplm.forEach(project => {
-    const weekData: any[] = project['week_data'] || [];
+    const projectName = project['customer_name'] || project['name'] || `ID:${project['id']}`;
+    const agsInfo = this.agslist?.find(x => x.code == project.ags_status);
+    const statusDesc = agsInfo?.description || '---';
 
-    const currentYearRecords = weekData
-      .filter(w => Number(w.year) === Number(this.year))
-      .sort((a, b) => Number(a.week) - Number(b.week));
+    // Longshot
+    const lsQ = getQuarter(project.longshot_date);
+    if (lsQ) {
+      this.quarterStats.find(q => q.label === lsQ).longshot++;
+      this.quarterStatDetails[lsQ]['LONGSHOT'].push({
+        id: project.id,
+        project_name: projectName,
+        date: project.longshot_date.split('T')[0],
+        status: statusDesc,
+        fieldName: 'longshot_date'
+      });
+    }
 
-    const quarterLastRecord: Record<string, any | null> = {};
-    quarterConfigs.forEach(config => {
-      const recordsInQuarter = currentYearRecords.filter(
-        w => Number(w.week) >= config.start && Number(w.week) <= config.end
-      );
-      quarterLastRecord[config.label] = recordsInQuarter.length > 0
-        ? recordsInQuarter[recordsInQuarter.length - 1]
-        : null;
-    });
+    // BCD
+    const bcdQ = getQuarter(project.bcd_date);
+    if (bcdQ) {
+      this.quarterStats.find(q => q.label === bcdQ).bcd++;
+      this.quarterStatDetails[bcdQ]['BCD'].push({
+        id: project.id,
+        project_name: projectName,
+        date: project.bcd_date.split('T')[0],
+        status: statusDesc,
+        fieldName: 'bcd_date'
+      });
+    }
 
-    // 上一年最後一筆作為基準，若無則用哨兵值確保第一筆必定計入
-    const prevYearLastRecord = weekData
-      .filter(w => Number(w.year) === Number(this.year) - 1)
-      .sort((a, b) => Number(b.week) - Number(a.week))[0];
-    let prevStatus: string = prevYearLastRecord?.ags_status ?? '__NONE__';
-
-    quarterConfigs.forEach(config => {
-      const lastRecord = quarterLastRecord[config.label];
-      const currentStatus: string = lastRecord?.ags_status ?? null;
-
-      // 該季無資料，跳過，prevStatus 維持不變供下季比較
-      if (currentStatus === null) return;
-
-      // 狀態有變化（含第一筆從 __NONE__ 變成任何狀態）才計入
-      if (currentStatus !== prevStatus) {
-        const agsInfo = this.agslist.find(x => x.code == currentStatus);
-        if (agsInfo?.description) {
-          const desc = agsInfo.description.toUpperCase().trim();
-          const qStat = this.quarterStats.find(q => q.label === config.label);
-          let category: string | null = null;
-
-          if (desc.includes('LONGSHOT'))      { qStat && qStat.longshot++; category = 'LONGSHOT'; }
-          else if (desc.includes('BCD'))      { qStat && qStat.bcd++;      category = 'BCD'; }
-          else if (desc.includes('COMMIT'))   { qStat && qStat.commit++;   category = 'COMMIT'; }
-
-          if (category) {
-            this.quarterStatDetails[config.label][category].push({
-              project_name: project['project_name'] ?? project['name'] ?? `ID:${project['id']}`,
-              week: lastRecord.week,
-              status: agsInfo.description
-            });
-          }
-        }
-      }
-
-      prevStatus = currentStatus;
-    });
+    // Commit
+    const commitQ = getQuarter(project.commit_date);
+    if (commitQ) {
+      this.quarterStats.find(q => q.label === commitQ).commit++;
+      this.quarterStatDetails[commitQ]['COMMIT'].push({
+        id: project.id,
+        project_name: projectName,
+        date: project.commit_date.split('T')[0],
+        status: statusDesc,
+        fieldName: 'commit_date'
+      });
+    }
   });
 }
 
