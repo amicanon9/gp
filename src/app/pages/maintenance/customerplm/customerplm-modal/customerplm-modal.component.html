@@ -94,10 +94,27 @@
       </div>
     </div>
 
+    <div class="mt-4">
+      <div style="padding-left: 1%; display: flex; align-items: center;">
+        <mat-icon color="primary" style="margin-right: 8px;">contact_page</mat-icon>
+        <h2 style="margin: 0;">客戶附件管理</h2>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-md-12">
+          <app-image-dialog 
+            #imgComponent
+            [id]="formGroup.get('id')?.value" 
+            category="customerplm">
+          </app-image-dialog>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <div class="modal-footer">
   <button type="button" class="btn btn-cancel" (click)='modal.dismiss("cancel click")'>取消</button>
-  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid">確認</button>
 </div>

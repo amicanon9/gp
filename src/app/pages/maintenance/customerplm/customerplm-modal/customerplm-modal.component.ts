@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
+import { ImageDialogComponent } from "app/_components/image-dialog/image-dialog.component";
+import { ApiService } from "app/_services/api.service";
 
 @Component({
   templateUrl: './customerplm-modal.component.html',
@@ -9,6 +11,7 @@ export class customerplmModalComponent implements OnInit {
   @Input() formData: any = {};
   @Input() title: String = "{ERROR}";
   @Input() crmlist: any[] = []; // 改為接收客戶清單
+  @ViewChild('imgComponent') imgComponent: ImageDialogComponent;
   selected: any = {};
   // 完整的 customerplm 表單定義
  formGroup = this.fb.group({
@@ -47,7 +50,8 @@ export class customerplmModalComponent implements OnInit {
 
   constructor(
     public modal: NgbActiveModal,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private apiSvc: ApiService
   ) { }
 
   ngOnInit() {
@@ -75,9 +79,25 @@ export class customerplmModalComponent implements OnInit {
   }
 
   submit() {
-    if (this.formGroup.valid) {
-      let data = this.formGroup.getRawValue();
-      this.modal.close(data);
+    if (this.formGroup.invalid) return;
+    const data = this.formGroup.getRawValue();
+
+    if (data.id > 0) {
+      // 【編輯模式】
+      this.apiSvc.updatedata('customerplm', data.id, data).subscribe(async (res: any) => {
+        // 就算資料沒變，也要檢查有沒有新選的圖片要傳
+        await this.imgComponent.manualUpload(data.id);
+        this.modal.close(true); // 關閉彈窗並傳回 true
+      });
+    } else {
+      // 【新增模式】
+      this.apiSvc.createdata('customerplm', data).subscribe(async (res: any) => {
+        const newId = Array.isArray(res) ? res[0].id : res.id;
+        if (newId) {
+          await this.imgComponent.manualUpload(newId);
+          this.modal.close(true);
+        }
+      });
     }
   }
 }

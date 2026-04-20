@@ -126,12 +126,9 @@ ngOnDestroy() {
     // 傳送必要清單到 Modal
     modalRef.componentInstance.crmlist = JSON.parse(JSON.stringify(this.crmlist));
     modalRef.result.then((res: any) => {
-      this.apiSvc.createdata('customerplm',res).pipe(
-        catchError(err => {
-          this.showErrorToast('新增失敗');
-          return throwError(err);
-        })
-      ).subscribe(() => this.showSuccessToast('新增成功'));
+      if (res) {
+        this.showSuccessToast('新增成功');
+      }
     }).catch(() => { });
   }
 
@@ -143,12 +140,9 @@ ngOnDestroy() {
     modalRef.componentInstance.crmlist = JSON.parse(JSON.stringify(this.crmlist));
 
     modalRef.result.then((res: any) => {
-      this.apiSvc.updatedata('customerplm',this.selected.id, res).pipe(
-        catchError(err => {
-          this.showErrorToast('編輯失敗');
-          return throwError(err);
-        })
-      ).subscribe(() => this.showSuccessToast('編輯成功'));
+      if (res) {
+        this.showSuccessToast('編輯成功');
+      }
     }).catch(() => { });
   }
 
