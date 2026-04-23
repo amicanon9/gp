@@ -111,6 +111,7 @@
     <button class="btn btn-primary" (click)="onAdd()" *hasPermission="2">新增</button>
     <button class="btn btn-warning" (click)="onEdit()" [disabled]="selected == null" *hasPermission="3">編輯</button>
     <button class="btn btn-danger" (click)="onDelete()" [disabled]="selected == null" *hasPermission="4">刪除</button>
+    <button class="btn btn-success" (click)="onAddCustomer()" *hasPermission="2">新增客戶</button>
     
     <!-- 欄位顯示控制 -->
     <button class="btn btn-info ml-2" [matMenuTriggerFor]="columnMenu">

@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { SignalrService } from 'app/_services/signalr.service';
 import { projectplmModalComponent } from './projectplm-modal/projectplm-modal.component';
+import { customerplmModalComponent } from '../customerplm/customerplm-modal/customerplm-modal.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { weeklyreportplmModalComponent } from './weeklyreportplm-modal/weeklyreportplm-modal.component';
 import dayjs from 'dayjs';
@@ -195,6 +196,18 @@ availableYears: number[] = [];
           return throwError(err);
         })
       ).subscribe(() => this.showSuccessToast('新增成功'));
+    }).catch(() => { });
+  }
+
+  onAddCustomer() {
+    const modalRef = this.modalSvc.open(customerplmModalComponent, { windowClass: "modal-mySize", backdrop: 'static' });
+    modalRef.componentInstance.title = "新增客戶";
+    modalRef.componentInstance.crmlist = JSON.parse(JSON.stringify(this.crmlist));
+    modalRef.result.then((res: any) => {
+      if (res) {
+        this.showSuccessToast('新增客戶成功');
+        this.loadData(); // 重新讀取資料以更新專案新增視窗中的客戶清單
+      }
     }).catch(() => { });
   }
 
