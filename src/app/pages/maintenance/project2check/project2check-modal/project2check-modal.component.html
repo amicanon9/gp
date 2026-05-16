@@ -1,0 +1,62 @@
+<div class="modal-header">
+  <h1 class="modal-title">{{ title }}</h1>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross Click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="form" [formGroup]="formGroup">
+    <div style="padding-left: 1%"> <h2>客戶資訊</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="customer_id">客戶</label></div>
+        <div class="form-input">
+          <ng-select id="customer_id" [items]="cuslist" bindValue="id" bindLabel="name" [clearable]="true"
+            formControlName="customer_id" [class.invalid]="isError('customer_id')" [notFoundText]="'查無資料'">
+          </ng-select>
+          <small class="text-danger" *ngIf="errorType('customer_id', 'required')">*必選</small>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-left: 1%"> <h2>專案資訊</h2> </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="year">年度</label></div>
+        <div class="form-input">
+          <input type="number" id="year" formControlName="year" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="quarter">季度</label></div>
+        <div class="form-input">
+          <input type="text" id="quarter" formControlName="quarter" placeholder="如: Q1" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="month">月</label></div>
+        <div class="form-input">
+          <input type="number" id="month" formControlName="month" min="1" max="12" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="close_date">預計結案日</label></div>
+        <div class="form-input">
+          <input type="date" id="close_date" formControlName="close_date" />
+        </div>
+      </div>
+      <div class="col-md-6 form-group">
+        <div class="form-name"><label for="status">狀態</label></div>
+        <div class="form-input">
+          <input type="text" id="status" formControlName="status" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" (click)="modal.dismiss('cancel click')">取消</button>
+  <button type="button" class="btn btn-danger" (click)="submit()" [disabled]="!formGroup.valid || formGroup.pristine">確認</button>
+</div>

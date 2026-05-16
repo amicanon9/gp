@@ -31,6 +31,7 @@ export class checkinComponent implements OnInit, OnDestroy {
   selectedSvcKeys: string[] = [];
   selectedInternalKeys: string[] = [];
   selectedFirmKeys: string[] = [];
+  selected2CheckKeys: string[] = [];
   projectAssignments: ProjectAssign[] = [];
 
   totalPercentage = 0;
@@ -101,7 +102,7 @@ loadHolidays() {
   get isBackfill() { return this.checkinMode === 'backfill'; }
 
   // 輔助方法：供 HTML 過濾不同類型的專案
-  getProjectsByType(type: 'PLM' | 'Internal'| 'Svc' | 'Firm') {
+  getProjectsByType(type: 'PLM' | 'Internal'| 'Svc' | 'Firm' | '2Check') {
     return this.Pjlist.filter(p => p.type === type);
   }
 
@@ -112,6 +113,7 @@ loadHolidays() {
       internal: this.apiSvc.getdata('projectinternal'),
       svc: this.apiSvc.getdata('projectsvc'),
       firm: this.apiSvc.getdata('projectfirm'),
+      project2check: this.apiSvc.getdata('project2check'),
     }).subscribe({
       next: (res) => {
         const plmList = (res.plm || []).map(p => ({
@@ -139,7 +141,13 @@ loadHolidays() {
           displayName: `(事務所 ${p.id}) ${p.name || '未命名項目'}`,
           uniqueKey: `Firm_${p.id}`
         }));
-        this.Pjlist = [...internalList, ...plmList, ...svcList, ...firmList];
+        const project2checkList = (res.project2check || []).map(p => ({
+          ...p,
+          type: '2Check',
+          displayName: `(2Check ${p.id}) ${p.customer_name || '未命名項目'}`,
+          uniqueKey: `2Check_${p.id}`
+        }));
+        this.Pjlist = [...internalList, ...plmList, ...svcList, ...firmList, ...project2checkList];
         this.getHistory();
       },
       error: () => this.toastr.error('專案清單載入失敗')
@@ -149,7 +157,7 @@ loadHolidays() {
   // 2. 處理選單選擇變更 (核心邏輯)
   onProjectSelectChange() {
     // 合併兩個選單的 Key 值
-    const allSelectedKeys = [...this.selectedPlmKeys, ...this.selectedInternalKeys, ...this.selectedSvcKeys, ...this.selectedFirmKeys];
+    const allSelectedKeys = [...this.selectedPlmKeys, ...this.selectedInternalKeys, ...this.selectedSvcKeys, ...this.selectedFirmKeys, ...this.selected2CheckKeys];
     const currentKeys = this.projectAssignments.map(a => `${a.type}_${a.id}`);
 
     // A. 處理新增：如果選單中有，但 Assignments 中沒有
@@ -208,6 +216,9 @@ loadHolidays() {
       this.selectedFirmKeys = this.projectAssignments
       .filter(a => a.type === 'Firm')
       .map(a => `Firm_${a.id}`);
+      this.selected2CheckKeys = this.projectAssignments
+      .filter(a => a.type === '2Check')
+      .map(a => `2Check_${a.id}`);
     this.calculateTotal();
   }
 
@@ -444,6 +455,7 @@ async deleteHistory(item: any) {
     this.selectedSvcKeys =[];
     this.selectedInternalKeys = [];
     this.selectedFirmKeys = [];
+    this.selected2CheckKeys = [];
     this.projectAssignments = [];
     this.totalPercentage = 0;
   }

@@ -23,6 +23,8 @@ import { departmentsComponent } from 'app/pages/manage/departments/departments.c
 import { projectinternalComponent } from 'app/pages/maintenance/projectinternal/projectinternal.component';
 import { projectsvcComponent } from 'app/pages/maintenance/projectsvc/projectsvc.component';
 import { taskmasterComponent } from 'app/pages/maintenance/taskmaster/taskmaster.component';
+import { project2checkComponent } from 'app/pages/maintenance/project2check/project2check.component';
+import { customer2checkComponent } from 'app/pages/maintenance/customer2check/customer2check.component';
 import { expenseclaimsComponent } from 'app/pages/tools/expenseclaims/expenseclaims.component';
 import { ReportsComponent } from 'app/pages/tools/reports/reports.component';
 import { projectfirmComponent } from 'app/pages/maintenance/projectfirm/projectfirm.component';
@@ -32,10 +34,12 @@ export const AdminLayoutRoutes: Routes = [
   { path: 'dashboard',      component: DashboardComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'icons',          component: IconsComponent},
   { path: 'project/projectplm',      component: projectplmComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'project/project2check',      component: project2checkComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectsvc',      component: projectsvcComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectinternal',      component: projectinternalComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'project/projectfirm',      component: projectfirmComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'customer/customerplm',      component: customerplmComponent, canActivate: [AuthGuard, MenuGuard] },
+  { path: 'customer/customer2check',      component: customer2checkComponent, canActivate: [AuthGuard, MenuGuard] },
   { path: 'tools/checkin',          component: checkinComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leaveapplications',          component: leaveapplicationsComponent, canActivate: [AuthGuard, MenuGuard]},
   { path: 'tools/leavemanagement',          component: leavemanagementComponent, canActivate: [AuthGuard, MenuGuard]},

@@ -51,8 +51,12 @@ import { FeemaskComponent } from 'app/pages/tools/feemask/feemask.component';
 import { MatSelectModule } from '@angular/material/select';
 import { projectplmComponent } from 'app/pages/maintenance/projectplm/projectplm.component';
 import { projectplmModalComponent } from 'app/pages/maintenance/projectplm/projectplm-modal/projectplm-modal.component';
+import { project2checkComponent } from 'app/pages/maintenance/project2check/project2check.component';
+import { project2checkModalComponent } from 'app/pages/maintenance/project2check/project2check-modal/project2check-modal.component';
 import { customerplmComponent } from 'app/pages/maintenance/customerplm/customerplm.component';
 import { customerplmModalComponent } from 'app/pages/maintenance/customerplm/customerplm-modal/customerplm-modal.component';
+import { customer2checkComponent } from 'app/pages/maintenance/customer2check/customer2check.component';
+import { customer2checkModalComponent } from 'app/pages/maintenance/customer2check/customer2check-modal/customer2check-modal.component';
 import { weeklyreportplmModalComponent } from 'app/pages/maintenance/projectplm/weeklyreportplm-modal/weeklyreportplm-modal.component';
 import { checkinComponent } from 'app/pages/tools/checkin/checkin.component';
 import { leaveapplicationsComponent } from 'app/pages/tools/leaveapplications/leaveapplications.component';
@@ -135,10 +139,14 @@ export const TW_FORMATS = {
     PspowernoinfoModalComponent,
     projectplmComponent,
     projectplmModalComponent,
+    project2checkComponent,
+    project2checkModalComponent,
     projectsvcComponent,
     projectsvcModalComponent,
     customerplmComponent,
     customerplmModalComponent,
+    customer2checkComponent,
+    customer2checkModalComponent,
     weeklyreportplmModalComponent,
     SetOfBooksComponent,
     TableComponent,
