@@ -92,11 +92,11 @@ export class customerplmModalComponent implements OnInit {
     } else {
       // 【新增模式】
       this.apiSvc.createdata('customerplm', data).subscribe(async (res: any) => {
-        const newId = Array.isArray(res) ? res[0].id : res.id;
+        const newId = Array.isArray(res) ? (res[0]?.id || res[0]) : (res?.id || res);
         if (newId) {
           await this.imgComponent.manualUpload(newId);
-          this.modal.close(true);
         }
+        this.modal.close(true);
       });
     }
   }

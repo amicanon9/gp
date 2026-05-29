@@ -277,6 +277,13 @@ availableYears: number[] = [];
     this.crmlist = crmlist;
     this.weeklist = weeklist;
 
+    // 映射客戶的產業別說明
+    if (this.cuslist && this.crmlist) {
+      this.cuslist.forEach(c => {
+        c['crm'] = this.crmlist.find(x => x.code == c.industry_crm)?.description;
+      });
+    }
+
     // B. 自動提取所有不重複年份 (用於年度選擇器)
     const rawYears = projectData.map(item => Number(item.year));
     rawYears.push(new Date().getFullYear()); // 確保包含今年
