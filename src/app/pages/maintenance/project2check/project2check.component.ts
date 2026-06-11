@@ -37,6 +37,7 @@ export class project2checkComponent implements OnInit {
       { name: 'month', displayName: '月', width: 80 },
       { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
       { name: 'status', displayName: '狀態', width: 120 },
+      { name: 'description', displayName: '狀態敘述', width: 300 },
       { name: 'detail', displayName: '資料維護', templateRef: 'detail', width: 100 },
     ]
   };

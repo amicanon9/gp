@@ -71,6 +71,19 @@ export class expenseclaimsModalComponent implements OnInit {
       this.formGroup.get('project_id').setValue(null);
     });
 
+    // 監聽報銷類別變化，非交通費時清空交通費專屬欄位
+    this.formGroup.get('category_item').valueChanges.subscribe(val => {
+      if (val !== '交通費') {
+        this.formGroup.patchValue({
+          location_from_to: null,
+          transportation: null,
+          mileage: 0,
+          toll_fee: 0,
+          parking_fee: 0
+        }, { emitEvent: false });
+      }
+    });
+
     // 監聽交通費相關數值變化，自動計算總額
     this.formGroup.valueChanges.subscribe(() => {
       this.calculateTotal();

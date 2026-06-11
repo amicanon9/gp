@@ -11,6 +11,8 @@ export class project2checkModalComponent implements OnInit {
   @Input() title: String = "{ERROR}";
   @Input() cuslist: any[] = [];
 
+  statusList = ['接洽中', '已結案', '暫無需求','潛在客戶'];
+
   formGroup = this.fb.group({
     id: [-1],
     year: [new Date().getFullYear()],
@@ -18,7 +20,8 @@ export class project2checkModalComponent implements OnInit {
     month: [null],
     close_date: [null],
     customer_id: [null, [Validators.required]],
-    status: [null]
+    status: [null],
+    description: [null]
   });
 
   constructor(

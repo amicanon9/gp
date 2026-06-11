@@ -145,6 +145,8 @@ availableYears: number[] = [];
     public signalRSvc: SignalrService,
     private route: ActivatedRoute,
   ) {
+    // 訂閱 queryParams 以支援分享篩選狀態
+    // 移除此訂閱以在重整後清除篩選狀態
     this.route.queryParams.subscribe(params => {
       if (params.id) this.stype_filter = params.id
     });
@@ -344,6 +346,13 @@ availableYears: number[] = [];
     
     // G. 載入並套用欄位隱藏設定
     this.loadColumnVisibility();
+
+    // H. 如果有過濾值，重新應用過濾以同步 UI
+    if (this.stype_filter && this.namiTable) {
+      setTimeout(() => {
+        this.namiTable.filterStatus();
+      });
+    }
   });
 }
 
