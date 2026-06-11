@@ -151,6 +151,7 @@
         [status]="agslist"  
         [stype]="stype" 
         [stype_filter]="stype_filter" 
+        (paginatorChange)="onPaginatorChange($event)"
         (actionClick)="handleTableAction($event)">
       </sepv-table>
     </ng-container>

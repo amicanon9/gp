@@ -131,6 +131,9 @@ availableYears: number[] = [];
 
   columnVisibility: { [key: string]: boolean } = {};
 
+  // Paginator 狀態保存到 Cookie
+  paginatorState: { pageIndex: number, pageSize: number } = { pageIndex: 0, pageSize: 10 };
+
   quarterStatDetails: Record<string, Record<string, Array<{id: number, project_name: string, date: string, status: string, fieldName: string}>>> = {
   Q1: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q2: { LONGSHOT: [], BCD: [], COMMIT: [] },
@@ -145,8 +148,12 @@ availableYears: number[] = [];
     public signalRSvc: SignalrService,
     private route: ActivatedRoute,
   ) {
-    // 訂閱 queryParams 以支援分享篩選狀態
-    // 移除此訂閱以在重整後清除篩選狀態
+    // 一次性讀取當前的 queryParams（確保頁面重整後立即恢復篩選值）
+    if (this.route.snapshot.queryParams.id) {
+      this.stype_filter = this.route.snapshot.queryParams.id;
+    }
+
+    // 訂閱 queryParams 以支援分享篩選狀態和未來的變化
     this.route.queryParams.subscribe(params => {
       if (params.id) this.stype_filter = params.id
     });
@@ -155,6 +162,17 @@ availableYears: number[] = [];
 
   async ngOnInit() {
     this.base_columns = this.table_config.columns.filter(c => c.name !== 'week');
+    
+    // 從 Cookie 恢復 Paginator 狀態
+    const savedPaginatorState = localStorage.getItem('projectplm_paginator_state');
+    if (savedPaginatorState) {
+      try {
+        this.paginatorState = JSON.parse(savedPaginatorState);
+      } catch (e) {
+        console.error('恢復 Paginator 狀態失敗', e);
+      }
+    }
+    
     try {
       // 即使多個 Component 都寫這行，Service 內部也會擋掉重複的連線請求
       await this.signalRSvc.StartConnection();
@@ -353,6 +371,14 @@ availableYears: number[] = [];
         this.namiTable.filterStatus();
       });
     }
+
+    // I. 恢復 Paginator 狀態
+    if (this.namiTable && this.namiTable.paginator) {
+      setTimeout(() => {
+        this.namiTable.paginator.pageIndex = this.paginatorState.pageIndex;
+        this.namiTable.paginator.pageSize = this.paginatorState.pageSize;
+      });
+    }
   });
 }
 
@@ -398,8 +424,8 @@ openStatDetail(quarterLabel: string, category: string) {
 }
 
 updateProjectDate(item: any, newDate: string) {
-  if (!newDate) return;
-  const updateData = { [item.fieldName]: newDate };
+  // 允許空值更新（用於清除日期）
+  const updateData = { [item.fieldName]: newDate || null };
   this.apiSvc.updatedata('projectplm', item.id, updateData).pipe(
     catchError(err => {
       this.showErrorToast('更新日期失敗');
@@ -409,10 +435,16 @@ updateProjectDate(item: any, newDate: string) {
     this.showSuccessToast('更新成功');
     // 更新本地資料
     const proj = this.projectplm.find(p => p.id === item.id);
-    if (proj) proj[item.fieldName] = newDate;
+    if (proj) proj[item.fieldName] = newDate || null;
     item.date = newDate;
     this.calculateQuarterlyStats();
   });
+}
+
+// 監聽 Paginator 變化並保存到 localStorage
+onPaginatorChange(event: { pageIndex: number, pageSize: number }) {
+  this.paginatorState = event;
+  localStorage.setItem('projectplm_paginator_state', JSON.stringify(this.paginatorState));
 }
 
 calculateQuarterlyStats() {

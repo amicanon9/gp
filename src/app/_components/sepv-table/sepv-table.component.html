@@ -3,7 +3,7 @@
   <ng-container *ngIf="status">
     <mat-form-field appearance="outline" class="filter-select-field" subscriptSizing="dynamic">
       <mat-label>{{stype.name}}過濾</mat-label>
-      <mat-select [(ngModel)]="stype_filter" (selectionChange)="filterStatus()" [compareWith]="compareById">
+      <mat-select [(ngModel)]="stype_filter" (selectionChange)="filterStatus()">
         <mat-option [value]="''">
           <span class="text-muted">顯示全部資料</span>
         </mat-option>

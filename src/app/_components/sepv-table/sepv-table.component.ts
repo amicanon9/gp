@@ -70,6 +70,7 @@ export class TableComponent implements OnInit, AfterViewInit, OnChanges {
   @Output() select = new EventEmitter<any>();
   @Output() detailClick = new EventEmitter<any>();
   @Output() actionClick = new EventEmitter<{ btn: any, row: any, weekitem?: any }>();
+  @Output() paginatorChange = new EventEmitter<{ pageIndex: number, pageSize: number }>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -93,6 +94,16 @@ export class TableComponent implements OnInit, AfterViewInit, OnChanges {
       this.innerDataSource.sort = this.sort;
       this.innerDataSource.paginator = this.paginator;
       this.setSortingAccessor(this.innerDataSource);
+    }
+
+    // 監聽 paginator 變化事件
+    if (this.paginator) {
+      this.paginator.page.subscribe((event: any) => {
+        this.paginatorChange.emit({
+          pageIndex: event.pageIndex,
+          pageSize: event.pageSize
+        });
+      });
     }
   }
 
@@ -222,6 +233,15 @@ export class TableComponent implements OnInit, AfterViewInit, OnChanges {
 
     if (this.translate_table !== null) {
       this.translate_back = this.reverseMap(this.translate_table);
+    }
+
+    // 監聽 stype_filter 的變化，當外部改變篩選值時更新 mat-select
+    if (changes.stype_filter && !changes.stype_filter.firstChange) {
+      // 使用 setTimeout 確保 change detection 完成
+      setTimeout(() => {
+        // 強制更新 ngModel
+        this.stype_filter = changes.stype_filter.currentValue;
+      });
     }
 
     if (changes.config) {
