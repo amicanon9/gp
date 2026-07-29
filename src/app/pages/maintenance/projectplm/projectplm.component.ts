@@ -147,6 +147,7 @@ availableYears: number[] = [];
     private snackbar: MatSnackBar,
     public signalRSvc: SignalrService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {
     // 一次性讀取當前的 queryParams（確保頁面重整後立即恢復篩選值）
     if (this.route.snapshot.queryParams.id) {
@@ -155,8 +156,18 @@ availableYears: number[] = [];
 
     // 訂閱 queryParams 以支援分享篩選狀態和未來的變化
     this.route.queryParams.subscribe(params => {
-      if (params.id) this.stype_filter = params.id
+      this.stype_filter = params.id || "";
     });
+  }
+
+  onQuickSearch(val: string) {
+    if (val && val.trim() !== "") {
+      this.stype_filter = "";
+      if (this.namiTable) {
+        this.namiTable.stype_filter = ""; // 強制同步子元件狀態，避免 setTimeout 造成的延遲
+        this.namiTable.filterStatus();
+      }
+    }
   }
 
 
@@ -413,19 +424,27 @@ updateTableConfigVisibility() {
   // 強制觸發 OnChanges
   this.table_config = { ...this.table_config };
 }
-selectedDetail: { title: string, items: Array<{id: number, project_name: string, date: string, status: string, fieldName: string}> } | null = null;
+selectedDetail: { title: string, quarter: string, category: string, items: Array<{id: number, project_name: string, date: string, status: string, fieldName: string}> } | null = null;
 
 openStatDetail(quarterLabel: string, category: string) {
   const items = this.quarterStatDetails[quarterLabel]?.[category.toUpperCase()] ?? [];
   this.selectedDetail = {
     title: `${quarterLabel} - ${category} 進入清單`,
+    quarter: quarterLabel,
+    category: category,
     items
   };
 }
 
 updateProjectDate(item: any, newDate: string) {
-  // 允許空值更新（用於清除日期）
-  const updateData = { [item.fieldName]: newDate || null };
+  const proj = this.projectplm.find(p => p.id === item.id);
+  if (!proj) {
+    this.showErrorToast('找不到專案資料');
+    return;
+  }
+
+  // 送出包含原始專案資料與更新欄位，避免後端誤把不在 payload 的欄位清掉
+  const updateData = this.buildProjectUpdatePayload(proj, item.fieldName, newDate || null);
   this.apiSvc.updatedata('projectplm', item.id, updateData).pipe(
     catchError(err => {
       this.showErrorToast('更新日期失敗');
@@ -434,11 +453,39 @@ updateProjectDate(item: any, newDate: string) {
   ).subscribe(() => {
     this.showSuccessToast('更新成功');
     // 更新本地資料
-    const proj = this.projectplm.find(p => p.id === item.id);
-    if (proj) proj[item.fieldName] = newDate || null;
-    item.date = newDate;
+    proj[item.fieldName] = newDate || null;
+    item.date = newDate || null;
+    if (this.dataSource) {
+      this.dataSource.data = [...this.projectplm];
+    }
+
+    // 重新計算統計資料
     this.calculateQuarterlyStats();
+
+    // 如果目前有開啟明細清單，同步更新清單內容（重跑一次清單）
+    if (this.selectedDetail) {
+      this.selectedDetail.items = this.quarterStatDetails[this.selectedDetail.quarter]?.[this.selectedDetail.category.toUpperCase()] ?? [];
+    }
   });
+}
+
+private buildProjectUpdatePayload(project: any, fieldName: string, newValue: any) {
+  const payload = { ...project, [fieldName]: newValue };
+  delete payload.customer;
+  delete payload.contact;
+  delete payload.telephone;
+  delete payload.email;
+  delete payload.existing_plm;
+  delete payload.existing_cad;
+  delete payload.sys;
+  delete payload.ags;
+  delete payload.ags_description;
+  delete payload.sales;
+  delete payload.service;
+  delete payload.button;
+  delete payload.week_data;
+  delete payload.this_week;
+  return payload;
 }
 
 // 監聽 Paginator 變化並保存到 localStorage

@@ -135,7 +135,7 @@
     accept="image/png,image/jpg,.doc, .docx,.pdf,.xlsx" style="display:none;" />
   <div class="text-right fieldinput">
     <mat-form-field>
-      <input matInput placeholder="快速搜尋" [(ngModel)]="search">
+      <input matInput placeholder="快速搜尋" [(ngModel)]="search" (ngModelChange)="onQuickSearch($event)">
     </mat-form-field>
   </div>
   <mat-card>

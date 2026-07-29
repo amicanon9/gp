@@ -71,7 +71,7 @@ export class expenseclaimsModalComponent implements OnInit {
       this.formGroup.get('project_id').setValue(null);
     });
 
-    // 監聽報銷類別變化，非交通費時清空交通費專屬欄位
+    // 監聽報銷類別變化，非交通費時清空交通費專屬欄位；同時重新帶入相同類別的上一筆資料
     this.formGroup.get('category_item').valueChanges.subscribe(val => {
       if (val !== '交通費') {
         this.formGroup.patchValue({
@@ -81,6 +81,13 @@ export class expenseclaimsModalComponent implements OnInit {
           toll_fee: 0,
           parking_fee: 0
         }, { emitEvent: false });
+      }
+      // 如果在新增模式且已選擇專案，則重新帶入相同類別的上一筆
+      if (this.formGroup.get('id').value === -1) {
+        const projectId = this.formGroup.get('project_id').value;
+        if (projectId) {
+          this.applyLastClaimData(projectId);
+        }
       }
     });
 
@@ -107,14 +114,18 @@ export class expenseclaimsModalComponent implements OnInit {
       return;
     }
 
-    // 2. 尋找該專案最近的一筆紀錄
-    const lastClaim = this.historyData.find(c => c.project_id === projectId);
+    // 2. 取得目前表單選中的類別
+    const currentCategory = this.formGroup.get('category_item').value;
+
+    // 3. 尋找「相同專案 + 相同類別」最近的一筆紀錄
+    const lastClaim = this.historyData.find(c => 
+      c.project_id === projectId && c.category_item === currentCategory
+    );
 
     if (lastClaim) {
-      // 3. 找到紀錄：根據類別帶入完整資料
-      if (lastClaim.category_item === '交通費') {
+      // 4. 找到紀錄：根據類別帶入完整資料
+      if (currentCategory === '交通費') {
         this.formGroup.patchValue({
-          category_item: '交通費',
           item_name: lastClaim.item_name,
           location_from_to: lastClaim.location_from_to,
           transportation: lastClaim.transportation,
@@ -124,11 +135,11 @@ export class expenseclaimsModalComponent implements OnInit {
           parking_fee: lastClaim.parking_fee || 0 // 帶入停車費
         }, { emitEvent: true });
       } else {
+        // 雜費類別
         this.formGroup.patchValue({
-          category_item: lastClaim.category_item,
           item_name: lastClaim.item_name,
           manual_amount: lastClaim.manual_amount,
-          // 非交通費時，清空交通相關欄位
+          // 清空交通相關欄位
           location_from_to: null,
           transportation: null,
           mileage: 0,
@@ -137,8 +148,33 @@ export class expenseclaimsModalComponent implements OnInit {
         }, { emitEvent: true });
       }
     } else {
-      // 4. 選到了專案，但該專案完全沒有歷史紀錄：清空表單至預設值
-      this.resetFormToDefault();
+      // 5. 選到了專案但該專案+類別沒有歷史紀錄：只清空可帶入的欄位
+      this.resetFormToDefaultForCategory(currentCategory);
+    }
+  }
+
+  // 根據類別清空對應的欄位
+  resetFormToDefaultForCategory(category: string) {
+    if (category === '交通費') {
+      this.formGroup.patchValue({
+        item_name: null,
+        location_from_to: null,
+        transportation: null,
+        mileage: 0,
+        subsidy_unit_price: 7,
+        toll_fee: 0,
+        parking_fee: 0
+      }, { emitEvent: true });
+    } else {
+      this.formGroup.patchValue({
+        item_name: null,
+        manual_amount: 0,
+        location_from_to: null,
+        transportation: null,
+        mileage: 0,
+        toll_fee: 0,
+        parking_fee: 0
+      }, { emitEvent: true });
     }
   }
 
