@@ -62,6 +62,12 @@
             <div>{{ element[column.name] | date:'yyyy-MM-dd'}}</div>
           </ng-container>
 
+          <ng-container *ngSwitchCase="'date_alert'">
+            <div [ngClass]="{'text-danger': isNearExpiryDate(element[column.name])}">
+              {{ element[column.name] | date:'yyyy-MM-dd'}}
+            </div>
+          </ng-container>
+
           <ng-container *ngSwitchCase="'date_long'">
             <div>{{ element[column.name] | date:'yyyy-MM-dd HH:mm'}}</div>
           </ng-container>

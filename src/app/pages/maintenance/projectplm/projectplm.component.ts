@@ -29,7 +29,7 @@ dayjs.extend(weekOfYear);
 export class projectplmComponent implements OnInit {
 year = new Date().getFullYear();
   week = dayjs().week();
-  search: string;
+  search: string = '';
   data: any;
   stype: any = {
     name: 'AGS狀態',
@@ -41,10 +41,10 @@ year = new Date().getFullYear();
   projectplm: any;
   // 1. 定義結構
 quarterStats: any[] = [
-  { label: 'Q1', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
-  { label: 'Q2', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
-  { label: 'Q3', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } },
-  { label: 'Q4', longshot: 0, bcd: 0, commit: 0, targets: { ls: 20, bcd: 3, cm: 1 } }
+  { label: 'Q1', longshot: 0, bcd: 0, commit: 0, targets: { ls: 36, bcd: 3, cm: 1 } },
+  { label: 'Q2', longshot: 0, bcd: 0, commit: 0, targets: { ls: 36, bcd: 3, cm: 1 } },
+  { label: 'Q3', longshot: 0, bcd: 0, commit: 0, targets: { ls: 36, bcd: 3, cm: 1 } },
+  { label: 'Q4', longshot: 0, bcd: 0, commit: 0, targets: { ls: 36, bcd: 3, cm: 1 } }
 ];
 availableYears: number[] = [];
   // 重要：用來強制重新渲染 Table 的 Flag
@@ -64,7 +64,7 @@ availableYears: number[] = [];
       { name: 'year', displayName: '年度', width: 80 },
       { name: 'quarter', displayName: '季度', width: 80 },
       { name: 'month', displayName: '月', width: 80 },
-      { name: 'close_date', displayName: '預計結案日', width: 120, templateRef: 'date' },
+      { name: 'close_date', displayName: '達梭報備到期日', width: 120, templateRef: 'date_alert' },
       { name: 'longshot_date', displayName: 'Longshot 日期', width: 120, templateRef: 'date' },
       { name: 'bcd_date', displayName: 'BCD 日期', width: 120, templateRef: 'date' },
       { name: 'commit_date', displayName: 'Commit 日期', width: 120, templateRef: 'date' },
@@ -95,7 +95,7 @@ availableYears: number[] = [];
   @ViewChild('namiTable') namiTable!: TableComponent;
   loaded = false;
   @ViewChild("xlsx", { static: false })
-  xlsx: ElementRef;
+  xlsx!: ElementRef;
   cuslist: any;
   crmlist: any;
   select_id: any;
@@ -109,7 +109,7 @@ availableYears: number[] = [];
     { name: 'year', displayName: '年度' },
     { name: 'quarter', displayName: '季度' },
     { name: 'month', displayName: '月' },
-    { name: 'close_date', displayName: '預計結案日' },
+    { name: 'close_date', displayName: '達梭報備到期日' },
     { name: 'longshot_date', displayName: 'Longshot 日期' },
     { name: 'bcd_date', displayName: 'BCD 日期' },
     { name: 'commit_date', displayName: 'Commit 日期' },
@@ -134,7 +134,7 @@ availableYears: number[] = [];
   // Paginator 狀態保存到 Cookie
   paginatorState: { pageIndex: number, pageSize: number } = { pageIndex: 0, pageSize: 10 };
 
-  quarterStatDetails: Record<string, Record<string, Array<{id: number, project_name: string, date: string, status: string, fieldName: string}>>> = {
+  quarterStatDetails: Record<string, Record<string, Array<{id: number, project_name: string, date: string, close_date?: string | null, status: string, fieldName: string}>>> = {
   Q1: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q2: { LONGSHOT: [], BCD: [], COMMIT: [] },
   Q3: { LONGSHOT: [], BCD: [], COMMIT: [] },
@@ -172,7 +172,7 @@ availableYears: number[] = [];
 
 
   async ngOnInit() {
-    this.base_columns = this.table_config.columns.filter(c => c.name !== 'week');
+    this.base_columns = this.table_config.columns.filter((c: any) => c.name !== 'week');
     
     // 從 Cookie 恢復 Paginator 狀態
     const savedPaginatorState = localStorage.getItem('projectplm_paginator_state');
@@ -310,8 +310,8 @@ availableYears: number[] = [];
 
     // 映射客戶的產業別說明
     if (this.cuslist && this.crmlist) {
-      this.cuslist.forEach(c => {
-        c['crm'] = this.crmlist.find(x => x.code == c.industry_crm)?.description;
+      this.cuslist.forEach((c: any) => {
+        c['crm'] = this.crmlist.find((x: any) => x.code == c.industry_crm)?.description;
       });
     }
 
@@ -322,7 +322,7 @@ availableYears: number[] = [];
 
     // C. 建立動態週別欄位 (這部分維持原邏輯)
     const weekSet = new Set<string>();
-    this.weeklist.forEach(w => weekSet.add(`${w.year}/W${w.week}`));
+    this.weeklist.forEach((w: any) => weekSet.add(`${w.year}/W${w.week}`));
     // const sortedWeeks = Array.from(weekSet).sort();
     const sortedWeeks = Array.from(weekSet)
     const dynamicWeekColumns = sortedWeeks.map(weekKey => ({
@@ -333,8 +333,8 @@ availableYears: number[] = [];
     }));
     
     const cleanBase = (this.base_columns && this.base_columns.length > 0) 
-                      ? this.base_columns 
-                      : this.table_config.columns.filter(c => !c.name.startsWith('dyn_week_') && c.name !== 'week');
+              ? this.base_columns 
+              : this.table_config.columns.filter((c: any) => !c.name.startsWith('dyn_week_') && c.name !== 'week');
 
     this.table_config = {
       ...this.table_config,
@@ -342,9 +342,9 @@ availableYears: number[] = [];
     };
 
     // D. 處理 projectplm 資料欄位 Mapping
-    projectData.forEach(e => {
-      const customer = this.cuslist.find(x => x.id == e.customer_id);
-      const ags = this.agslist.find(x => x.code == e.ags_status);
+    projectData.forEach((e: any) => {
+      const customer = this.cuslist.find((x: any) => x.id == e.customer_id);
+      const ags = this.agslist.find((x: any) => x.code == e.ags_status);
       
       e['customer'] = customer;
       e['contact'] = customer?.contact;
@@ -352,16 +352,16 @@ availableYears: number[] = [];
       e['email'] = customer?.email;
       e['existing_plm'] = customer?.existing_plm;
       e['existing_cad'] = customer?.existing_cad;
-      e['sys'] = this.syslist.find(x => x.code == e.system_inquiry_channel)?.description;
+      e['sys'] = this.syslist.find((x: any) => x.code == e.system_inquiry_channel)?.description;
       e['ags'] = ags;
       e['ags_description'] = ags?.description;
-      e['sales'] = this.userlist.find(x => x.id == e.sales_owner)?.username;
-      e['service'] = this.userlist.find(x => x.id == e.service_owner)?.username;
+      e['sales'] = this.userlist.find((x: any) => x.id == e.sales_owner)?.username;
+      e['service'] = this.userlist.find((x: any) => x.id == e.service_owner)?.username;
       e['button'] = [{ name: '編輯週報', type: 'weekly_report' }];
       
       // 週報比對邏輯
-      e['week_data'] = this.weeklist.filter(x => x.project_id == e.id);
-      const foundThisWeek = e['week_data'].find(w => w.year == this.year && w.week == this.week);
+      e['week_data'] = this.weeklist.filter((x: any) => x.project_id == e.id);
+      const foundThisWeek = e['week_data'].find((w: any) => w.year == this.year && w.week == this.week);
       e['this_week'] = foundThisWeek ? [foundThisWeek] : [];
     });
 
@@ -424,7 +424,7 @@ updateTableConfigVisibility() {
   // 強制觸發 OnChanges
   this.table_config = { ...this.table_config };
 }
-selectedDetail: { title: string, quarter: string, category: string, items: Array<{id: number, project_name: string, date: string, status: string, fieldName: string}> } | null = null;
+selectedDetail: { title: string, quarter: string, category: string, items: Array<{id: number, project_name: string, date: string, close_date?: string | null, status: string, fieldName: string}> } | null = null;
 
 openStatDetail(quarterLabel: string, category: string) {
   const items = this.quarterStatDetails[quarterLabel]?.[category.toUpperCase()] ?? [];
@@ -437,7 +437,7 @@ openStatDetail(quarterLabel: string, category: string) {
 }
 
 updateProjectDate(item: any, newDate: string) {
-  const proj = this.projectplm.find(p => p.id === item.id);
+  const proj = this.projectplm.find((p: any) => p.id === item.id);
   if (!proj) {
     this.showErrorToast('找不到專案資料');
     return;
@@ -515,9 +515,9 @@ calculateQuarterlyStats() {
     return null;
   };
 
-  this.projectplm.forEach(project => {
+  this.projectplm.forEach((project: any) => {
     const projectName = project['customer_name'] || project['name'] || `ID:${project['id']}`;
-    const agsInfo = this.agslist?.find(x => x.code == project.ags_status);
+    const agsInfo = this.agslist?.find((x: any) => x.code == project.ags_status);
     const statusDesc = agsInfo?.description || '---';
 
     // Longshot
@@ -528,6 +528,7 @@ calculateQuarterlyStats() {
         id: project.id,
         project_name: projectName,
         date: project.longshot_date.split('T')[0],
+        close_date: project.close_date ? project.close_date.split('T')[0] : null,
         status: statusDesc,
         fieldName: 'longshot_date'
       });
@@ -541,6 +542,7 @@ calculateQuarterlyStats() {
         id: project.id,
         project_name: projectName,
         date: project.bcd_date.split('T')[0],
+        close_date: project.close_date ? project.close_date.split('T')[0] : null,
         status: statusDesc,
         fieldName: 'bcd_date'
       });
@@ -554,9 +556,54 @@ calculateQuarterlyStats() {
         id: project.id,
         project_name: projectName,
         date: project.commit_date.split('T')[0],
+        close_date: project.close_date ? project.close_date.split('T')[0] : null,
         status: statusDesc,
         fieldName: 'commit_date'
       });
+    }
+  });
+}
+
+isNearExpiryDate(dateStr?: string | null) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays <= 30;
+}
+
+updateProjectFieldDate(item: any, fieldName: string, newDate: string) {
+  const proj = this.projectplm.find((p: any) => p.id === item.id);
+  if (!proj) {
+    this.showErrorToast('找不到專案資料');
+    return;
+  }
+
+  const updateData = this.buildProjectUpdatePayload(proj, fieldName, newDate || null);
+  this.apiSvc.updatedata('projectplm', item.id, updateData).pipe(
+    catchError(err => {
+      this.showErrorToast('更新日期失敗');
+      return throwError(err);
+    })
+  ).subscribe(() => {
+    this.showSuccessToast('更新成功');
+    proj[fieldName] = newDate || null;
+    if (fieldName === 'close_date') {
+      item.close_date = newDate || null;
+    } else {
+      // fallback: keep original item.date for main date column
+      item.date = newDate || null;
+    }
+
+    if (this.dataSource) {
+      this.dataSource.data = [...this.projectplm];
+    }
+
+    this.calculateQuarterlyStats();
+
+    if (this.selectedDetail) {
+      this.selectedDetail.items = this.quarterStatDetails[this.selectedDetail.quarter]?.[this.selectedDetail.category.toUpperCase()] ?? [];
     }
   });
 }

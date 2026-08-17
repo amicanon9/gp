@@ -5,6 +5,55 @@ import { AuthService } from 'app/_services/auth.service';
 import { forkJoin } from 'rxjs';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 
+export function calculateLeaveHours(start: Date, end: Date, holidays: Set<string> = new Set()): number {
+  if (!(start instanceof Date) || Number.isNaN(start.getTime()) || !(end instanceof Date) || Number.isNaN(end.getTime()) || end <= start) {
+    return 0;
+  }
+
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  const cursor = new Date(startDay);
+
+  let totalMs = 0;
+
+  while (cursor <= endDay) {
+    const dateStr = cursor.toDateString();
+    const isWeekend = cursor.getDay() === 0 || cursor.getDay() === 6;
+    const isHoliday = holidays.has(dateStr);
+
+    if (!isWeekend && !isHoliday) {
+      const dayStart = new Date(cursor);
+      dayStart.setHours(8, 30, 0, 0);
+      const dayEnd = new Date(cursor);
+      dayEnd.setHours(17, 30, 0, 0);
+
+      const segmentStart = cursor.getTime() === startDay.getTime() ? start : dayStart;
+      const segmentEnd = cursor.getTime() === endDay.getTime() ? end : dayEnd;
+
+      if (segmentEnd > segmentStart) {
+        let segmentMs = segmentEnd.getTime() - segmentStart.getTime();
+
+        const lunchStart = new Date(cursor);
+        lunchStart.setHours(12, 30, 0, 0);
+        const lunchEnd = new Date(cursor);
+        lunchEnd.setHours(13, 30, 0, 0);
+
+        const overlapStart = Math.max(segmentStart.getTime(), lunchStart.getTime());
+        const overlapEnd = Math.min(segmentEnd.getTime(), lunchEnd.getTime());
+        if (overlapEnd > overlapStart) {
+          segmentMs -= overlapEnd - overlapStart;
+        }
+
+        totalMs += Math.max(0, segmentMs);
+      }
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return Math.round((totalMs / (1000 * 60 * 60)) * 10) / 10;
+}
+
 @Component({
   selector: 'sepvdb-leaveapplications',
   templateUrl: './leaveapplications.component.html',
@@ -43,6 +92,7 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
   checkedInDates = new Set<string>();
   approvedLeaves = new Set<string>();
   pendingLeaves = new Set<string>();
+  holidays = new Set<string>();
   // 額度顯示
   annualLeaveTotal = 0;     // 總特休
   annualLeaveUsed = 0;      // 已休特休
@@ -117,6 +167,8 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     return totalDays * 8;
   }
   loadData() {
+    this.loadHolidayData();
+
     forkJoin({
       deplist: this.apiSvc.getdata('Departments'),
       userinfo: this.apiSvc.getdatabyid('LoginInfo', this.authSvc.state.user_id),
@@ -157,6 +209,32 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
       }
     });
   }
+  loadHolidayData() {
+    const currentYearNum = new Date().getFullYear();
+    const lastYear = (currentYearNum - 1).toString();
+    const currentYear = currentYearNum.toString();
+
+    forkJoin({
+      lastYearData: this.apiSvc.getHolidaysData(lastYear),
+      currentYearData: this.apiSvc.getHolidaysData(currentYear)
+    }).subscribe({
+      next: (result) => {
+        this.holidays.clear();
+        [...result.lastYearData, ...result.currentYearData]
+          .filter(item => item.isHoliday)
+          .forEach(item => {
+            const y = parseInt(item.date.substring(0, 4));
+            const m = parseInt(item.date.substring(4, 6)) - 1;
+            const d = parseInt(item.date.substring(6, 8));
+            const dateObj = new Date(y, m, d);
+            this.holidays.add(dateObj.toDateString());
+          });
+        this.onTimeChange();
+      },
+      error: () => console.error('載入假日資料失敗')
+    });
+  }
+
   // 4. 請假與打卡狀態判定邏輯
   processLeaveDates(history: any[]) {
     this.approvedLeaves.clear();
@@ -215,7 +293,7 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
 
   }
 
-  // 自動計算總時數 (合併日期與時間字串)
+  // 自動計算總時數 (按工作日 8 小時與假日排除計算)
   onTimeChange() {
     if (!this.applyData.start_date || !this.applyData.end_date ||
       !this.applyData.start_time_only || !this.applyData.end_time_only) return;
@@ -223,37 +301,7 @@ export class leaveapplicationsComponent implements OnInit, OnDestroy {
     const start = this.combineDateAndTime(this.applyData.start_date, this.applyData.start_time_only);
     const end = this.combineDateAndTime(this.applyData.end_date, this.applyData.end_time_only);
 
-    if (end > start) {
-      let diffMs = end.getTime() - start.getTime();
-      let hours = diffMs / (1000 * 60 * 60);
-
-      // --- 午休扣除邏輯 (12:30 - 13:30) ---
-      // 建立當天的午休開始與結束時間物件
-      const lunchStart = new Date(start);
-      lunchStart.setHours(12, 30, 0, 0);
-
-      const lunchEnd = new Date(start);
-      lunchEnd.setHours(13, 30, 0, 0);
-
-      // 判斷是否跨越午休時段 (且必須是同一天請假，若跨天邏輯會更複雜)
-      // 邏輯：開始時間早於午休結束，且結束時間晚於午休開始
-      if (start < lunchEnd && end > lunchStart) {
-        // 計算重疊的毫秒數，如果是整點請假 (如 09:00 - 18:00)，這裡會扣掉剛好 1 小時
-        // 如果只請到 13:00，則只會扣掉 12:30 - 13:00 的 30 分鐘
-        const overlapStart = start > lunchStart ? start.getTime() : lunchStart.getTime();
-        const overlapEnd = end < lunchEnd ? end.getTime() : lunchEnd.getTime();
-
-        const overlapMs = overlapEnd - overlapStart;
-        if (overlapMs > 0) {
-          diffMs -= overlapMs;
-        }
-      }
-
-      // 重新計算最終小時數
-      this.applyData.total_hours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
-    } else {
-      this.applyData.total_hours = 0;
-    }
+    this.applyData.total_hours = calculateLeaveHours(start, end, this.holidays);
   }
   // 輔助：合併 Date 物件與 "HH:mm" 字串
   combineDateAndTime(date: Date, timeStr: string): Date {

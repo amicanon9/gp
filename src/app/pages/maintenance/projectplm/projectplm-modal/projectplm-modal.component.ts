@@ -72,6 +72,17 @@ export class projectplmModalComponent implements OnInit {
       (this.formGroup.get(item)?.dirty || this.formGroup.get(item)?.touched);
   }
 
+  isNearExpiry(controlName: string) {
+    const val = this.formGroup.get(controlName)?.value;
+    if (!val) return false;
+    const target = new Date(val);
+    if (isNaN(target.getTime())) return false;
+    const now = new Date();
+    const diffDays = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    // 若到期日在未來 30 天以內，或已過期，回傳 true
+    return diffDays <= 30;
+  }
+
   errorType(item: string, type: string) {
     return this.isError(item) && this.formGroup.get(item)?.hasError(type);
   }

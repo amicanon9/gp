@@ -82,6 +82,7 @@
               <th>專案 ID</th>
               <th>專案名稱</th>
               <th>進入日期</th>
+              <th>達梭報備到期日</th>
               <th>目前狀態</th>
             </tr>
           </thead>
@@ -93,6 +94,13 @@
                 <input type="date" class="form-control form-control-sm" 
                        [ngModel]="item.date" 
                        (ngModelChange)="updateProjectDate(item, $event)"
+                       style="width: 150px; display: inline-block;">
+              </td>
+              <td>
+                <input type="date" class="form-control form-control-sm"
+                       [ngModel]="item.close_date"
+                       (ngModelChange)="updateProjectFieldDate(item, 'close_date', $event)"
+                       [ngClass]="{'text-danger': isNearExpiryDate(item.close_date)}"
                        style="width: 150px; display: inline-block;">
               </td>
               <td>{{ item.status }}</td>

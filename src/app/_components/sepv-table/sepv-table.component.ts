@@ -337,4 +337,13 @@ export class TableComponent implements OnInit, AfterViewInit, OnChanges {
     if (!projectWeeks) return null;
     return projectWeeks.find(w => `${w.year}/W${w.week}` === weekKey);
   }
+
+  isNearExpiryDate(dateStr?: any): boolean {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    const now = new Date();
+    const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 30;
+  }
 }
